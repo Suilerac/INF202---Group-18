@@ -1,6 +1,12 @@
 class Factory:
-    def createCell(pointIDs, type):
+    def createCell(type, coordinates):
+        """
+        A function for creating a new Cell object
+
+        :param type: String of the type of cell. Either "Triangle" or "Line"
+        :param coordinates: A list of floats pulled from meshio
+        """
         if type == "Triangle":
-            return TriangleCell(pointIDs)
+            return Triangle(coordinates)
         elif type == "Line":
-            return LineCell(pointIDs)
+            return Line(coordinates)

@@ -33,7 +33,8 @@ class Mesh:
         """
         triangles = self.mesh.cells[1]
         for triangle in triangles:
-            self.cells.append(Factory.createCell("Triangle", triangle.data))
+            coordinates = [triangle.points[i] for i in triangle.data]
+            self.cells.append(Factory.createCell("Triangle", coordinates))
 
     def _addLines(self):
         """
@@ -42,4 +43,5 @@ class Mesh:
         """
         lines = self.mesh.cells[0]
         for line in lines:
-            self.cells.append(Factory.createCell("Line", line.data))
+            coordinates = [line.points[i] for i in line.data]
+            self.cells.append(Factory.createCell("Line", coordinates))
