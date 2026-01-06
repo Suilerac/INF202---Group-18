@@ -1,3 +1,7 @@
+from triangle import Triangle
+from line import Line
+
+
 class Factory:
     def createCell(type, coordinates):
         """
