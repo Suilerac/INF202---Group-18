@@ -1,8 +1,8 @@
-<h1>Collaberators</h1>
+<h1>Collaborators</h1>
 <ul>
     <li>Haakon Bekken</li>
     <li>Andreas Carelius Brustad</li>
     <li>Johannes Husevåg Standal</li>
 </ul>
 
-<p> A program for simulating oil spillage accross ocean currents</p>
+<p> A program for simulating oil spillage across ocean currents</p>
