@@ -4,7 +4,7 @@ class Cell:
         self.area = 0
         self.flow = []
 
-        self.points = []
+        self.pointIDs = []
         self.neighbours = []
 
     def FindNeighbours():
