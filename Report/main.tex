@@ -1,0 +1,175 @@
+% Packages & Document Configurations
+\documentclass{report_template}
+
+% Authors & Supervisor
+%TODO: Add your names here:
+\firstauthor{Student name}
+
+\secondauthor{Student name}
+
+% Report Title & Subtitle
+\title{Report: Simulation of an oil spill}
+%TODO: Add subtitle here:
+\subtitle{Your own subtitle \\ with a line break}
+
+% Filiations
+\university{Norwegian University of Life Sciences (NMBU)}
+\degree{}
+\school{}
+\course{}
+
+% Local & Date
+\date{Norway, \monthname[\month] \number\year}
+
+\begin{document}
+
+% Covers
+\include{Covers/00-Cover}
+
+% Roman numeration
+\pagenumbering{roman}
+
+% List of contents, figures, and tables
+\tableofcontents\blankpage
+
+% Arabic numeration
+\pagenumbering{arabic}
+
+% Chapters
+\chapter{Introduction}
+\label{ch:introduction}
+This is the introduction. The following text provides a few helpful commands in latex. You can refer to other chapters titled \nameref{ch:images} (referred to as \autoref{ch:images}). You can use code statements \texttt{which take this font}. Also, you can put \emph{emphasis on certain words}. To make text bold use \textbf{this command}. A new line can be started like this. You can also cite others via \cite{khodak2021initialization, vaswani2017attention} when adding the corresponding entry into the \emph{Bibliography} folder.\\
+
+A list of bullet points can be created with
+\begin{itemize}
+    \item item A,
+    \item item B.
+\end{itemize}
+
+A list of numbered items can be created with
+\begin{enumerate}
+    \item item C.
+    \item item D.
+\end{enumerate}
+
+Now, let us create a new section.
+
+% This here is a comment. It will not affect the text produced in the PDF file.
+\section{Formulas}
+Use the formula environment to include formulas like $f(x) = x$. You can also use the formula as a separate line via
+\begin{align*}
+    f(x) = x.
+\end{align*}
+You can also use multiple formulas in one align statement:
+\begin{align*}
+    f(x) =& x \\
+    g(x,y) =& x + y.
+\end{align*}
+If you want to assign a label to a formula, leave the star after \texttt{align}. That is, use
+\begin{align}\label{eq:ref1}
+    v(x) = \sin(x)
+\end{align}
+You can reference this formula by \eqref{eq:ref1} or as \autoref{eq:ref1}. Use one reference style and stick to it. Subscripts are written as $x_n$, and superscripts are written as $x^n$. Several Greek characters can be used, like $\Delta$, $\alpha$, $\beta$, etc. Fractions are expressed by $\frac{a}{b}$. If you want to find the correct command for a given formula, use the internet or ChatGPT. Let us now start a new subsection to define vector operations:
+
+\subsection{Linear algebra}
+
+To define matrices and vectors, use the \texttt{pmatrix} environment. Use
+\begin{align*}
+    b = \begin{pmatrix} 
+    1 \\ 2 \\ 3
+  \end{pmatrix}
+\end{align*}
+for vectors. We can for example use
+\begin{align}
+    v(\vec{x}) = \begin{pmatrix}
+        y-0.2 x \\
+        -x
+    \end{pmatrix}.
+\end{align}
+
+\section{Pseudo-Code}
+
+You can include pseudo-code and reference it as Algorithm~\ref{alg:cap}.
+
+\begin{algorithm}[H]
+\caption{An algorithm with caption}\label{alg:cap}
+\begin{algorithmic}
+\Require $n \geq 0$
+\Ensure $y = x^n$
+\State $y \gets 1$
+\State $X \gets x$
+\State $N \gets n$
+\While{$N \neq 0$}
+\If{$N$ is even}
+    \State $X \gets X \times X$
+    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+\ElsIf{$N$ is odd}
+    \State $y \gets y \times X$
+    \State $N \gets N - 1$
+\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+The positioning of the pseudo-code and images can sometimes jump around.
+
+\chapter{Images}
+\label{ch:images}
+To include images use
+\begin{figure}[H]
+    \centering % This puts the image in the center
+    \includegraphics[width=0.7\linewidth]{Figures/example_image.png}
+    \caption{Caption}
+    \label{fig:example_image}
+\end{figure}
+
+You can also include multiple images:
+
+\begin{figure}[H]
+    \centering % This puts the image in the center
+    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}%
+    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}%
+    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}
+    \caption{Three images with the same caption}
+    \label{fig:example_image2}
+\end{figure}
+
+If you want to have multiple captions use
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{Figures/ex1.png}
+  \captionof{figure}{A figure}
+  \label{fig:test1}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{Figures/ex2.png}
+  \captionof{figure}{Another figure}
+  \label{fig:test2}
+\end{minipage}
+\end{figure}
+
+\chapter{Tables}
+\label{ch:tables}
+
+Tables should be used to for example define simulation parameters. Include tables in the following way:
+\begin{center}
+\begin{tabular}{ |c|c|c| } 
+\hline
+col1 & col2 & col3 \\
+\hline
+\multirow{3}{4em}{Multiple row} & cell2 & cell3 \\ 
+& cell5 & cell6 \\ 
+& cell8 & cell9 \\ 
+\hline
+Single row & cell10 & cell11 \\ 
+\hline
+\end{tabular}
+\end{center}
+
+% Bibliography
+\blankpage\printbibliography
+
+\end{document}
