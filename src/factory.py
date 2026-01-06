@@ -3,7 +3,7 @@ from line import Line
 
 
 class Factory:
-    def createCell(type, coordinates):
+    def createCell(type, pointIDs):
         """
         A function for creating a new Cell object
 
@@ -11,6 +11,6 @@ class Factory:
         :param coordinates: A list of floats pulled from meshio
         """
         if type == "Triangle":
-            return Triangle(coordinates)
+            return Triangle(pointIDs)
         elif type == "Line":
-            return Line(coordinates)
+            return Line(pointIDs)
