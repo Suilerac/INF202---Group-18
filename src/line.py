@@ -6,3 +6,8 @@ class Line(Cell):
         self.length = 0
         self.startPointID = None
         self.endPointID = None
+    def __str__(self):
+        '''
+        Prints line information
+        '''
+        pass
