@@ -43,6 +43,9 @@ class Triangle(Cell):
         return (p1 + p2 + p3) / 3
 
     def _calculateEdgeVectors(self):
+        """
+        Creates vectors between every point in the triangle
+        """
         # points
         p1 = self.points[0]
         p2 = self.points[1]
@@ -93,7 +96,7 @@ class Triangle(Cell):
             centerToMidpointVector = midPoint - self.centralPoint
 
             # check alignment using the dot product.
-            # S < 0 implies the vector is pointing out
+            # (0 < Alignment) implies the vector is pointing out
             # of the triangle
             alignment = np.dot(normal, centerToMidpointVector)
             if (alignment < 0):
