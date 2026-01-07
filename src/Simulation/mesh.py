@@ -42,8 +42,8 @@ class Mesh:
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
         # Appends cell to cells local cells list
-        for triangle in triangles:
-            coordinates = [np.array(triangle.points[i]) for i in triangle.data]
+        for triangle in triangles.data:
+            coordinates = [np.array(self._points[i]) for i in triangle]
             self._cells.append(Factory.createCell("Triangle", coordinates))
 
     def _addLines(self):
@@ -55,8 +55,8 @@ class Mesh:
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
         # Appends cell to cells local cells list
-        for line in lines:
-            coordinates = np.array([line.points[i] for i in line.data])
+        for line in lines.data:
+            coordinates = np.array([self._points[i] for i in line])
             self._cells.append(Factory.createCell("Line", coordinates))
 
     def _findTriangleIndex(self):
@@ -64,15 +64,19 @@ class Mesh:
         Finds the index of triangle cells in a meshio cell list
         """
         meshioCellList = self._mesh.cells
-        for i in len(meshioCellList):
-            if meshioCellList[i].type == "Triangle":
+        i = 0
+        for _ in meshioCellList:
+            if meshioCellList[i].type == "triangle":
                 return i
+            i += 1
 
     def _findLineIndex(self):
         """
         Finds the index of line cells in a meshio cell list
         """
         meshioCellList = self._mesh.cells
-        for i in len(meshioCellList):
-            if meshioCellList[i].type == "Line":
+        i = 0
+        for _ in meshioCellList:
+            if meshioCellList[i].type == "line":
                 return i
+            i += 1
