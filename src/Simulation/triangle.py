@@ -6,7 +6,7 @@ from numpy import linalg as la
 
 class Triangle(Cell):
     def __init__(self, points):
-        super().__init__()
+        super().__init__(points)
         self.points = points
 
         # order of these calculations matter
