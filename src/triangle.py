@@ -62,7 +62,7 @@ class Triangle(Cell):
         sideLengths = [la.norm(edge) for edge in self.edges]
         return sideLengths
 
-    def _calculateMidPoint(self, edgeIndex):
+    def _calculateEdgeMidPoint(self, edgeIndex):
         """
         Calculates the midpoints of a line / edge
 
@@ -89,7 +89,7 @@ class Triangle(Cell):
             normal = rotated / la.norm(rotated)
 
             # vector pointing from the center to the midpoint
-            midPoint = self._calculateMidPoint(i)
+            midPoint = self._calculateEdgeMidPoint(i)
             centerToMidpointVector = midPoint - self.centralPoint
 
             # check alignment using the dot product.
