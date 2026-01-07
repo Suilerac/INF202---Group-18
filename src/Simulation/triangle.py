@@ -1,4 +1,4 @@
-from cells import Cell
+from .cells import Cell
 
 import numpy as np
 from numpy import linalg as la

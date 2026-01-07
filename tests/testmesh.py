@@ -1,1 +1,3 @@
-from src.Simulation.mesh import Mesh
+from Simulation.mesh import Mesh
+
+msh = Mesh("meshes/simple.msh")

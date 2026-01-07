@@ -1,6 +1,6 @@
 import meshio
 import numpy as np
-from factory import Factory
+from .factory import Factory
 
 
 class Mesh:

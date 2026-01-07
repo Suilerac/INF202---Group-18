@@ -1,4 +1,4 @@
-from cells import Cell
+from .cells import Cell
 
 
 class Line(Cell):

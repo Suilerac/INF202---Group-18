@@ -1,5 +1,5 @@
-from triangle import Triangle
-from line import Line
+from .triangle import Triangle
+from .line import Line
 
 
 class Factory:
