@@ -38,12 +38,15 @@ class Mesh:
         Creates TriangleCell objects of the triangle cells
         and adds them to the list
         """
-        triangles = self._mesh.cells[self._findTriangleIndex()]
+        triangles = []
+        for i in self._findTriangleIndexes():
+            triangles.append(self._mesh.cells[i])
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
         # Appends cell to cells local cells list
-        for triangle in triangles.data:
-            coordinates = [np.array(self._points[i]) for i in triangle]
+        for triangle in triangles:
+            data = triangle.data
+            coordinates = [np.array(self._points[i]) for i in data]
             self._cells.append(Factory.createCell("Triangle", coordinates))
 
     def _addLines(self):
@@ -51,32 +54,39 @@ class Mesh:
         Creates LineCell objects of the border cells and adds
         them to the list.
         """
-        lines = self._mesh.cells[self._findLineIndex()]
+        lines = []
+        for i in self._findLineIndexes():
+            lines.append(self._mesh.cells[i])
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
         # Appends cell to cells local cells list
-        for line in lines.data:
-            coordinates = np.array([self._points[i] for i in line])
+        for line in lines:
+            data = line.data
+            coordinates = np.array([self._points[i] for i in data])
             self._cells.append(Factory.createCell("Line", coordinates))
 
-    def _findTriangleIndex(self):
+    def _findTriangleIndexes(self):
         """
-        Finds the index of triangle cells in a meshio cell list
+        Finds the indexes of triangle cells in a meshio cell list
         """
+        indexes = []
         meshioCellList = self._mesh.cells
         i = 0
         for _ in meshioCellList:
             if meshioCellList[i].type == "triangle":
-                return i
+                indexes.append(i)
             i += 1
+        return indexes
 
-    def _findLineIndex(self):
+    def _findLineIndexes(self):
         """
-        Finds the index of line cells in a meshio cell list
+        Finds the indexes of line cells in a meshio cell list
         """
+        indexes = []
         meshioCellList = self._mesh.cells
         i = 0
         for _ in meshioCellList:
             if meshioCellList[i].type == "line":
-                return i
+                indexes.append(i)
             i += 1
+        return indexes
