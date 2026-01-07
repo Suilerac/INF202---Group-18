@@ -5,10 +5,11 @@ import numpy as np
 from numpy import linalg as la
 
 class Triangle(Cell):
-    def __init__(self):
+    def __init__(self, points):
         super().__init__()
+        self.points = points
+
         self.sideLengths = [0, 0, 0]
-        self.points = [None, None, None]
         self.normals = [None, None, None]
 
     def __str__(self):
@@ -16,7 +17,7 @@ class Triangle(Cell):
         Prints triangle information
         '''
         pass
-
+    
     def calculate(self):
         # Vectorize vertecies
         p1 = np.array(Mesh.points[self.pointIDs[0]])
@@ -35,9 +36,9 @@ class Triangle(Cell):
 
         edges = [e1, e2, e3]
 
-        self.sideLengths[0] = np.sqrt(np.dot(e1, e1))
-        self.sideLengths[1] = np.sqrt(np.dot(e1, e1))
-        self.sideLengths[2] = np.sqrt(np.dot(e1, e1))
+        self.sideLengths[0] = la.norm(e1)
+        self.sideLengths[1] = la.norm(e2)
+        self.sideLengths[2] = la.norm(e3)
         
 
         # Calculate orthogonal vectors for each edge
