@@ -20,6 +20,14 @@ class Cell(ABC):
     def __str__(self):
         return str(self._coordinates)
 
+    @property
+    def neighbours(self):
+        return self._neighbours
+
+    @property
+    def coordinates(self):
+        return self._coordinates
+
     @abstractmethod
     def _calculateArea(self):
         pass

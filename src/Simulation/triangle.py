@@ -7,7 +7,6 @@ from numpy import linalg as la
 class Triangle(Cell):
     def __init__(self, coordinates):
         super().__init__(coordinates)
-        self.coordinates = coordinates
 
         # order of these calculations matter
         self.centerPoint = self._calculateCenterPoint()
