@@ -51,3 +51,14 @@ def test_flow_value(line1, line2, line3):
     assert line1.flow == [0, 0]
     assert line2.flow == [0, 0]
     assert line3.flow == [0, 0]
+
+
+def test_string_conversion(line1, line2, line3):
+    assert str(line1) == "[[0, 0, 0], [1, 1, 0]]"
+    assert str(line2) == "[[0, 0, 0], [-2, 2, 0]]"
+    assert str(line3) == "[[0.1, -1.0, 0.0], [3, -3, 0]]"
+
+
+def test_oil_setter(line1):
+    line1.oilValue = 4
+    assert line1.oilValue == 4

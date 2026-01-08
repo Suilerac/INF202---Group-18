@@ -18,7 +18,26 @@ class Cell(ABC):
         self._coordinates = coordinates
 
     def __str__(self):
-        return str(self._coordinates)
+        """
+        Returns a string in the form [[X Y Z], [X Y Z], ... , [X Y Z]]
+        This is to represent the points that make up the cell
+        """
+        cellStr = '['
+        firstLoop = True
+        for point in self.coordinates:
+            # Only add commas after the first point has been added
+            if not firstLoop:
+                cellStr += ', '
+            cellStr += '['
+            # Slicing is used to only add commas after the first number
+            cellStr += str(point[0])
+            for xyz in point[1:]:
+                cellStr += ', '
+                cellStr += str(xyz)
+            cellStr += ']'
+            firstLoop = False
+        cellStr += ']'
+        return cellStr
 
     def addNeighbour(self, ngh):
         self._neighbours.append(ngh)
