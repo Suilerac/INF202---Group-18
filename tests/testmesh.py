@@ -9,8 +9,8 @@ def mesh():
 
 # Assert that the lists of datapoints aren't left empty
 def test_list_filling(mesh):
-    assert len(mesh.getCells()) > 0
-    assert len(mesh.getPoints()) > 0
+    assert len(mesh.cells) > 0
+    assert len(mesh.points) > 0
 
 
 # Assert that correct indexes are found

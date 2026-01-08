@@ -20,10 +20,12 @@ class Mesh:
         self._cells = []  # List to store all cells as Cell objects
         self._addCellsToList()
 
-    def getCells(self):
+    @property
+    def cells(self):
         return self._cells
 
-    def getPoints(self):
+    @property
+    def points(self):
         return self._points
 
     def _addCellsToList(self):
