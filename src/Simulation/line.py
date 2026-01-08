@@ -1,5 +1,11 @@
 from .cells import Cell
 
+"""
+General attributes of the line class
+Oil value is always 0
+Lines has a length but no area
+"""
+
 
 class Line(Cell):
     def __init__(self, coordinates):
@@ -8,14 +14,6 @@ class Line(Cell):
     def _calculateArea(self):
         return 0
 
-    def getArea(self):
-        return 0
-
-    def updateOilValue(self, newValue):
-        self._oilValue = newValue
-
-    def getOilValue(self):
-        return self._oilValue
-
-    def getFlowValue(self):
-        return self._flow
+    @property
+    def flow(self):  # A vector with no flow
+        return [0, 0]

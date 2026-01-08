@@ -1,8 +1,11 @@
+import pytest
+
 import math
 import numpy as np
+
 from Simulation.triangle import Triangle
 
-triangleTestValues = {
+expectedValues = {
     "points": [
         np.array([2, 0, 0]),
         np.array([3, 1, 0]),
@@ -10,7 +13,7 @@ triangleTestValues = {
     ],
     "centerPoint": np.array([5/3, 1/3, 0]),
     "area": 1.0,
-    "edgeLength": np.sqrt(np.array([2, 10, 2])),
+    "edgeLength": np.sqrt(np.array([2, 10, 4])),
     "edgeVectors": [
         np.array([1, 1, 0]),
         np.array([-3, -1, 0]),
@@ -28,31 +31,43 @@ triangleTestValues = {
     ],
 }
 
-
-t = Triangle(triangleTestValues["points"])
-print(triangleTestValues["edgeLength"])
-# Area
-assert triangleTestValues["area"] == t.area
-# centerPoint
-assert np.allclose(triangleTestValues["centerPoint"], t.centerPoint)
-
-t._calculateNormals()
-
-for i in range(3):
-    print("\nEdge: ", i)
-    # edge vectors
-    assert np.allclose(triangleTestValues["edgeVectors"][i], t.edges[i])
-    # edge midpoints
-    m = t._calculateEdgeMidPoint(i)
-    assert np.allclose(triangleTestValues["edgeMidPoints"][i], m)
-    # sidelength
-    assert np.allclose(triangleTestValues["edgeLength"][i], t.sideLengths[i])
-    # normals
-    a = triangleTestValues["normals"][i]
-    b = t.normals[i]
-    assert np.allclose(triangleTestValues["normals"][i], t.normals[i])
+print(expectedValues["edgeLength"])
 
 
-print("\nNormals:")
-for normals in t.normals:
-    print(normals)
+@pytest.fixture
+def triangle():
+    return Triangle(expectedValues["points"])
+
+
+def test_area(triangle):
+    assert expectedValues["area"] == triangle.area
+
+
+def test_centerPoint(triangle):
+    assert np.allclose(expectedValues["centerPoint"], triangle.centerPoint)
+
+
+def test_edgeVectors(triangle):
+    for i in range(3):
+        assert np.allclose(expectedValues["edgeVectors"][i], triangle.edges[i])
+
+
+def test_edgeLength(triangle):
+    answer = expectedValues["edgeLength"]
+    result = triangle.sideLengths
+    assert np.allclose(answer, result)
+
+
+def test_midPoints(triangle):
+    for i in range(3):
+        # edge midpoints
+        m = triangle._calculateEdgeMidPoint(i)
+        assert np.allclose(expectedValues["edgeMidPoints"][i], m)
+
+
+def test_normals(triangle):
+    triangle._calculateNormals()
+    for i in range(3):
+        answer = expectedValues["normals"][i]
+        result = triangle.normals[i]
+        assert np.allclose(answer, result)
