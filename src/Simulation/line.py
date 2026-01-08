@@ -15,14 +15,5 @@ class Line(Cell):
         return 0
 
     @property
-<<<<<<< HEAD
-    def Area(self):
-        return 0
-
-    @property
-    def FlowValue(self):#A vector with no flow 
-        return [0,0]
-=======
     def flow(self):  # A vector with no flow
         return [0, 0]
->>>>>>> 05fb10d91ad1939fa2666131791db1716e1b1496
