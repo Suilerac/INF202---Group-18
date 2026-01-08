@@ -18,3 +18,11 @@ def test_oil_value():
 def test_area_value():
     line = Line(Line1)
     assert line.Area == 0
+
+def test_area_calculation():
+    line = Line(Line1)
+    assert line._calculateArea() == 0
+
+def test_flow_value():
+    line = Line(Line1)
+    assert line.FlowValue == [0,0]

@@ -22,5 +22,5 @@ class Line(Cell):
         return 0
 
     @property
-    def FlowValue(self):
-        return self._flow
+    def FlowValue(self): #A vector with no flow 
+        return [0,0]
