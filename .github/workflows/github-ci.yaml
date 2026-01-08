@@ -33,4 +33,4 @@ jobs:
         run: tox -e format
 
       - name: Run tox for tests
-        run: tox --skip-env format
+        run: tox -e tests
