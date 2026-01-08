@@ -4,7 +4,7 @@ from Simulation.mesh import Mesh
 
 @pytest.fixture
 def mesh():
-    return Mesh("simple_mesh.msh")
+    return Mesh("meshes/simple_mesh.msh")
 
 
 # Assert that the lists of datapoints aren't left empty
