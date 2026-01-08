@@ -5,9 +5,9 @@ from numpy import linalg as la
 
 
 class Triangle(Cell):
-    def __init__(self, points):
-        super().__init__(points)
-        self.points = points
+    def __init__(self, coordinates):
+        super().__init__(coordinates)
+        self.coordinates = coordinates
 
         # order of these calculations matter
         self.centerPoint = self._calculateCenterPoint()
@@ -28,16 +28,16 @@ class Triangle(Cell):
         e2 = self.edges[1]
 
         # formula for Area of a triangle given by two vectors
-        self.area = 0.5 * abs(la.cross(e1, e2))
+        return 0.5 * la.norm(la.cross(e1, e2))
 
     def _calculateCenterPoint(self):
         """
         Calulates the centerpoint of the triangle
         """
         # points
-        p1 = self.points[0]
-        p2 = self.points[1]
-        p3 = self.points[2]
+        p1 = self.coordinates[0]
+        p2 = self.coordinates[1]
+        p3 = self.coordinates[2]
 
         # centerpint is the average of the three
         return (p1 + p2 + p3) / 3
@@ -47,9 +47,9 @@ class Triangle(Cell):
         Creates vectors between every point in the triangle
         """
         # points
-        p1 = self.points[0]
-        p2 = self.points[1]
-        p3 = self.points[2]
+        p1 = self.coordinates[0]
+        p2 = self.coordinates[1]
+        p3 = self.coordinates[2]
 
         # Vectorize edges
         e1 = p2 - p1
@@ -71,7 +71,7 @@ class Triangle(Cell):
 
         :param edge: index refering to a edgevector in the edges list
         """
-        return self.points[edgeIndex] + self.edges[edgeIndex] / 2
+        return self.coordinates[edgeIndex] + self.edges[edgeIndex] / 2
 
     def _calculateNormals(self):
         """
@@ -86,19 +86,20 @@ class Triangle(Cell):
             y = self.edges[i][1]
 
             # rotate vector 90 degrees counterclockwise (X, Y) -> (-Y, X)
-            rotated = np.array(-y, x)
+            rotated = np.array([-y, x, 0])
 
             # normalising the rotated vector gives the orthonormal
             normal = rotated / la.norm(rotated)
 
             # vector pointing from the center to the midpoint
             midPoint = self._calculateEdgeMidPoint(i)
-            centerToMidpointVector = midPoint - self.centralPoint
+            centerToMidpointVector = midPoint - self.centerPoint
 
             # check alignment using the dot product.
             # (0 < Alignment) implies the vector is pointing out
             # of the triangle
             alignment = np.dot(normal, centerToMidpointVector)
+            
             if (alignment < 0):
                 # if it points into the center of the triangle,
                 # flip the sign of the normalvector
