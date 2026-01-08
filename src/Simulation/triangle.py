@@ -99,7 +99,7 @@ class Triangle(Cell):
             # (0 < Alignment) implies the vector is pointing out
             # of the triangle
             alignment = np.dot(normal, centerToMidpointVector)
-            
+
             if (alignment < 0):
                 # if it points into the center of the triangle,
                 # flip the sign of the normalvector
