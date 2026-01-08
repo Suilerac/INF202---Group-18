@@ -31,8 +31,6 @@ expectedValues = {
     ],
 }
 
-print(expectedValues["edgeLength"])
-
 
 @pytest.fixture
 def triangle():
