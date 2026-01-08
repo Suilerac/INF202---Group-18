@@ -20,6 +20,9 @@ class Cell(ABC):
     def __str__(self):
         return str(self._coordinates)
 
+    def addNeighbour(self, ngh):
+        self._neighbours.append(ngh)
+
     @property
     def neighbours(self):
         return self._neighbours
@@ -28,23 +31,22 @@ class Cell(ABC):
     def coordinates(self):
         return self._coordinates
 
-    @abstractmethod
-    def _calculateArea(self):
-        pass
     @property
-    def Area(self):
+    def area(self):
         return self._area
 
     @property
-    def OilValue(self):
+    def oilValue(self):
         return self._oilValue
 
     @property
-    def FlowValue(self):
+    def flow(self):
         return self._flow
 
-    @OilValue.setter
-    def updateOilValue(self, value):
+    @oilValue.setter
+    def oilValue(self, value):
         self._oilValue = value
-    def addNeighbour(self, ngh):
-        self._neighbours.append(ngh)
+
+    @abstractmethod
+    def _calculateArea(self):
+        pass
