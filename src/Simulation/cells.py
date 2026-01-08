@@ -23,18 +23,20 @@ class Cell(ABC):
     @abstractmethod
     def _calculateArea(self):
         pass
-
-    def getArea(self):
+    @property
+    def Area(self):
         return self._area
 
-    def updateOilValue(self, value):
-        self._oilValue = value
-
-    def getOilValue(self):
+    @property
+    def OilValue(self):
         return self._oilValue
 
-    def getFlowValue(self):
+    @property
+    def FlowValue(self):
         return self._flow
 
+    @OilValue.setter
+    def updateOilValue(self, value):
+        self._oilValue = value
     def addNeighbour(self, ngh):
         self._neighbours.append(ngh)
