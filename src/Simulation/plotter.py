@@ -36,22 +36,24 @@ class Plotter:
         plt.ylim(0, 1)
         plt.gca().set_aspect('equal')
 
-    def save_current_plot(self, fileName):
+    def save_current_plot(self, fileName, imgDir="img"):
         """
         Saves the currently generated plot as a file
 
         :param fileName: Description
         """
-        imgDir = Path("img")
+        imgDir = Path(imgDir)
         imgDir.mkdir(parents=True, exist_ok=True)
         plt.savefig(imgDir / fileName)
         plt.close
 
-    def video_maker(self, video_name='vids/simulation.mp4'):
-        folder = 'img'
+    def video_maker(self, video_name='simulation.mp4',
+                    video_dir="vids", image_dir="img", list_dir=''):
+        folder = image_dir
         # natural/alphabetical sort
         images = sorted(glob.glob(os.path.join(folder, "*.png")))
-        list_path = 'images.txt'
+        list_path = f'{list_dir}/images.txt'
+        output_loc = f"{video_dir}/{video_name}"
         with open(list_path, "w", encoding="utf-8") as f:
             for img in images:
                 safe = img.replace("\\", "/").replace("'", "'\\''")
@@ -63,11 +65,11 @@ class Plotter:
         (
             ffmpeg
             .input(list_path, format='concat', safe=0)
-            .output(video_name, vcodec='libx264', pix_fmt='yuv420p')
+            .output(output_loc, vcodec='libx264', pix_fmt='yuv420p')
             .run())
 
-    def clean_up(self, list_path):
-        os.remove(list_path)        # Clean up the temporary file
-        images = os.listdir("img")  # Get all images in img folder
+    def clean_up(self, list_path, imgage_dir="img"):
+        os.remove(f"{list_path}/images.txt")  # Clean up the temporary file
+        images = os.listdir(imgage_dir)  # Get all images in img folder
         for img in images:
-            os.remove(os.path.join("img", img))
+            os.remove(os.path.join(imgage_dir, img))

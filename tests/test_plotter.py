@@ -13,24 +13,34 @@ def test_plotting(plotter):
     plotter.plot_current_values()
 
 
-def test_save(plotter):
-    plotter.save_current_plot("test.png")
-    assert os.path.isfile("img/test.png")
-    os.remove("img/test.png")
+def test_save(plotter, tmp_path):
+    temp = tmp_path / "img"
+    temp.mkdir()
+    plotter.save_current_plot(fileName="test.png", imgDir=str(temp))
+    assert os.path.isfile(temp / "test.png")
 
 
-def test_video(plotter):
+def test_video(plotter, tmp_path):
     plotter.plot_current_values()
-    plotter.save_current_plot("test.png")
-    plotter.video_maker()
-    assert os.path.isfile("vids/simulation.mp4")
-    os.remove("img/test.png")
-    os.remove("vids/simulation.mp4")
+    imgDir = tmp_path / "img"
+    plotter.save_current_plot("test.png", imgDir=str(imgDir))
+    vidDir = tmp_path / "vids"
+    vidDir.mkdir()
+    plotter.video_maker(
+        video_dir=str(vidDir), image_dir=str(imgDir), list_dir=tmp_path
+        )
+    assert os.path.isfile(vidDir / "simulation.mp4")
 
 
-def test_cleanup(plotter):
+def test_cleanup(plotter, tmp_path):
     plotter.plot_current_values()
-    plotter.save_current_plot("test.png")
-    plotter.video_maker()
-    plotter.clean_up("images.txt")
-    assert not os.path.isfile("img/test.png")
+    vidDir = tmp_path / "vids"
+    imgDir = tmp_path / "img"
+    vidDir.mkdir()
+    imgDir.mkdir()
+    plotter.save_current_plot("test.png", str(imgDir))
+    plotter.video_maker(
+        video_dir=str(vidDir), image_dir=str(imgDir), list_dir=tmp_path
+        )
+    plotter.clean_up(str(tmp_path), imgage_dir=str(imgDir))
+    assert not os.path.isfile(f"{str(imgDir)}/test.png")
