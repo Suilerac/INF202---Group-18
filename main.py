@@ -1,6 +1,7 @@
 from Geometry.mesh import Mesh
 from Simulation.plotter import Plotter
 import numpy as np
+import os
 
 
 def main():
@@ -14,7 +15,8 @@ def main():
         cell.oilValue = oil
     plotter = Plotter(msh)
     plotter.plot_current_values()
-    plotter.save_current_plot()
+    plotter.save_current_plot("img.png")
+    os.remove("img.png")
 
 
 if __name__ == "__main__":
