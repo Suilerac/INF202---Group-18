@@ -49,13 +49,15 @@ class Plotter:
 
     def video_maker(self, video_name='simulation.mp4'):
         folder = 'img'
-        images = sorted(glob.glob(os.path.join(folder, "*.png")))  # natural/alphabetical sort
+        # natural/alphabetical sort
+        images = sorted(glob.glob(os.path.join(folder, "*.png")))
         list_path = 'images.txt'
         with open(list_path, "w", encoding="utf-8") as f:
             for img in images:
                 safe = img.replace("\\", "/").replace("'", "'\\''")
                 f.write(f"file '{safe}'\n")
-                f.write("duration 1\n")     # Chooses duration of each frame in seconds
+                # Chooses duration of each frame in seconds
+                f.write("duration 1\n")
             # Optional: make last frame last the same duration
             # f.write("duration 0.04\n") == 1/25 seconds for 25 fps for example
         (
