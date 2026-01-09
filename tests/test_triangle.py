@@ -6,11 +6,11 @@ import numpy as np
 from Geometry.triangle import Triangle
 
 expectedValues = {
-    "points": [
-        np.array([2, 0, 0]),
-        np.array([3, 1, 0]),
-        np.array([0, 0, 0]),
-    ],
+    "points": np.array([
+        [2, 0, 0],
+        [3, 1, 0],
+        [0, 0, 0],
+    ]),
     "centerPoint": np.array([5/3, 1/3, 0]),
     "area": 1.0,
     "edgeLength": np.sqrt(np.array([2, 10, 4])),

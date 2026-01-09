@@ -7,6 +7,8 @@ from numpy import linalg as la
 class Triangle(Cell):
     def __init__(self, coordinates):
         super().__init__(coordinates)
+        # vectorized points used for calculations
+        self._points = [np.array(coord) for coord in coordinates]
 
         # order of these calculations matter
         self._centerPoint = self._calculateCenterPoint()
@@ -50,9 +52,9 @@ class Triangle(Cell):
         Calulates the centerpoint of the triangle
         """
         # points
-        p1 = self.coordinates[0]
-        p2 = self.coordinates[1]
-        p3 = self.coordinates[2]
+        p1 = self.points[0]
+        p2 = self.points[1]
+        p3 = self.points[2]
 
         # centerpint is the average of the three
         return (p1 + p2 + p3) / 3
@@ -62,9 +64,9 @@ class Triangle(Cell):
         Creates vectors between every point in the triangle
         """
         # points
-        p1 = self.coordinates[0]
-        p2 = self.coordinates[1]
-        p3 = self.coordinates[2]
+        p1 = self.points[0]
+        p2 = self.points[1]
+        p3 = self.points[2]
 
         # Vectorize edges
         e1 = p2 - p1
@@ -86,7 +88,7 @@ class Triangle(Cell):
 
         :param edge: index refering to a edgevector in the edges list
         """
-        return self.coordinates[edgeIndex] + self._edges[edgeIndex] / 2
+        return self.points[edgeIndex] + self._edges[edgeIndex] / 2
 
     def _calculateNormals(self):
         """
