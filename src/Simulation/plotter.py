@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
+import os
+import glob
+import ffmpeg
 
 
 class Plotter:
@@ -43,3 +46,25 @@ class Plotter:
         imgDir.mkdir(parents=True, exist_ok=True)
         plt.savefig(imgDir / fileName)
         plt.close
+
+        def video_maker(self, images, video_name='simulation.mp4'):
+            folder = 'img'
+            images = sorted(glob.glob(os.path.join(folder, "*.jpg")))  # natural/alphabetical sort
+
+            list_path = images
+            with open(list_path, "w", encoding="utf-8") as f:
+                for img in images:
+                    safe = img.replace("\\", "/").replace("'", "'\\''")
+                    f.write(f"file '{safe}'\n")
+                    f.write("duration 1\n")     # Chooses duration of each frame in seconds
+            # Optional: make last frame last the same duration
+            # f.write("duration 0.04\n") == 1/25 seconds for 25 fps for example
+            (
+                ffmpeg
+                .input(list_path, format='concat', safe=0)
+                .output(video_name, vcodec='libx264', pix_fmt='yuv420p')
+                .run())
+            os.remove(list_path)        # Clean up the temporary file
+            images = os.listdir("img")  # Get all images in img folder
+            for img in images:
+                os.remove(os.path.join("img", img))
