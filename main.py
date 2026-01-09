@@ -1,11 +1,20 @@
-import numpy as np
-from Geometry.line import Line
 from Geometry.mesh import Mesh
+from Simulation.plotter import Plotter
+import numpy as np
 
 
 def main():
-    msh = Mesh("meshes/simple_mesh.msh")
-    print(msh.cells[0].coordinates)
+    msh = Mesh("meshes/bay.msh")
+    xstar = np.array([0.35, 0.45])
+    for cell in msh.cells:
+        cellCenter = np.array(cell.centerPoint[:2])
+        finalVector = cellCenter - xstar
+        finalNorm = np.linalg.norm(finalVector)
+        oil = np.exp(-abs(finalNorm)**2/0.01)
+        cell.oilValue = oil
+    plotter = Plotter(msh)
+    plotter.plot_current_values()
+    plotter.save_current_plot()
 
 
 if __name__ == "__main__":

@@ -10,18 +10,11 @@ class Triangle(Cell):
         # vectorized points used for calculations
         self._points = [np.array(coord) for coord in coordinates]
 
-        # order of these calculations matter
-        self._centerPoint = self._calculateCenterPoint()
-
         self._edges = self._calculateEdgeVectors()
         self._sideLengths = self._calculateSideLengths()
 
         self._area = self._calculateArea()
         self._normals = [None, None, None]
-
-    @property
-    def centerPoint(self):
-        return self._centerPoint
 
     @property
     def edges(self):
@@ -46,18 +39,6 @@ class Triangle(Cell):
 
         # formula for Area of a triangle given by two vectors
         return 0.5 * la.norm(la.cross(e1, e2))
-
-    def _calculateCenterPoint(self):
-        """
-        Calulates the centerpoint of the triangle
-        """
-        # points
-        p1 = self._points[0]
-        p2 = self._points[1]
-        p3 = self._points[2]
-
-        # centerpint is the average of the three
-        return (p1 + p2 + p3) / 3
 
     def _calculateEdgeVectors(self):
         """
