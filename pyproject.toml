@@ -1,5 +1,5 @@
 [project]
-name = "Oil sim"
+name = "inf202-group-18"
 version = "0.1.0"
 description = "A project for simulating movement of oil in water through a computational mesh."
 readme = "README.md"
