@@ -14,7 +14,7 @@ class Cell(ABC):
         self._oilValue = 0
         self._area = 0
         self._flow = []
-        self._neighbours = []
+        self._neighbours = {}
         self._coordinates = coordinates
 
     def __str__(self):
@@ -40,7 +40,7 @@ class Cell(ABC):
         return cellStr
 
     def addNeighbour(self, ngh):
-        self._neighbours.append(ngh)
+        self._neighbours[ngh] = 0
 
     @property
     def neighbours(self):
