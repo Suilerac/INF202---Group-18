@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from Simulation.line import Line
+from Geometry.line import Line
 
 # Testline
 Line1 = [np.array([0, 0, 0]), np.array([1, 1, 0])]
