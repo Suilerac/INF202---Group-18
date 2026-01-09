@@ -1,6 +1,6 @@
 import meshio
 import numpy as np
-from factory import Factory
+from .factory import Factory
 
 
 class Mesh:
@@ -20,10 +20,12 @@ class Mesh:
         self._cells = []  # List to store all cells as Cell objects
         self._addCellsToList()
 
-    def getCells(self):
+    @property
+    def cells(self):
         return self._cells
 
-    def getPoints(self):
+    @property
+    def points(self):
         return self._points
 
     def _addCellsToList(self):
@@ -38,41 +40,84 @@ class Mesh:
         Creates TriangleCell objects of the triangle cells
         and adds them to the list
         """
-        triangles = self._mesh.cells[self._findTriangleIndex()]
+        triangles = []
+        for i in self._findTriangleIndexes():
+            triangles.append(self._mesh.cells[i])
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
-        # Appends cell to cells local cells list
+        # Appends cell to local cells list
         for triangle in triangles:
-            coordinates = [np.array(triangle.points[i]) for i in triangle.data]
-            self._cells.append(Factory.createCell("Triangle", coordinates))
+            data = triangle.data
+            coordinates = [self.points[i] for i in data]
+            for coord in coordinates:
+                finalObjectCoords = [np.array(c) for c in coord]
+                self._cells.append(
+                    Factory.createCell("Triangle", finalObjectCoords)
+                    )
 
     def _addLines(self):
         """
         Creates LineCell objects of the border cells and adds
         them to the list.
         """
-        lines = self._mesh.cells[self._findLineIndex()]
+        lines = []
+        for i in self._findLineIndexes():
+            lines.append(self._mesh.cells[i])
         # Finds and vectorizes the coordinates for the cell
         # Creates cell
-        # Appends cell to cells local cells list
+        # Appends cell to local cells list
         for line in lines:
-            coordinates = np.array([line.points[i] for i in line.data])
-            self._cells.append(Factory.createCell("Line", coordinates))
+            data = line.data
+            coordinates = [self.points[i] for i in data]
+            for coord in coordinates:
+                finalObjectCoords = [np.array(c) for c in coord]
+                self._cells.append(
+                    Factory.createCell("Line", finalObjectCoords)
+                    )
 
-    def _findTriangleIndex(self):
+    def _findTriangleIndexes(self):
         """
-        Finds the index of triangle cells in a meshio cell list
+        Finds the indexes of triangle cells in a meshio cell list
         """
+        indexes = []
         meshioCellList = self._mesh.cells
-        for i in len(meshioCellList):
-            if meshioCellList[i].type == "Triangle":
-                return i
+        i = 0
+        for _ in meshioCellList:
+            if meshioCellList[i].type == "triangle":
+                indexes.append(i)
+            i += 1
+        return indexes
 
-    def _findLineIndex(self):
+    def _findLineIndexes(self):
         """
-        Finds the index of line cells in a meshio cell list
+        Finds the indexes of line cells in a meshio cell list
         """
+        indexes = []
         meshioCellList = self._mesh.cells
-        for i in len(meshioCellList):
-            if meshioCellList[i].type == "Line":
-                return i
+        i = 0
+        for _ in meshioCellList:
+            if meshioCellList[i].type == "line":
+                indexes.append(i)
+            i += 1
+        return indexes
+
+    def _findNeighboursOf(self, cell):
+        """
+        Finds all neighbours of cell
+
+        :param cell: Cell object
+        """
+        # Store the coordinates as a list of tuples
+        # This is to be able to convert it to a set later
+        cellCoords = [tuple(coord.tolist()) for coord in cell.coordinates]
+        for ngh in self.cells:
+            # Store the ngh coordinates as a list of tuples for the same reason
+            nghCoords = [tuple(coord.tolist()) for coord in ngh.coordinates]
+            print(f"Neighbour coords: {nghCoords}")
+            # Convert both coordinates to sets
+            # Check that the amount of elements in the intersection of the two
+            # sets is 2
+            # If it is, they share two points, and they are neighbours
+            if len(set(cellCoords) & set(nghCoords)) == 2:
+                cell.addNeighbour(ngh)
+                ngh.addNeighbour(cell)

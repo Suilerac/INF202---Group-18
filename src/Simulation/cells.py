@@ -18,27 +18,54 @@ class Cell(ABC):
         self._coordinates = coordinates
 
     def __str__(self):
-        return str(self._coordinates)
+        """
+        Returns a string in the form [[X Y Z], [X Y Z], ... , [X Y Z]]
+        This is to represent the points that make up the cell
+        """
+        cellStr = '['
+        firstLoop = True
+        for point in self.coordinates:
+            # Only add commas after the first point has been added
+            if not firstLoop:
+                cellStr += ', '
+            cellStr += '['
+            # Slicing is used to only add commas after the first number
+            cellStr += str(point[0])
+            for xyz in point[1:]:
+                cellStr += ', '
+                cellStr += str(xyz)
+            cellStr += ']'
+            firstLoop = False
+        cellStr += ']'
+        return cellStr
+
+    def addNeighbour(self, ngh):
+        self._neighbours.append(ngh)
+
+    @property
+    def neighbours(self):
+        return self._neighbours
+
+    @property
+    def coordinates(self):
+        return self._coordinates
+
+    @property
+    def area(self):
+        return self._area
+
+    @property
+    def oilValue(self):
+        return self._oilValue
+
+    @property
+    def flow(self):
+        return self._flow
+
+    @oilValue.setter
+    def oilValue(self, value):
+        self._oilValue = value
 
     @abstractmethod
     def _calculateArea(self):
         pass
-
-    @abstractmethod
-    def getArea(self):
-        pass
-
-    @abstractmethod
-    def updateOilValue(self):
-        pass
-
-    @abstractmethod
-    def getOilValue(self):
-        pass
-
-    @abstractmethod
-    def getFlowValue(self):
-        pass
-
-    def addNeighbour(self, ngh):
-        self._neighbours.append(ngh)
