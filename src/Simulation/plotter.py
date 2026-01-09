@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
 
 class Plotter:
@@ -38,5 +39,7 @@ class Plotter:
 
         :param fileName: Description
         """
-        plt.savefig(f"img/{fileName}")
+        imgDir = Path("img")
+        imgDir.mkdir(parents=True, exist_ok=True)
+        plt.savefig(imgDir / fileName)
         plt.close
