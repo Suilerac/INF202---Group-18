@@ -63,6 +63,8 @@ class Plotter:
             .input(list_path, format='concat', safe=0)
             .output(video_name, vcodec='libx264', pix_fmt='yuv420p')
             .run())
+
+    def clean_up(self, list_path):
         os.remove(list_path)        # Clean up the temporary file
         images = os.listdir("img")  # Get all images in img folder
         for img in images:
