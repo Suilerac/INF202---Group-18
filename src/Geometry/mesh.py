@@ -1,6 +1,5 @@
 import meshio
-import numpy as np
-from .factory import Factory
+from .cellfactory import CellFactory
 
 
 class Mesh:
@@ -18,6 +17,7 @@ class Mesh:
         self._mesh = meshio.read(meshFile)
         self._points = self._mesh.points
         self._cells = []  # List to store all cells as Cell objects
+        self._factory = CellFactory()
         self._addCellsToList()
 
     @property
@@ -47,13 +47,9 @@ class Mesh:
         # Creates cell
         # Appends cell to local cells list
         for triangle in triangles:
-            data = triangle.data
-            coordinates = [self.points[i] for i in data]
-            for coord in coordinates:
-                finalObjectCoords = [np.array(c) for c in coord]
-                self._cells.append(
-                    Factory.createCell("Triangle", finalObjectCoords)
-                    )
+            self._cells += self._factory.createCell(
+                "Triangle", triangle, self._points
+                )
 
     def _addLines(self):
         """
@@ -67,13 +63,9 @@ class Mesh:
         # Creates cell
         # Appends cell to local cells list
         for line in lines:
-            data = line.data
-            coordinates = [self.points[i] for i in data]
-            for coord in coordinates:
-                finalObjectCoords = [np.array(c) for c in coord]
-                self._cells.append(
-                    Factory.createCell("Line", finalObjectCoords)
-                    )
+            self._cells += self._factory.createCell(
+                "Line", line, self._points
+            )
 
     def _findTriangleIndexes(self):
         """
