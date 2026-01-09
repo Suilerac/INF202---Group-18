@@ -52,9 +52,9 @@ class Triangle(Cell):
         Calulates the centerpoint of the triangle
         """
         # points
-        p1 = self.points[0]
-        p2 = self.points[1]
-        p3 = self.points[2]
+        p1 = self._points[0]
+        p2 = self._points[1]
+        p3 = self._points[2]
 
         # centerpint is the average of the three
         return (p1 + p2 + p3) / 3
@@ -64,9 +64,9 @@ class Triangle(Cell):
         Creates vectors between every point in the triangle
         """
         # points
-        p1 = self.points[0]
-        p2 = self.points[1]
-        p3 = self.points[2]
+        p1 = self._points[0]
+        p2 = self._points[1]
+        p3 = self._points[2]
 
         # Vectorize edges
         e1 = p2 - p1
@@ -88,7 +88,7 @@ class Triangle(Cell):
 
         :param edge: index refering to a edgevector in the edges list
         """
-        return self.points[edgeIndex] + self._edges[edgeIndex] / 2
+        return self._points[edgeIndex] + self._edges[edgeIndex] / 2
 
     def _calculateNormals(self):
         """

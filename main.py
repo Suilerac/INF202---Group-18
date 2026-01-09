@@ -1,11 +1,11 @@
 import numpy as np
 from Geometry.line import Line
+from Geometry.mesh import Mesh
 
 
 def main():
-    Line1 = [np.array([0.1, -1, 0]), np.array([1.5, -1.2, 0])]
-    line = Line(Line1)
-    print(line)
+    msh = Mesh("meshes/simple_mesh.msh")
+    print(msh.cells[0].coordinates)
 
 
 if __name__ == "__main__":
