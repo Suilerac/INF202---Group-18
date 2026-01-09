@@ -39,6 +39,12 @@ class Cell(ABC):
         cellStr += ']'
         return cellStr
 
+    def _edgeIdFromCoords(self, coords):
+        p1 = tuple(round(component / 1e-10) for component in coords[0])
+        p2 = tuple(round(component / 1e-10) for component in coords[1])
+
+        return tuple(sorted((p1, p2)))
+
     def addNeighbour(self, ngh):
         self._neighbours[ngh] = 0
 
