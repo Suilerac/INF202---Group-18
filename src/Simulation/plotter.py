@@ -47,7 +47,7 @@ class Plotter:
         plt.savefig(imgDir / fileName)
         plt.close
 
-    def video_maker(self, video_name='simulation.mp4'):
+    def video_maker(self, video_name='vids/simulation.mp4'):
         folder = 'img'
         # natural/alphabetical sort
         images = sorted(glob.glob(os.path.join(folder, "*.png")))
