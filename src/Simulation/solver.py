@@ -32,3 +32,12 @@ class Solver:
 
     def averageVelocity(a, b):
         return 0.5 * (a + b)
+
+    def flux(self, cellA, cellB, flowValue):
+        # the flowvalue is the dot product of
+        # the average velocity between two neighbours
+        # and the scaled normal of the shared edge
+        if (0 < flowValue):
+            return cellA.oilValue * flowValue
+        else:
+            return cellB.oilValue * flowValue
