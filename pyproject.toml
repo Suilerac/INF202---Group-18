@@ -1,7 +1,13 @@
 [project]
-name = "inf202-group-18"
+name = "Oil sim"
 version = "0.1.0"
-description = "Add your description here"
+description = "A project for simulating movement of oil in water through a computational mesh."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
 requires-python = ">=3.11"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Suilerac/INF202---Group-18"
+Issues = "https://github.com/Suilerac/INF202---Group-18/issues"
