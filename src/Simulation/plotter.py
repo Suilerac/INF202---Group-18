@@ -38,5 +38,5 @@ class Plotter:
 
         :param fileName: Description
         """
-        plt.savefig(fileName)
+        plt.savefig(f"img/{fileName}")
         plt.close

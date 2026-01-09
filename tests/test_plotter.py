@@ -15,5 +15,5 @@ def test_plotting(plotter):
 
 def test_save(plotter):
     plotter.save_current_plot("test.png")
-    assert os.path.isfile("test.png")
-    os.remove("test.png")
+    assert os.path.isfile("img/test.png")
+    os.remove("img/test.png")
