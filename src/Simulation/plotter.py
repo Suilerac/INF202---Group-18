@@ -47,10 +47,10 @@ class Plotter:
         plt.savefig(imgDir / fileName)
         plt.close
 
-    def video_maker(self, images, video_name='simulation.mp4'):
+    def video_maker(self, video_name='simulation.mp4'):
         folder = 'img'
-        images = sorted(glob.glob(os.path.join(folder, "*.jpg")))  # natural/alphabetical sort
-        list_path = images
+        images = sorted(glob.glob(os.path.join(folder, "*.png")))  # natural/alphabetical sort
+        list_path = 'images.txt'
         with open(list_path, "w", encoding="utf-8") as f:
             for img in images:
                 safe = img.replace("\\", "/").replace("'", "'\\''")
