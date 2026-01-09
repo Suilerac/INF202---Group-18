@@ -1,5 +1,5 @@
 import numpy as np
-from Simulation.line import Line
+from Geometry.line import Line
 
 
 def main():

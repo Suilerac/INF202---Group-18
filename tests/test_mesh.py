@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-from Simulation.mesh import Mesh
-from Simulation.cells import Cell
+from Geometry.mesh import Mesh
+from Geometry.cells import Cell
 
 
 @pytest.fixture

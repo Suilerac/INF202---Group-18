@@ -3,7 +3,7 @@ import pytest
 import math
 import numpy as np
 
-from Simulation.triangle import Triangle
+from Geometry.triangle import Triangle
 
 expectedValues = {
     "points": [
