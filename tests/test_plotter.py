@@ -20,8 +20,15 @@ def test_ensure_directories(plotter):
 
 
 def test_image_txt_write(plotter):
+    # Generate a test file so a file directory gets written
+    # to images.txt
+    testfile = open(f"{plotter.image_dir}/test.png", 'w')
+    testfile.close()
     plotter._write_temp_images()
     assert os.path.isfile(f"{plotter.list_dir}/images.txt")
+    with open(f"{plotter.list_dir}/images.txt", 'r', encoding='utf-8') as f:
+        image = f.readline().strip().split(' ')[1].strip("'")
+        assert os.path.isfile(image)
 
 
 def test_plotting(plotter):

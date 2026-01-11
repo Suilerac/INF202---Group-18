@@ -16,6 +16,7 @@ def main():
     plotter.plot_current_values()
     plotter.save_current_plot("img.png")
     plotter.video_maker("simulation.mp4")
+    plotter.clean_up()
 
 
 if __name__ == "__main__":

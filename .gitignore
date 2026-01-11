@@ -267,4 +267,5 @@ Report/Covers/*.aux
 .python-version
 img/*
 *.mp4
+*.png
 images.txt

@@ -130,7 +130,8 @@ class Plotter:
         images = sorted(glob.glob(os.path.join(self._image_dir, "*.png")))
         with open(self._list_path, 'w', encoding='utf-8') as txtfile:
             for img in images:
-                safe = img.replace("\\", "/").replace("'", "'\\''")
+                abs_path = os.path.abspath(img)
+                safe = abs_path.replace("\\", "/").replace("'", "'\\''")
                 txtfile.write(f"file '{safe}'\n")
                 txtfile.write(f"duration {frame_duration}\n")
 
