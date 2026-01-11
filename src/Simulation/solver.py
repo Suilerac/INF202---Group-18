@@ -1,6 +1,6 @@
-import numpy as np
-import numpy.linalg as la
 import math
+import numpy as np
+la = np.linalg
 
 
 class Solver:
@@ -30,8 +30,38 @@ class Solver:
         fieldY = -x
         return np.array([fieldX, fieldY])
 
-    def averageVelocity(a, b):
-        return 0.5 * (a + b)
+    def _averageVelocity(self, cellA, cellB):
+        vA = cellA.flow
+        vB = cellB.flow 
+        return 0.5 * (vA + vB)
+
+    def calculateFlowValue(self, cellA, cellB, sharedCoordinates):
+        """
+        Calculates a scalar value that gives the flow from cell A to cell B.
+        This is calculated from the dot product of the average velocity
+        between cellA and cellB and the scaled normal pointing
+        from cellA to cellB.
+
+        parameters:
+            cellA: cell object,
+            cellB: cell object,
+            edgeID: tuple key calculated by cell.
+        """
+
+        # Since the vector field is constant at a given position.
+        # Therefore the average velocity between cells is constant as well
+        averageVelocity = self._averageVelocity(cellA, cellB)
+
+        # The scaled normals of the shared edge between cellA and cellB
+        # are parallell to each other, with opposite direction.
+        # They have the same lenght s the relation between them is given as
+        # "scaledNormalA = - scaledNormalB"
+        scaledNormal = cellA._calculateScaledNormal(sharedCoordinates)
+
+        # since both the averageVelocity and the scaledNormal is constant
+        # we only have to calculate this value once during the simulation.
+        # this saves a lot of time
+        return la.dot(averageVelocity, scaledNormal)
 
     def flux(self, cellA, cellB, flowValue):
         # the flowvalue is the dot product of
