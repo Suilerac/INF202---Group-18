@@ -19,6 +19,11 @@ def test_ensure_directories(plotter):
     assert os.path.isdir(plotter.list_dir)
 
 
+def test_image_txt_write(plotter):
+    plotter._write_temp_images()
+    assert os.path.isfile(f"{plotter.list_dir}/images.txt")
+
+
 def test_plotting(plotter):
     plotter.plot_current_values()
 
@@ -28,14 +33,14 @@ def test_save(plotter):
     assert os.path.isfile(f"{plotter._image_dir}/test.png")
 
 
-def test_video(plotter, tmp_path):
+def test_video(plotter):
     plotter.plot_current_values()
     plotter.save_current_plot("test.png")
     plotter.video_maker()
     assert os.path.isfile(f"{plotter.video_dir}/simulation.mp4")
 
 
-def test_cleanup(plotter, tmp_path):
+def test_cleanup(plotter):
     plotter.plot_current_values()
     plotter.save_current_plot("test.png")
     plotter.video_maker()
