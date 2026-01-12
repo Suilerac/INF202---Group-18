@@ -16,7 +16,7 @@ class Cell(ABC):
         self._update = 0
 
         self._area = 0
-        self._flow = []
+        self._flow = None
         self._neighbours = {}
         self._coordinates = coordinates
         self._centerPoint = sum(self._coordinates) / len(self._coordinates)
@@ -53,8 +53,11 @@ class Cell(ABC):
 
         return tuple(sorted((p1, p2)))
 
-    def addNeighbour(self, ngh, flowValue):
-        self._neighbours.setdefault(ngh, flowValue)
+    def addNeighbour(self, ngh, sharedCoords, flowValue=None):
+        self._neighbours[ngh] = [sharedCoords, flowValue]
+
+    def updateFlowToNeighbour(self, ngh, flowValue):
+        self._neighbours[ngh][1] = flowValue
 
     @property
     def neighbours(self):
@@ -87,6 +90,10 @@ class Cell(ABC):
     @oilValue.setter
     def oilValue(self, value):
         self._oilValue = value
+
+    @flow.setter
+    def flow(self, value):
+        self._flow = value
 
     @abstractmethod
     def _calculateArea(self):

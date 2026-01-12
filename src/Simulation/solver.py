@@ -4,8 +4,8 @@ la = np.linalg
 
 
 class Solver:
-    def __init__(self):
-        self._initialOilSpatialPoint = np.array[0, 0]
+    def __init__(self, initialOilPoint=np.array([0.35, 0.45])):
+        self._initialOilSpatialPoint = initialOilPoint
 
     def initalOil(self, position):
         """
@@ -61,7 +61,7 @@ class Solver:
         # since both the averageVelocity and the scaledNormal is constant
         # we only have to calculate this value once during the simulation.
         # this saves a lot of time
-        return la.dot(averageVelocity, scaledNormal)
+        return np.dot(averageVelocity, scaledNormal)
 
     def flux(self, cellA, cellB, flowValue):
         # the flowvalue is the dot product of

@@ -23,7 +23,7 @@ class Mesh:
         self._addCellsToList()
 
     @property
-    def cells(self):
+    def cells(self) -> list[Cell]:
         return self._cells
 
     @property
@@ -103,7 +103,6 @@ class Mesh:
         """
         # Store the coordinates as a list of tuples
         # This is to be able to convert it to a set later
-        couples = []
         cellPoints = cell.pointIDs
         maxNgh = len(cell.coordinates)
         for ngh in self.cells:
@@ -116,7 +115,7 @@ class Mesh:
             sharedPoints = np.intersect1d(cellPoints, nghPoints)
             if len(sharedPoints) == 2:
                 sharedCoords = [self._points[i] for i in sharedPoints]
-                couples.append((ngh, sharedCoords))
-            if len(couples) == maxNgh:
+                cell.addNeighbour(ngh, sharedCoords)
+                ngh.addNeighbour(cell, sharedCoords)
+            if len(cell.neighbours) == maxNgh:
                 break
-        return couples

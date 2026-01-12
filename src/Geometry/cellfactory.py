@@ -16,10 +16,11 @@ class CellFactory:
         cells = []
         data = cell.data
         coordinates = [points[i] for i in data]
-        for coord in coordinates:
-            finalObjectCoords = np.array(coord)
+        for i in range(len(coordinates)):
+            finalObjectCoords = np.array(coordinates[i])
+            pointIDs = data[i]
             if type == "Triangle":
-                cells.append(Triangle(finalObjectCoords, data))
+                cells.append(Triangle(finalObjectCoords, pointIDs))
             elif type == "Line":
-                cells.append(Line(finalObjectCoords, data))
+                cells.append(Line(finalObjectCoords, pointIDs))
         return cells

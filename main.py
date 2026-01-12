@@ -1,14 +1,10 @@
-from Geometry.mesh import Mesh
-from Simulation.plotter import Plotter
-import numpy as np
+from Simulation.simulation import Simulation
 
 
 def main():
-    msh = Mesh("meshes/simple.msh")
-    print(len(msh.cells))
-    print(msh.cells[0].pointIDs)
-    for cell in msh.cells:
-        msh.findNeighboursOf(cell)
+    sim = Simulation("")
+    dt = 0.5/500
+    sim.run(endTime=0.5, nSteps=500, writeFrequency=20, dt=dt)
 
 
 if __name__ == "__main__":

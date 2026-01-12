@@ -93,4 +93,4 @@ class Triangle(Cell):
         # calulate and store scaled normal
         scaledNormal = normal * edgeLength
 
-        return scaledNormal
+        return scaledNormal[:-1]

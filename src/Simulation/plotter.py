@@ -90,7 +90,9 @@ class Plotter:
         plt.savefig(f"{self._image_dir}/{fileName}")
         plt.close
 
-    def video_maker(self, video_name: str = 'simulation.mp4'):
+    def video_maker(self,
+                    video_name: str = 'simulation.mp4',
+                    frame_duration: float = 1):
         """_
         A function that loops through a txt file of image paths
         and makes a video file out of it.
@@ -98,7 +100,7 @@ class Plotter:
         :param video_name: The wanted file name for the final product.
             Must include the file type. Example: "simulation.mp4"
         """
-        self._write_temp_images()
+        self._write_temp_images(frame_duration)
         output_loc = f"{self._video_dir}/{video_name}"
         # Reads the arguments in image.txt through the input function
         # Writes the video file in the output function

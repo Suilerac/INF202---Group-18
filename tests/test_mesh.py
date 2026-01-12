@@ -27,6 +27,6 @@ def test_points(mesh):
 
 def test_neighbours(mesh):
     cell = mesh.cells[0]
-    ngh = mesh.findNeighboursOf(cell)
+    mesh.findNeighboursOf(cell)
+    ngh = cell.neighbours
     assert len(ngh) > 0
-    assert isinstance(ngh[0][0], Cell)
