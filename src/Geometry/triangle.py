@@ -7,26 +7,8 @@ from numpy import linalg as la
 class Triangle(Cell):
     def __init__(self, coordinates, pointIDs):
         super().__init__(coordinates, pointIDs)
-        # vectorized points used for calculations
-        self._points = [np.array(coord) for coord in coordinates]
 
         self._area = self._calculateArea()
-
-    @property
-    def edges(self):
-        return self._edges
-
-    @property
-    def sideLengths(self):
-        return self._sideLengths
-
-    @property
-    def normals(self):
-        return self._normals
-
-    @property
-    def scaledNormals(self):
-        return self._scaledNormals
 
     def _calculateArea(self):
         """
