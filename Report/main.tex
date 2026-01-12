@@ -2,7 +2,6 @@
 \documentclass{report_template}
 
 % Authors & Supervisor
-%TODO: Add your names here:
 \firstauthor{Andreas Carelius Brustad}
 
 \secondauthor{Håkon Bekken}
@@ -11,8 +10,8 @@
 
 % Report Title & Subtitle
 \title{Report: Simulation of an oil spill}
-%TODO: Add subtitle here:
-\subtitle{Your own subtitle \\ with a line break}
+
+\subtitle{Funker dette? \\ with a line break}
 
 % Filiations
 \university{Norwegian University of Life Sciences (NMBU)}
@@ -40,7 +39,30 @@
 % Chapters
 \chapter{Introduction}
 \label{ch:introduction}
-This is the introduction. The following text provides a few helpful commands in latex. You can refer to other chapters titled \nameref{ch:images} (referred to as \autoref{ch:images}). You can use code statements \texttt{which take this font}. Also, you can put \emph{emphasis on certain words}. To make text bold use \textbf{this command}. A new line can be started like this. You can also cite others via \cite{khodak2021initialization, vaswani2017attention} when adding the corresponding entry into the \emph{Bibliography} folder.\\
+Computer simulations are widely used in science and engineering to model complex systems and phenomena. They allow researchers to analyze and predict the behavior of systems under various conditions, providing insights that may be difficult or impossible to obtain through traditional experimental methods. 
+\\In this report, we will explore the simulation of an oil spill using computational simulation. 
+The problem of oil spills has a real world implementation and are of significant for environmental concern. There are multiple examples like the Deepwater Horizon oil spill in 2010, where computational simulations was crucial in order to predict where surface oil would go, aiding skimming, booming, and shoreline protection.
+\begin{figure}[H]
+    \centering % This puts the image in the center
+    \includegraphics[width=0.7\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
+    \caption{Deepwater Horizon BP oil spill\\ Public domain media }
+    \label{fig:deepwater horizonbp oil spill}
+\end{figure}
+
+Our simulation aims to model oil trajectory and spread forecasting in Bay city. Outside Bay city is a fishing ground that are voulnerable to oil spills.
+We will discuss the mathematical models used to represent the oil spill dynamics, the numerical methods employed to solve these models, and the implementation of the simulation.
+\begin{figure}[H]
+    \centering % This puts the image in the center
+    \includegraphics[width=0.7\linewidth]{Figures/BayCity.png}
+    \caption{Bay City with fishing ground}
+    \label{fig:Bay City}
+\end{figure}
+
+\cite{khodak2021initialization, vaswani2017attention} 
+
+
+
+
 
 A list of bullet points can be created with
 \begin{itemize}
@@ -57,7 +79,7 @@ A list of numbered items can be created with
 Now, let us create a new section.
 
 % This here is a comment. It will not affect the text produced in the PDF file.
-\section{Formulas}
+\section{Hei}
 Use the formula environment to include formulas like $f(x) = x$. You can also use the formula as a separate line via
 \begin{align*}
     f(x) = x.
