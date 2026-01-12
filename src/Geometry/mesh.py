@@ -110,6 +110,7 @@ class Mesh:
             # Check that the amount of elements in the intersection of the two
             # sets is 2
             # If it is, they share two points, and they are neighbours
-            if len(set(cellCoords) & set(nghCoords)) == 2:
-                cell.addNeighbour(ngh)
-                ngh.addNeighbour(cell)
+            sharedCoords = set(cellCoords) & set(nghCoords)
+            if len(sharedCoords) == 2:
+                cell.addNeighbour(ngh, sharedCoords)
+                ngh.addNeighbour(cell, sharedCoords)

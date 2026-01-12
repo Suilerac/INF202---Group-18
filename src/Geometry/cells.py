@@ -12,9 +12,11 @@ class Cell(ABC):
         in the form of numpy arrays
         """
         self._oilValue = 0
+        self._update = 0
+
         self._area = 0
         self._flow = []
-        self._neighbours = []
+        self._neighbours = {}
         self._coordinates = coordinates
 
     def __str__(self):
@@ -39,8 +41,18 @@ class Cell(ABC):
         cellStr += ']'
         return cellStr
 
-    def addNeighbour(self, ngh):
-        self._neighbours.append(ngh)
+    def updateOilValue(self):
+        self._oilValue += self._update
+        self._update = 0
+
+    def _edgeIdFromCoords(self, coords):
+        p1 = tuple(round(component / 1e-10) for component in coords[0])
+        p2 = tuple(round(component / 1e-10) for component in coords[1])
+
+        return tuple(sorted((p1, p2)))
+
+    def addNeighbour(self, ngh, flowValue):
+        self._neighbours.setdefault(ngh, flowValue)
 
     @property
     def neighbours(self):

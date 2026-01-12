@@ -12,28 +12,22 @@ class Triangle(Cell):
 
         # order of these calculations matter
         self._centerPoint = self._calculateCenterPoint()
-
-        self._edges = self._calculateEdgeVectors()
-        self._sideLengths = self._calculateSideLengths()
-
         self._area = self._calculateArea()
-        self._normals = [None, None, None]
+
+        self._normals = {}
+        self._scaledNormals = {}
 
     @property
     def centerPoint(self):
         return self._centerPoint
 
     @property
-    def edges(self):
-        return self._edges
-
-    @property
-    def sideLengths(self):
-        return self._sideLengths
-
-    @property
     def normals(self):
         return self._normals
+
+    @property
+    def scaledNormals(self):
+        return self._scaledNormals
 
     def _calculateArea(self):
         """
@@ -41,8 +35,12 @@ class Triangle(Cell):
 
         :param self: Description
         """
-        e1 = self._edges[0]
-        e2 = self._edges[1]
+        p1 = self._coordinates[0]
+        p2 = self._coordinates[1]
+        p3 = self._coordinates[2]
+
+        e1 = self._calculateEdgeVector([p1, p2])
+        e2 = self._calculateEdgeVector([p1, p3])
 
         # formula for Area of a triangle given by two vectors
         return 0.5 * la.norm(la.cross(e1, e2))
@@ -59,67 +57,79 @@ class Triangle(Cell):
         # centerpint is the average of the three
         return (p1 + p2 + p3) / 3
 
-    def _calculateEdgeVectors(self):
+    def _calculateEdgeVector(self, coordinates):
         """
         Creates vectors between every point in the triangle
         """
         # points
-        p1 = self._points[0]
-        p2 = self._points[1]
-        p3 = self._points[2]
+        p1 = np.array(coordinates[0])
+        p2 = np.array(coordinates[1])
 
         # Vectorize edges
-        e1 = p2 - p1
-        e2 = p3 - p2
-        e3 = p1 - p3
+        return p2 - p1
 
-        return [e1, e2, e3]
-
-    def _calculateSideLengths(self):
-        """
-        Calulate the side lengths for every edge vector in the edges list
-        """
-        sideLengths = [la.norm(edge) for edge in self._edges]
-        return sideLengths
-
-    def _calculateEdgeMidPoint(self, edgeIndex):
+    def _calculateEdgeMidPoint(self, coordinates, edgeVector):
         """
         Calculates the midpoints of a line / edge
 
         :param edge: index refering to a edgevector in the edges list
         """
-        return self._points[edgeIndex] + self._edges[edgeIndex] / 2
+        p1 = np.array(coordinates[0])
 
-    def _calculateNormals(self):
+        return p1 + edgeVector / 2
+
+    def _calculateEdgeLength(self, edgeVector):
+        return la.norm(edgeVector)
+
+    def _calculateNormal(self, coordinates):
         """
         Calculates the normal vectors pointing towards neighbours
         (away from the triangle centerpoint) for every edge in the edges list
         """
 
-        # iterate over every edge in edges
-        for i in range(3):
-            # decompose edge vector
-            x = self._edges[i][0]
-            y = self._edges[i][1]
+        # decompose edge vector
+        edgeVector = self._calculateEdgeVector(coordinates)
 
-            # rotate vector 90 degrees counterclockwise (X, Y) -> (-Y, X)
-            rotated = np.array([-y, x, 0])
+        x = edgeVector[0]
+        y = edgeVector[1]
 
-            # normalising the rotated vector gives the orthonormal
-            normal = rotated / la.norm(rotated)
+        # rotate vector 90 degrees counterclockwise (X, Y, 0) -> (-Y, X, 0)
+        rotated = np.array([-y, x, 0])
 
-            # vector pointing from the center to the midpoint
-            midPoint = self._calculateEdgeMidPoint(i)
-            centerToMidpointVector = midPoint - self._centerPoint
+        # normalising the rotated vector gives the orthonormal
+        normal = rotated / la.norm(rotated)
 
-            # check alignment using the dot product.
-            # (0 < Alignment) implies the vector is pointing out
-            # of the triangle
-            alignment = np.dot(normal, centerToMidpointVector)
+        # vector pointing from the center to the midpoint
+        midPoint = self._calculateEdgeMidPoint(coordinates, edgeVector)
+        centerToMidpointVector = midPoint - self._centerPoint
 
-            if (alignment < 0):
-                # if it points into the center of the triangle,
-                # flip the sign of the normalvector
-                normal *= -1
+        # check alignment using the dot product.
+        # (0 < Alignment) implies the vector is pointing out
+        # of the triangle
+        alignment = np.dot(normal, centerToMidpointVector)
 
-            self._normals[i] = normal
+        if (alignment < 0):
+            # if it points into the center of the triangle,
+            # flip the sign of the normalvector
+            normal *= -1
+
+        edge_id = self._edgeIdFromCoords(coordinates)
+
+        self._normals[edge_id] = normal
+
+        return normal
+
+    def _calculateScaledNormal(self, coordinates):
+        # calculateData
+        normal = self._calculateNormal(coordinates)
+        edgeVector = self._calculateEdgeVector(coordinates)
+        edgeLength = la.norm(edgeVector)
+
+        # edge id for storing the coordinates
+        edgeId = self._edgeIdFromCoords(coordinates)
+
+        # calulate and store scaled normal
+        scaledNormal = normal * edgeLength
+        self._scaledNormals[edgeId] = scaledNormal
+
+        return scaledNormal
