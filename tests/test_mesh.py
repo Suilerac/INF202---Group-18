@@ -22,8 +22,7 @@ def test_index_search(mesh):
 
 
 def test_points(mesh):
-    assert isinstance(mesh.cells[0].coordinates, list)
-    assert isinstance(mesh.cells[0].coordinates[0], np.ndarray)
+    assert isinstance(mesh.cells[0].coordinates, np.ndarray)
 
 
 def test_neighbours(mesh):
