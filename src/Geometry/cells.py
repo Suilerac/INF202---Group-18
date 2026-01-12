@@ -18,6 +18,7 @@ class Cell(ABC):
         self._flow = []
         self._neighbours = {}
         self._coordinates = coordinates
+        self._centerPoint = sum(self._coordinates) / len(self._coordinates)
 
     def __str__(self):
         """
@@ -61,6 +62,10 @@ class Cell(ABC):
     @property
     def coordinates(self):
         return self._coordinates
+
+    @property
+    def centerPoint(self):
+        return self._centerPoint
 
     @property
     def area(self):

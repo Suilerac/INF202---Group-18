@@ -265,3 +265,7 @@ Report/Covers/*.aux
 
 # Stuff we notice that we don't want in the repository
 .python-version
+img/*
+*.mp4
+*.png
+images.txt

@@ -1,1 +1,4 @@
 meshio
+matplotlib
+ffmpeg
+ffmpeg-python
