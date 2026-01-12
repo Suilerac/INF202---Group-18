@@ -105,7 +105,7 @@ class Mesh:
         # This is to be able to convert it to a set later
         couples = []
         cellPoints = cell.pointIDs
-        print("Finding neighbors")
+        maxNgh = len(cell.coordinates)
         for ngh in self.cells:
             # Store the ngh coordinates as a list of tuples for the same reason
             nghPoints = ngh.pointIDs
@@ -114,9 +114,9 @@ class Mesh:
             # sets is 2
             # If it is, they share two points, and they are neighbours
             sharedPoints = np.intersect1d(cellPoints, nghPoints)
-            print("Shared points:" + str(sharedPoints))
             if len(sharedPoints) == 2:
-                print("Found neighbor")
                 sharedCoords = [self._points[i] for i in sharedPoints]
                 couples.append((ngh, sharedCoords))
+            if len(couples) == maxNgh:
+                break
         return couples
