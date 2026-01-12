@@ -50,7 +50,7 @@ class Mesh:
         # Appends cell to local cells list
         for triangle in triangles:
             self._cells += self._factory.createCell(
-                "Triangle", triangle, self._points
+                "triangle", triangle, self._points
                 )
 
     def _addLines(self):
@@ -66,7 +66,7 @@ class Mesh:
         # Appends cell to local cells list
         for line in lines:
             self._cells += self._factory.createCell(
-                "Line", line, self._points
+                "line", line, self._points
             )
 
     def _findTriangleIndexes(self):
@@ -104,10 +104,12 @@ class Mesh:
         # Store the point indexes as a set for later comparison
         cellPoints = set(cell.pointIDs)
 
+        # The max amount of neighbours the cell can have
+        maxNgh = len(cell.coordinates)
+
         for ngh in self.cells:
             # Check if all neighbours have already been added
             # That way we can avoid redundant loops
-            maxNgh = len(cell.coordinates)
             if len(cell.neighbours) == maxNgh:
                 return
 
