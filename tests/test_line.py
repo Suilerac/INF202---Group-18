@@ -10,17 +10,17 @@ Line3 = [np.array([.1, -1, 0]), np.array([3, -3, 0])]
 
 @pytest.fixture
 def line1():
-    return Line(Line1)
+    return Line(Line1, [])
 
 
 @pytest.fixture
 def line2():
-    return Line(Line2)
+    return Line(Line2, [])
 
 
 @pytest.fixture
 def line3():
-    return Line(Line3)
+    return Line(Line3, [])
 
 
 def coordinates_test(line1, line2, line3):

@@ -26,7 +26,7 @@ class Simulation:
             if (0 < cell.Oilvalue):
                 # code for activating a cell
                 # simply adds the neighboors and the related flow value
-                neighboors = self.mesh._findNeighboursOf(cell)
+                neighboors = self.mesh.findNeighboursOf(cell)
                 for neighboor in neighboors:
                     # would be nice if the find neighboors method returned
                     # a tuple = (neigboor cell object, shared coords)

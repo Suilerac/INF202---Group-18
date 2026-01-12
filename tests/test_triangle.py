@@ -60,7 +60,7 @@ edgeCoords = [
 
 @pytest.fixture
 def triangle():
-    return Triangle(expectedValues["points"])
+    return Triangle(expectedValues["points"], [])
 
 
 def test_area(triangle):

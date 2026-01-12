@@ -269,3 +269,4 @@ img/*
 *.mp4
 *.png
 images.txt
+.vscode/*

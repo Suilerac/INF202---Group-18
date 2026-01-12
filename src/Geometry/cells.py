@@ -6,11 +6,12 @@ class Cell(ABC):
     An abstract class for handling relevant data of cells
     in the oil simulation
     """
-    def __init__(self, coordinates):
+    def __init__(self, coordinates, pointIDs):
         """
         :param coordinates: An array of coordinate vectors
         in the form of numpy arrays
         """
+        self._pointIDs = pointIDs
         self._oilValue = 0
         self._update = 0
 
@@ -78,6 +79,10 @@ class Cell(ABC):
     @property
     def flow(self):
         return self._flow
+
+    @property
+    def pointIDs(self):
+        return self._pointIDs
 
     @oilValue.setter
     def oilValue(self, value):

@@ -1,5 +1,7 @@
 import meshio
+import numpy as np
 from .cellfactory import CellFactory
+from .cells import Cell
 
 
 class Mesh:
@@ -93,7 +95,7 @@ class Mesh:
             i += 1
         return indexes
 
-    def _findNeighboursOf(self, cell):
+    def findNeighboursOf(self, cell: Cell) -> list[tuple[Cell, list]]:
         """
         Finds all neighbours of cell
 
@@ -101,16 +103,20 @@ class Mesh:
         """
         # Store the coordinates as a list of tuples
         # This is to be able to convert it to a set later
-        cellCoords = [tuple(coord.tolist()) for coord in cell.coordinates]
+        couples = []
+        cellPoints = cell.pointIDs
+        print("Finding neighbors")
         for ngh in self.cells:
             # Store the ngh coordinates as a list of tuples for the same reason
-            nghCoords = [tuple(coord.tolist()) for coord in ngh.coordinates]
-            print(f"Neighbour coords: {nghCoords}")
+            nghPoints = ngh.pointIDs
             # Convert both coordinates to sets
             # Check that the amount of elements in the intersection of the two
             # sets is 2
             # If it is, they share two points, and they are neighbours
-            sharedCoords = set(cellCoords) & set(nghCoords)
-            if len(sharedCoords) == 2:
-                cell.addNeighbour(ngh, sharedCoords)
-                ngh.addNeighbour(cell, sharedCoords)
+            sharedPoints = np.intersect1d(cellPoints, nghPoints)
+            print("Shared points:" + str(sharedPoints))
+            if len(sharedPoints) == 2:
+                print("Found neighbor")
+                sharedCoords = [self._points[i] for i in sharedPoints]
+                couples.append((ngh, sharedCoords))
+        return couples

@@ -5,18 +5,12 @@ from numpy import linalg as la
 
 
 class Triangle(Cell):
-    def __init__(self, coordinates):
-        super().__init__(coordinates)
+    def __init__(self, coordinates, pointIDs):
+        super().__init__(coordinates, pointIDs)
         # vectorized points used for calculations
         self._points = [np.array(coord) for coord in coordinates]
 
-        self._edges = self._calculateEdgeVectors()
-        self._sideLengths = self._calculateSideLengths()
-
         self._area = self._calculateArea()
-
-        self._normals = {}
-        self._scaledNormals = {}
 
     @property
     def edges(self):
@@ -50,7 +44,7 @@ class Triangle(Cell):
         # formula for Area of a triangle given by two vectors
         return 0.5 * la.norm(la.cross(e1, e2))
 
-    def _calculateEdgeVectors(self):
+    def _calculateEdgeVector(self, coordinates):
         """
         Creates vectors between every point in the triangle
         """
@@ -106,10 +100,6 @@ class Triangle(Cell):
             # flip the sign of the normalvector
             normal *= -1
 
-        edge_id = self._edgeIdFromCoords(coordinates)
-
-        self._normals[edge_id] = normal
-
         return normal
 
     def _calculateScaledNormal(self, coordinates):
@@ -118,11 +108,7 @@ class Triangle(Cell):
         edgeVector = self._calculateEdgeVector(coordinates)
         edgeLength = la.norm(edgeVector)
 
-        # edge id for storing the coordinates
-        edgeId = self._edgeIdFromCoords(coordinates)
-
         # calulate and store scaled normal
         scaledNormal = normal * edgeLength
-        self._scaledNormals[edgeId] = scaledNormal
 
         return scaledNormal

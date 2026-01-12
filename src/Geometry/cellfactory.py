@@ -19,7 +19,7 @@ class CellFactory:
         for coord in coordinates:
             finalObjectCoords = np.array(coord)
             if type == "Triangle":
-                cells.append(Triangle(finalObjectCoords))
+                cells.append(Triangle(finalObjectCoords, data))
             elif type == "Line":
-                cells.append(Line(finalObjectCoords))
+                cells.append(Line(finalObjectCoords, data))
         return cells
