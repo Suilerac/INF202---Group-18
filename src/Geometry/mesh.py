@@ -95,27 +95,29 @@ class Mesh:
             i += 1
         return indexes
 
-    def findNeighboursOf(self, cell: Cell) -> list[tuple[Cell, list]]:
+    def findNeighboursOf(self, cell: Cell):
         """
         Finds all neighbours of cell
 
-        :param cell: Cell object
+        :param cell: The cell you want to find the neighbours of
         """
-        # Store the coordinates as a list of tuples
-        # This is to be able to convert it to a set later
-        cellPoints = cell.pointIDs
-        maxNgh = len(cell.coordinates)
+        # Store the point indexes as a set for later comparison
+        cellPoints = set(cell.pointIDs)
+
         for ngh in self.cells:
-            # Store the ngh coordinates as a list of tuples for the same reason
-            nghPoints = ngh.pointIDs
-            # Convert both coordinates to sets
-            # Check that the amount of elements in the intersection of the two
-            # sets is 2
-            # If it is, they share two points, and they are neighbours
-            sharedPoints = np.intersect1d(cellPoints, nghPoints)
+            # Check if all neighbours have already been added
+            # That way we can avoid redundant loops
+            maxNgh = len(cell.coordinates)
+            if len(cell.neighbours) == maxNgh:
+                return
+
+            # Store the ngh point indexes as a set for later comparison
+            nghPoints = set(ngh.pointIDs)
+            # Find the intersection leaving us with the shared point indexes
+            sharedPoints = cellPoints & nghPoints
+            # If they share exactly two points, then they are neighbours
             if len(sharedPoints) == 2:
-                sharedCoords = [self._points[i] for i in sharedPoints]
+                a, b = sharedPoints
+                sharedCoords = [self._points[a], self._points[b]]
                 cell.addNeighbour(ngh, sharedCoords)
                 ngh.addNeighbour(cell, sharedCoords)
-            if len(cell.neighbours) == maxNgh:
-                break
