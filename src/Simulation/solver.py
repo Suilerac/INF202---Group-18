@@ -32,7 +32,7 @@ class Solver:
 
     def _averageVelocity(self, cellA, cellB):
         vA = cellA.flow
-        vB = cellB.flow 
+        vB = cellB.flow
         return 0.5 * (vA + vB)
 
     def calculateFlowValue(self, cellA, cellB, sharedCoordinates):
