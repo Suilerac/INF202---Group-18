@@ -47,6 +47,7 @@ class Simulation:
         # after simulation is over, log the final result
         pbar.close()
         self._plot.video_maker("simulation.mp4", frameduration)
+        self._plot.clean_up()
 
     def _savePicture(self):
         # Because the picture list is sorted alphabetically, it
