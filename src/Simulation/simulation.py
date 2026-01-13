@@ -1,5 +1,6 @@
 from Geometry.mesh import Mesh
 from Geometry.line import Line
+from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from tqdm import tqdm
@@ -15,10 +16,17 @@ class Simulation:
         self._outPutPath = "file path"
         self._plotNumber = 1
         self._plotDigits = 0
+        self._oilHitsFish = False
+        self._fishing_grounds = [[0, 0.45], [0, 0.2]]
+        self._totalOilStart = 0
+        self._totalOilEnd = 0
 
     def run(self, endTime, writeFrequency, numSteps):
         print("Updating initial oil values")
         self._initialCellValues()
+        for cell in self._mesh.cells:
+            self.totalOilStart += cell.oilValue
+        self._updateCellFishBools()
         self._addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
         self._initialFlowValues()
@@ -48,6 +56,8 @@ class Simulation:
         pbar.close()
         self._plot.video_maker("simulation.mp4", frameduration)
         self._plot.clean_up()
+        for cell in self._mesh.cells:
+            self.totalOilEnd += cell.oilValue
 
     def _savePicture(self):
         # Because the picture list is sorted alphabetically, it
@@ -75,6 +85,16 @@ class Simulation:
 
         for cell in self._mesh.cells:
             cell.updateOilValue()
+            self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
+
+    def _cellInFishingGrounds(self, cell: Cell) -> bool:
+        center2d = cell.centerPoint[:2]
+        x_range = self._fishing_grounds[0]
+        y_range = self._fishing_grounds[1]
+        return (
+            (x_range[0] <= center2d[0] <= x_range[1]) and
+            (y_range[0] <= center2d[1] <= y_range[1])
+            )
 
     def _initialCellValues(self):
         for cell in self._mesh.cells:
@@ -84,6 +104,10 @@ class Simulation:
     def _addAllNeighbours(self):
         for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
             self._mesh.findNeighboursOf(cell)
+
+    def _updateCellFishBools(self):
+        for cell in self._mesh.cells:
+            cell.inFishingGround = self._cellInFishingGrounds(cell)
 
     def _initialFlowValues(self):
         for cell in self._mesh.cells:
@@ -107,3 +131,15 @@ class Simulation:
                         )
                     cell.updateFlowToNeighbour(neighbour, flowValue)
                     neighbour.updateFlowToNeighbour(cell, -flowValue)
+
+    @property
+    def oilHitsFish(self):
+        return self._oilHitsFish
+
+    @property
+    def totalOilStart(self):
+        return self._totalOilStart
+
+    @property
+    def totalOilEnd(self):
+        return self._totalOilEnd
