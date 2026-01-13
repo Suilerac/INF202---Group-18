@@ -1,11 +1,9 @@
-import numpy as np
-from Geometry.line import Line
-from Geometry.mesh import Mesh
+from Simulation.simulation import Simulation
 
 
 def main():
-    msh = Mesh("meshes/simple_mesh.msh")
-    print(msh.cells[0].coordinates)
+    sim = Simulation("")
+    sim.run(endTime=0.5, numSteps=500, writeFrequency=20)
 
 
 if __name__ == "__main__":

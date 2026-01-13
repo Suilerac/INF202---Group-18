@@ -6,16 +6,20 @@ class Cell(ABC):
     An abstract class for handling relevant data of cells
     in the oil simulation
     """
-    def __init__(self, coordinates):
+    def __init__(self, coordinates, pointIDs):
         """
         :param coordinates: An array of coordinate vectors
         in the form of numpy arrays
         """
+        self._pointIDs = pointIDs
         self._oilValue = 0
+        self._update = 0
+
         self._area = 0
-        self._flow = []
-        self._neighbours = []
+        self._flow = None
+        self._neighbours = {}
         self._coordinates = coordinates
+        self._centerPoint = sum(self._coordinates) / len(self._coordinates)
 
     def __str__(self):
         """
@@ -39,8 +43,15 @@ class Cell(ABC):
         cellStr += ']'
         return cellStr
 
-    def addNeighbour(self, ngh):
-        self._neighbours.append(ngh)
+    def updateOilValue(self):
+        self._oilValue += self._update
+        self._update = 0
+
+    def addNeighbour(self, ngh, sharedCoords, flowValue=None):
+        self._neighbours[ngh] = [sharedCoords, flowValue]
+
+    def updateFlowToNeighbour(self, ngh, flowValue):
+        self._neighbours[ngh][1] = flowValue
 
     @property
     def neighbours(self):
@@ -49,6 +60,10 @@ class Cell(ABC):
     @property
     def coordinates(self):
         return self._coordinates
+
+    @property
+    def centerPoint(self):
+        return self._centerPoint
 
     @property
     def area(self):
@@ -62,9 +77,25 @@ class Cell(ABC):
     def flow(self):
         return self._flow
 
+    @property
+    def pointIDs(self):
+        return self._pointIDs
+
+    @property
+    def update(self):
+        return self._update
+
+    @update.setter
+    def update(self, value):
+        self._update = value
+
     @oilValue.setter
     def oilValue(self, value):
         self._oilValue = value
+
+    @flow.setter
+    def flow(self, value):
+        self._flow = value
 
     @abstractmethod
     def _calculateArea(self):

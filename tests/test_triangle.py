@@ -29,16 +29,49 @@ expectedValues = {
         np.array([-1, 3, 0]) / math.sqrt(10),
         np.array([0, -1, 0]),
     ],
+    "scaledNormals": [
+        np.array([1, -1]),
+        np.array([-1, 3]),
+        np.array([0, -2]),
+    ],
 }
+
+coords1 = [
+    [2, 0, 0],
+    [3, 1, 0],
+]
+
+coords2 = [
+    [3, 1, 0],
+    [0, 0, 0],
+]
+
+coords3 = [
+    [0, 0, 0],
+    [2, 0, 0],
+]
+
+edgeCoords = [
+    coords1,
+    coords2,
+    coords3,
+]
 
 
 @pytest.fixture
 def triangle():
-    return Triangle(expectedValues["points"])
+    return Triangle(expectedValues["points"], [])
 
 
 def test_area(triangle):
     assert expectedValues["area"] == triangle.area
+
+
+def test_updateOilValue(triangle):
+    flowIn = 10
+    triangle.update = flowIn
+    triangle.updateOilValue()
+    assert triangle.oilValue == flowIn
 
 
 def test_centerPoint(triangle):
@@ -47,25 +80,37 @@ def test_centerPoint(triangle):
 
 def test_edgeVectors(triangle):
     for i in range(3):
-        assert np.allclose(expectedValues["edgeVectors"][i], triangle.edges[i])
+        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
+        assert np.allclose(expectedValues["edgeVectors"][i], edgeVector)
 
 
 def test_edgeLength(triangle):
-    answer = expectedValues["edgeLength"]
-    result = triangle.sideLengths
-    assert np.allclose(answer, result)
+    for i in range(3):
+        answer = expectedValues["edgeLength"][i]
+        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
+        result = triangle._calculateEdgeLength(edgeVector)
+
+        assert result == answer
 
 
 def test_midPoints(triangle):
     for i in range(3):
-        # edge midpoints
-        m = triangle._calculateEdgeMidPoint(i)
+        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
+        m = triangle._calculateEdgeMidPoint(edgeCoords[i], edgeVector)
         assert np.allclose(expectedValues["edgeMidPoints"][i], m)
 
 
 def test_normals(triangle):
-    triangle._calculateNormals()
     for i in range(3):
         answer = expectedValues["normals"][i]
-        result = triangle.normals[i]
+        result = triangle._calculateNormal(edgeCoords[i])
+
+        assert np.allclose(answer, result)
+
+
+def test_scaledNormals(triangle):
+    for i in range(3):
+        answer = expectedValues["scaledNormals"][i]
+
+        result = triangle._calculateScaledNormal(edgeCoords[i])
         assert np.allclose(answer, result)

@@ -1,5 +1,7 @@
 import meshio
+import numpy as np
 from .cellfactory import CellFactory
+from .cells import Cell
 
 
 class Mesh:
@@ -21,7 +23,7 @@ class Mesh:
         self._addCellsToList()
 
     @property
-    def cells(self):
+    def cells(self) -> list[Cell]:
         return self._cells
 
     @property
@@ -48,7 +50,7 @@ class Mesh:
         # Appends cell to local cells list
         for triangle in triangles:
             self._cells += self._factory.createCell(
-                "Triangle", triangle, self._points
+                "triangle", triangle, self._points
                 )
 
     def _addLines(self):
@@ -64,7 +66,7 @@ class Mesh:
         # Appends cell to local cells list
         for line in lines:
             self._cells += self._factory.createCell(
-                "Line", line, self._points
+                "line", line, self._points
             )
 
     def _findTriangleIndexes(self):
@@ -93,23 +95,31 @@ class Mesh:
             i += 1
         return indexes
 
-    def _findNeighboursOf(self, cell):
+    def findNeighboursOf(self, cell: Cell):
         """
         Finds all neighbours of cell
 
-        :param cell: Cell object
+        :param cell: The cell you want to find the neighbours of
         """
-        # Store the coordinates as a list of tuples
-        # This is to be able to convert it to a set later
-        cellCoords = [tuple(coord.tolist()) for coord in cell.coordinates]
+        # Store the point indexes as a set for later comparison
+        cellPoints = set(cell.pointIDs)
+
+        # The max amount of neighbours the cell can have
+        maxNgh = len(cell.coordinates)
+
         for ngh in self.cells:
-            # Store the ngh coordinates as a list of tuples for the same reason
-            nghCoords = [tuple(coord.tolist()) for coord in ngh.coordinates]
-            print(f"Neighbour coords: {nghCoords}")
-            # Convert both coordinates to sets
-            # Check that the amount of elements in the intersection of the two
-            # sets is 2
-            # If it is, they share two points, and they are neighbours
-            if len(set(cellCoords) & set(nghCoords)) == 2:
-                cell.addNeighbour(ngh)
-                ngh.addNeighbour(cell)
+            # Check if all neighbours have already been added
+            # That way we can avoid redundant loops
+            if len(cell.neighbours) == maxNgh:
+                return
+
+            # Store the ngh point indexes as a set for later comparison
+            nghPoints = set(ngh.pointIDs)
+            # Find the intersection leaving us with the shared point indexes
+            sharedPoints = cellPoints & nghPoints
+            # If they share exactly two points, then they are neighbours
+            if len(sharedPoints) == 2:
+                a, b = sharedPoints
+                sharedCoords = [self._points[a], self._points[b]]
+                cell.addNeighbour(ngh, sharedCoords)
+                ngh.addNeighbour(cell, sharedCoords)
