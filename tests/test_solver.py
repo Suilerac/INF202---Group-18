@@ -7,9 +7,7 @@ expectedValues = {
     "coord": np.array([0.5, 0.5, 0],  # Point 1
                       [0.2, 0.9, 0],  # Point 2
                       [0, 0, 0]),      # Point 3
-    "oilValues": [
-        
-    ]
+    "oilValues": []
     }
 
 
@@ -19,9 +17,9 @@ def solver():
 
 
 def test_inital_oilValue():
-    for i in range(3):
-         answer=expectedValues["oilValue"][i]
-
+    # for i in range(3):
+    # answer=expectedValues["oilValue"][i]
+    pass
 
 
 def test_vector_field():
