@@ -43,21 +43,23 @@ Computer simulations are widely used in science and engineering to model complex
 \\In this report, we will explore the simulation of an oil spill using computational simulation. 
 The problem of oil spills has a real world implementation and are of significant for environmental concern. There are multiple examples like the Deepwater Horizon oil spill in 2010, where computational simulations was crucial in order to predict where surface oil would go, aiding skimming, booming, and shoreline protection.
 \begin{figure}[H]
-    \centering % This puts the image in the center
-    \includegraphics[width=0.7\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
-    \caption{Deepwater Horizon BP oil spill\\ Public domain media }
-    \label{fig:deepwater horizonbp oil spill}
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=1.1\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
+  \captionof{figure}{Deepwater Horizon BP oil spill\\ Public domain media}
+  \label{fig:Deepwater Horizon BP oil spill}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{Figures/BayCity.png}
+  \captionof{figure}{Bay city}
+  \label{fig:Bay city from task}
+\end{minipage}
 \end{figure}
 
 Our simulation aims to model oil trajectory and spread forecasting in Bay city. Outside Bay city is a fishing ground that are voulnerable to oil spills.
 We will discuss the mathematical models used to represent the oil spill dynamics, the numerical methods employed to solve these models, and the implementation of the simulation.
-\begin{figure}[H]
-    \centering % This puts the image in the center
-    \includegraphics[width=0.7\linewidth]{Figures/BayCity.png}
-    \caption{Bay City with fishing ground}
-    \label{fig:Bay City}
-\end{figure}
-
 \cite{khodak2021initialization, vaswani2017attention} 
 
 
