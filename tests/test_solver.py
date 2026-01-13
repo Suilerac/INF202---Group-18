@@ -2,13 +2,11 @@ from Simulation.solver import Solver
 import numpy as np
 import pytest
 
+S = Solver()
 
-expectedValues = {
-    "coord": np.array([0.5, 0.5, 0],  # Point 1
-                      [0.2, 0.9, 0],  # Point 2
-                      [0, 0, 0]),      # Point 3
-    "oilValues": []
-    }
+P1 = np.array([.5, .5])
+P2 = np.array([.35, .45])
+P3 = np.array([.2, .2])
 
 
 @pytest.fixture
@@ -16,10 +14,14 @@ def solver():
     return Solver()
 
 
-def test_inital_oilValue():
-    # for i in range(3):
-    # answer=expectedValues["oilValue"][i]
-    pass
+@pytest.mark.parametrize("coord, expected", [
+    (P1, .08208499862389),
+    (P2, 1),
+    (P3, .000203468369010),
+])
+def test_inital_oilValue(solver, coord, expected):
+    result = solver.initalOil(coord)
+    assert (result) == pytest.approx(expected)
 
 
 def test_vector_field():

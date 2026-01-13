@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from src.Geometry.line import Line
+from Geometry.line import Line
 la = np.linalg
 
 
