@@ -25,7 +25,7 @@ class Simulation:
         print("Updating initial oil values")
         self._initialCellValues()
         for cell in self._mesh.cells:
-            self.totalOilStart += cell.oilValue
+            self._totalOilStart += cell.oilValue
         self._updateCellFishBools()
         self._addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
@@ -57,7 +57,7 @@ class Simulation:
         self._plot.video_maker("simulation.mp4", frameduration)
         self._plot.clean_up()
         for cell in self._mesh.cells:
-            self.totalOilEnd += cell.oilValue
+            self._totalOilEnd += cell.oilValue
 
     def _savePicture(self):
         # Because the picture list is sorted alphabetically, it
