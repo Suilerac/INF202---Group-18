@@ -2,7 +2,6 @@ from Simulation.solver import Solver
 import numpy as np
 import pytest
 
-S = Solver()
 
 P1 = np.array([.5, .5])
 P2 = np.array([.35, .45])
@@ -24,8 +23,14 @@ def test_inital_oilValue(solver, coord, expected):
     assert (result) == pytest.approx(expected)
 
 
-def test_vector_field():
-    pass
+@pytest.mark.parametrize("coord, expectedVector", [
+    (P1, np.array([.4, -.5])),
+    (P2, np.array([.38, -.35])),
+    (P3, np.array([.16, -.2])),
+])
+def test_vector_field(solver, coord, expectedVector):
+    result = solver.vectorField(coord)
+    assert np.allclose(result, expectedVector)
 
 
 def test_average_velocity():
