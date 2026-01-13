@@ -30,9 +30,9 @@ expectedValues = {
         np.array([0, -1, 0]),
     ],
     "scaledNormals": [
-        np.array([1, -1, 0]),
-        np.array([-1, 3, 0]),
-        np.array([0, -2, 0]),
+        np.array([1, -1]),
+        np.array([-1, 3]),
+        np.array([0, -2]),
     ],
 }
 
@@ -65,6 +65,13 @@ def triangle():
 
 def test_area(triangle):
     assert expectedValues["area"] == triangle.area
+
+
+def test_updateOilValue(triangle):
+    flowIn = 10
+    triangle.update = flowIn
+    triangle.updateOilValue()
+    assert triangle.oilValue == flowIn
 
 
 def test_centerPoint(triangle):
