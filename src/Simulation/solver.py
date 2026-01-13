@@ -27,7 +27,7 @@ class Solver:
         x = position[0]
         y = position[1]
 
-        fieldX = y - 0.2 * y
+        fieldX = y - 0.2 * x
         fieldY = -x
         return np.array([fieldX, fieldY])
 
@@ -66,11 +66,11 @@ class Solver:
         # this saves a lot of time
         return np.dot(averageVelocity, scaledNormal)
 
-    def flux(self, cellA, cellB, flowValue):
+    def flux(self, oilInCellA, oilInCellB, flowValue):
         # the flowvalue is the dot product of
         # the average velocity between two neighbours
         # and the scaled normal of the shared edge
         if (0 < flowValue):
-            return cellA.oilValue * flowValue
+            return oilInCellA * flowValue
         else:
-            return cellB.oilValue * flowValue
+            return oilInCellB * flowValue
