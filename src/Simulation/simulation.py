@@ -1,5 +1,6 @@
 from Geometry.mesh import Mesh
 from Geometry.line import Line
+from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from tqdm import tqdm
@@ -15,6 +16,8 @@ class Simulation:
         self._outPutPath = "file path"
         self._plotNumber = 1
         self._plotDigits = 0
+        self._oilHitsFish = False
+        self._fishing_grounds = [[0, 0.45], [0, 0.2]]
 
     def run(self, endTime, writeFrequency, numSteps):
         print("Updating initial oil values")
@@ -75,6 +78,20 @@ class Simulation:
 
         for cell in self._mesh.cells:
             cell.updateOilValue()
+            if self._cellInFishingGrounds(cell) and cell.oilValue > 0:
+                self._oilHitsFish = True
+
+    def _cellInFishingGrounds(self, cell: Cell) -> bool:
+        center2d = cell.centerPoint[:2]
+        x_range = self._fishing_grounds[0]
+        y_range = self._fishing_grounds[1]
+        if (
+            (x_range[0] <= center2d[0] <= x_range[1]) and
+            (y_range[0] <= center2d[1] <= y_range[1])
+        ):
+            return True
+        else:
+            return False
 
     def _initialCellValues(self):
         for cell in self._mesh.cells:
@@ -107,3 +124,7 @@ class Simulation:
                         )
                     cell.updateFlowToNeighbour(neighbour, flowValue)
                     neighbour.updateFlowToNeighbour(cell, -flowValue)
+
+    @property
+    def oilHitsFish(self):
+        return self._oilHitsFish
