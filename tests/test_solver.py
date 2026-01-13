@@ -33,6 +33,14 @@ def test_vector_field(solver, coord, expectedVector):
     assert np.allclose(result, expectedVector)
 
 
+Cell1 = np.array([0, 0])
+Cell2 = np.array([0, 0])
+
+
+@pytest.mark.parametrize("Cell, expectedFlow", [
+    (Cell1,)
+    (Cell2,)
+])
 def test_average_velocity():
     pass
 
