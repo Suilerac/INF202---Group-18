@@ -3,3 +3,4 @@ matplotlib
 ffmpeg
 ffmpeg-python
 tqdm
+pytest
