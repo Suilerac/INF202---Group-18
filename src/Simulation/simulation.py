@@ -57,7 +57,7 @@ class Simulation:
                 totalFlux += flux
 
             # update value calculatet from formula
-            cell._update = - dt / cell.area * totalFlux
+            cell.update = - dt / cell.area * totalFlux
 
         for cell in self._mesh.cells:
             cell.updateOilValue()
