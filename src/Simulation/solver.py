@@ -27,7 +27,7 @@ class Solver:
         x = position[0]
         y = position[1]
 
-        fieldX = y - 0.2 * x
+        fieldX = y - 0.2 * y
         fieldY = -x
         return np.array([fieldX, fieldY])
 
