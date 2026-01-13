@@ -20,6 +20,7 @@ class Cell(ABC):
         self._neighbours = {}
         self._coordinates = coordinates
         self._centerPoint = sum(self._coordinates) / len(self._coordinates)
+        self._inFishingGround = False
 
     def __str__(self):
         """
@@ -85,6 +86,10 @@ class Cell(ABC):
     def update(self):
         return self._update
 
+    @property
+    def inFishingGround(self):
+        return self._inFishingGround
+
     @update.setter
     def update(self, value):
         self._update = value
@@ -96,6 +101,10 @@ class Cell(ABC):
     @flow.setter
     def flow(self, value):
         self._flow = value
+
+    @inFishingGround.setter
+    def inFishingGround(self, value: bool):
+        self._inFishingGround = value
 
     @abstractmethod
     def _calculateArea(self):
