@@ -1,5 +1,7 @@
 from Geometry.mesh import Mesh
+from Geometry.line import Line
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection, LineCollection
 import numpy as np
 from pathlib import Path
 import os
@@ -63,16 +65,28 @@ class Plotter:
         Generates a plot based on the current
         oil values of the cells in the mesh
         """
+        line_coords = []
+        line_values = []
+        poly_coords = []
+        poly_values = []
         for cell in self._msh.cells:
             # Make the points two dimensional
             coord = np.array([point[:2] for point in cell.coordinates])
-            plt.gca().add_patch(
-                plt.Polygon(
-                    coord,
-                    color=plt.cm.viridis(cell.oilValue),
-                    alpha=0.9
-                )
-            )
+            if isinstance(cell, Line):
+                line_coords.append(coord)
+                line_values.append(cell.oilValue)
+            else:
+                poly_coords.append(coord)
+                poly_values.append(cell.oilValue)
+        polcol = PolyCollection(
+            verts=poly_coords,
+            array=poly_values,
+            cmap='viridis',
+            alpha=0.9
+        )
+        lincol = LineCollection(segments=line_coords, linewidths=line_values)
+        plt.gca().add_collection(polcol)
+        plt.gca().add_collection(lincol)
         plt.xlabel('x-axis')
         plt.ylabel('y-axis')
         plt.xlim(0, 1)
