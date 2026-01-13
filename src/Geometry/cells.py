@@ -47,12 +47,6 @@ class Cell(ABC):
         self._oilValue += self._update
         self._update = 0
 
-    def _edgeIdFromCoords(self, coords):
-        p1 = tuple(round(component / 1e-10) for component in coords[0])
-        p2 = tuple(round(component / 1e-10) for component in coords[1])
-
-        return tuple(sorted((p1, p2)))
-
     def addNeighbour(self, ngh, sharedCoords, flowValue=None):
         self._neighbours[ngh] = [sharedCoords, flowValue]
 
@@ -86,6 +80,14 @@ class Cell(ABC):
     @property
     def pointIDs(self):
         return self._pointIDs
+
+    @property
+    def update(self):
+        return self._update
+
+    @update.setter
+    def update(self, value):
+        self._update = value
 
     @oilValue.setter
     def oilValue(self, value):
