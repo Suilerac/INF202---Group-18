@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 from Geometry.mesh import Mesh
-from Geometry.cells import Cell
 
 
 @pytest.fixture
@@ -30,3 +29,4 @@ def test_neighbours(mesh):
     mesh.findNeighboursOf(cell)
     ngh = cell.neighbours
     assert len(ngh) > 0
+    assert len(ngh) <= 3
