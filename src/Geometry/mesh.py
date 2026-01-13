@@ -1,5 +1,4 @@
 import meshio
-import numpy as np
 from .cellfactory import CellFactory
 from .cells import Cell
 
