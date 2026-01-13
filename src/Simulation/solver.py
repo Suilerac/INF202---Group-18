@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from src.Geometry.line import Line
 la = np.linalg
 
 
@@ -36,6 +37,8 @@ class Solver:
         return 0.5 * (vA + vB)
 
     def calculateFlowValue(self, cellA, cellB, sharedCoordinates):
+        if isinstance(cellB, Line):
+            return 0
         """
         Calculates a scalar value that gives the flow from cell A to cell B.
         This is calculated from the dot product of the average velocity
