@@ -82,6 +82,7 @@ class Simulation:
         self._addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
         self._initialFlowValues()
+        self._createFaucets()
 
     def _createFaucets(self):
         """
