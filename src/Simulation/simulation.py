@@ -102,8 +102,10 @@ class Simulation:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
     def _addAllNeighbours(self):
+        exclude = 0
         for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
-            self._mesh.findNeighboursOf(cell)
+            self._mesh.findNeighboursOf(cell, exclude)
+            exclude += 1
 
     def _updateCellFishBools(self):
         for cell in self._mesh.cells:

@@ -94,7 +94,7 @@ class Mesh:
             i += 1
         return indexes
 
-    def findNeighboursOf(self, cell: Cell):
+    def findNeighboursOf(self, cell: Cell, exclude: int = 0):
         """
         Finds all neighbours of cell
 
@@ -106,7 +106,7 @@ class Mesh:
         # The max amount of neighbours the cell can have
         maxNgh = len(cell.coordinates)
 
-        for ngh in self.cells:
+        for ngh in self.cells[exclude:]:
             # Check if all neighbours have already been added
             # That way we can avoid redundant loops
             if len(cell.neighbours) == maxNgh:
