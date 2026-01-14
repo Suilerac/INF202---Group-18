@@ -6,7 +6,8 @@ from multiprocessing import Process
 def main():
     sims = [Simulation("configs/default.toml"),
             Simulation("configs/test1.toml"),
-            Simulation("configs/test2.toml")]
+            Simulation("configs/test2.toml"),
+            Simulation("configs/test3.toml")]
     threads = []
     for sim in sims:
         t = Process(target=sim.run)
