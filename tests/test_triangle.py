@@ -1,40 +1,7 @@
 import pytest
-
+from Geometry.triangle import Triangle
 import math
 import numpy as np
-
-from Geometry.triangle import Triangle
-
-expectedValues = {
-    "points": np.array([
-        [2, 0, 0],
-        [3, 1, 0],
-        [0, 0, 0],
-    ]),
-    "centerPoint": np.array([5/3, 1/3, 0]),
-    "area": 1.0,
-    "edgeLength": np.sqrt(np.array([2, 10, 4])),
-    "edgeVectors": [
-        np.array([1, 1, 0]),
-        np.array([-3, -1, 0]),
-        np.array([2, 0, 0]),
-    ],
-    "edgeMidPoints": [
-        np.array([2.5, 0.5, 0]),
-        np.array([1.5, 0.5, 0]),
-        np.array([1.0, 0, 0]),
-    ],
-    "normals": [
-        np.array([1, -1, 0]) / math.sqrt(2),
-        np.array([-1, 3, 0]) / math.sqrt(10),
-        np.array([0, -1, 0]),
-    ],
-    "scaledNormals": [
-        np.array([1, -1]),
-        np.array([-1, 3]),
-        np.array([0, -2]),
-    ],
-}
 
 coords1 = [
     [2, 0, 0],
@@ -51,20 +18,17 @@ coords3 = [
     [2, 0, 0],
 ]
 
-edgeCoords = [
-    coords1,
-    coords2,
-    coords3,
-]
-
 
 @pytest.fixture
 def triangle():
-    return Triangle(expectedValues["points"], [])
-
-
-def test_area(triangle):
-    assert expectedValues["area"] == triangle.area
+    return Triangle(
+        np.array([
+            [2, 0, 0],
+            [3, 1, 0],
+            [0, 0, 0],
+        ]),
+        []
+    )
 
 
 def test_updateOilValue(triangle):
@@ -74,43 +38,67 @@ def test_updateOilValue(triangle):
     assert triangle.oilValue == flowIn
 
 
-def test_centerPoint(triangle):
-    assert np.allclose(expectedValues["centerPoint"], triangle.centerPoint)
+@pytest.mark.parametrize("expectedArea", [
+    (1.0),
+])
+def test_area(triangle, expectedArea):
+    assert triangle.area == expectedArea
 
 
-def test_edgeVectors(triangle):
-    for i in range(3):
-        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
-        assert np.allclose(expectedValues["edgeVectors"][i], edgeVector)
+@pytest.mark.parametrize("expectedCenterPoint", [
+    (np.array([5/3, 1/3, 0])),
+])
+def test_centerPoint(triangle, expectedCenterPoint):
+    assert np.allclose(triangle.centerPoint, expectedCenterPoint)
 
 
-def test_edgeLength(triangle):
-    for i in range(3):
-        answer = expectedValues["edgeLength"][i]
-        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
-        result = triangle._calculateEdgeLength(edgeVector)
-
-        assert result == answer
-
-
-def test_midPoints(triangle):
-    for i in range(3):
-        edgeVector = triangle._calculateEdgeVector(edgeCoords[i])
-        m = triangle._calculateEdgeMidPoint(edgeCoords[i], edgeVector)
-        assert np.allclose(expectedValues["edgeMidPoints"][i], m)
+@pytest.mark.parametrize("edgeCoords, expectedEdgeVectors", [
+    (coords1, np.array([1, 1, 0])),
+    (coords2, np.array([-3, -1, 0])),
+    (coords3, np.array([2, 0, 0])),
+])
+def test_edgeVectors(triangle, edgeCoords, expectedEdgeVectors):
+    result = triangle._calculateEdgeVector(edgeCoords)
+    assert np.allclose(result, expectedEdgeVectors)
 
 
-def test_normals(triangle):
-    for i in range(3):
-        answer = expectedValues["normals"][i]
-        result = triangle._calculateNormal(edgeCoords[i])
+@pytest.mark.parametrize("edgeCoords, expectedEdgeLength", [
+    (coords1, math.sqrt(2)),
+    (coords2, math.sqrt(10)),
+    (coords3, 2),
+])
+def test_edgeLength(triangle, edgeCoords, expectedEdgeLength):
+    edgeVector = triangle._calculateEdgeVector(edgeCoords)
+    result = triangle._calculateEdgeLength(edgeVector)
+    assert result == expectedEdgeLength
 
-        assert np.allclose(answer, result)
+
+@pytest.mark.parametrize("edgeCoords, expectedMidpoints", [
+    (coords1, np.array([2.5, 0.5, 0])),
+    (coords2, np.array([1.5, 0.5, 0])),
+    (coords3, np.array([1.0, 0, 0])),
+])
+def test_midPoints(triangle, edgeCoords, expectedMidpoints):
+    edgeVector = triangle._calculateEdgeVector(edgeCoords)
+    result = triangle._calculateEdgeMidPoint(edgeCoords, edgeVector)
+    assert np.allclose(result, expectedMidpoints)
 
 
-def test_scaledNormals(triangle):
-    for i in range(3):
-        answer = expectedValues["scaledNormals"][i]
+@pytest.mark.parametrize("edgeCoords, expectedNormals", [
+    (coords1, np.array([1, -1, 0]) / math.sqrt(2)),
+    (coords2, np.array([-1, 3, 0]) / math.sqrt(10)),
+    (coords3, np.array([0, -1, 0])),
+])
+def test_normals(triangle, edgeCoords, expectedNormals):
+    result = triangle._calculateNormal(edgeCoords)
+    assert np.allclose(result, expectedNormals)
 
-        result = triangle._calculateScaledNormal(edgeCoords[i])
-        assert np.allclose(answer, result)
+
+@pytest.mark.parametrize("edgeCoords, expectedScaledNormals", [
+    (coords1, np.array([1, -1])),
+    (coords2, np.array([-1, 3])),
+    (coords3, np.array([0, -2])),
+])
+def test_scaledNormals(triangle, edgeCoords, expectedScaledNormals):
+    result = triangle._calculateScaledNormal(edgeCoords)
+    assert np.allclose(result, expectedScaledNormals)

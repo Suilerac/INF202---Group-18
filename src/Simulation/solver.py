@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from src.Geometry.line import Line
+from Geometry.line import Line
 la = np.linalg
 
 
@@ -70,7 +70,7 @@ class Solver:
         # the flowvalue is the dot product of
         # the average velocity between two neighbours
         # and the scaled normal of the shared edge
-        if (0 < flowValue):
+        if (0 <= flowValue):
             return oilInCellA * flowValue
         else:
             return oilInCellB * flowValue
