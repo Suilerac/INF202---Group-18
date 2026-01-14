@@ -65,6 +65,7 @@ class Plotter:
         Generates a plot based on the current
         oil values of the cells in the mesh
         """
+        plt.clf()
         line_coords = []
         line_values = []
         poly_coords = []
