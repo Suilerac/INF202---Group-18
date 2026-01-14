@@ -6,8 +6,6 @@ from Simulation.plotter import Plotter
 from tqdm import tqdm
 import toml
 import math
-import numpy as np
-from random import random
 
 
 class Simulation:
@@ -51,10 +49,12 @@ class Simulation:
         while elapsed < self._nSteps:
             self._step(dt)
             if self._writeFrequency:
-                if (elapsed % self._writeFrequency == 0): # Must be nested, since if the previous check is false, then this code would crash
+                # Must be nested due to modulo by 0 error
+                if (elapsed % self._writeFrequency == 0):
                     frameAmount = self._nSteps / self._writeFrequency
                     # This is needed for proper sorting
-                    # It is the amount of digits the suffix of each plot name will have
+                    # It is the amount of digits the suffix of each plot name
+                    # needs for proper sorting
                     # Logic pulled from this stackoverflow post
                     # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
                     self._plotDigits = int(math.log10(frameAmount))+1
@@ -67,7 +67,6 @@ class Simulation:
 
         for cell in self._mesh.cells:
             self._totalOilEnd += cell.oilValue
-
 
     def saveVid(self):
         if not self._writeFrequency:
@@ -195,7 +194,6 @@ class Simulation:
         io = config.get("IO", {})
         self._logName = io.get("logName", "log")
         self._writeFrequency = io.get("writeFrequency", False)
-        
 
     @property
     def oilHitsFish(self):

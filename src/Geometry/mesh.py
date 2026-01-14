@@ -1,5 +1,4 @@
 import meshio
-import numpy as np
 from .cellfactory import CellFactory
 from .cells import Cell
 
@@ -18,9 +17,9 @@ class Mesh:
         """
         self._mesh = meshio.read(meshFile)
         self._points = self._mesh.points
-        self._x_range = [self._points[:,0].min(), self._points[:,0].max()]
-        self._y_range = [self._points[:,1].min(), self._points[:,1].max()]
-        
+        self._x_range = [self._points[:, 0].min(), self._points[:, 0].max()]
+        self._y_range = [self._points[:, 1].min(), self._points[:, 1].max()]
+
         self._cells = []  # List to store all cells as Cell objects
         self._factory = CellFactory()
         self._addCellsToList()
@@ -32,11 +31,11 @@ class Mesh:
     @property
     def points(self):
         return self._points
-    
+
     @property
     def x_range(self):
         return self._x_range
-    
+
     @property
     def y_range(self):
         return self._y_range

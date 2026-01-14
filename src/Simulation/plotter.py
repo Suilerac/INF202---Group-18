@@ -101,7 +101,9 @@ class Plotter:
             edgecolors='cyan',
             alpha=0.9
         )
-        lincol_normal = LineCollection(segments=line_coords_normal, linewidths=line_values)
+        lincol_normal = LineCollection(
+            segments=line_coords_normal, linewidths=line_values
+            )
         lincol_fish = LineCollection(segments=line_coords_fish, colors='cyan')
         plt.gca().add_collection(polcol_normal)
         plt.gca().add_collection(polcol_fish)

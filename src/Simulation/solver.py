@@ -1,7 +1,6 @@
 import math
 import numpy as np
 from src.Geometry.line import Line
-from random import random
 la = np.linalg
 
 
