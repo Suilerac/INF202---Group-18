@@ -4,56 +4,74 @@ from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from tqdm import tqdm
+import toml
 import math
+import numpy as np
+from random import random
 
 
 class Simulation:
     def __init__(self, configFile):
-        self._mesh = Mesh("meshes/bay.msh")
-        self._plot = Plotter(self._mesh)
-        self._solver = Solver()
         # Desired folder for video output (optional)
         self._outPutPath = "file path"
         self._plotNumber = 1
         self._plotDigits = 0
         self._oilHitsFish = False
-        self._fishing_grounds = [[0, 0.45], [0, 0.2]]
         self._totalOilStart = 0
         self._totalOilEnd = 0
 
-    def run(self, endTime, writeFrequency, numSteps):
+        # Config values
+        self._configFile = configFile
+        self._nSteps = 0
+        self._tEnd = 0
+        self._meshName = ""
+        self._borders = []
+        self._logName = ""
+        self._writeFrequency = 0
+        self._readConfig()
+
+        # Object creations
+        self._mesh = Mesh(self._meshName)
+        self._simName = configFile.split('.')[0].split('/')[1]
+        self._imagePath = f"temp/{self._simName}/img"
+        self._listPath = f"temp/{self._simName}"
+        self._plot = Plotter(self._mesh, image_dir=self._imagePath, list_dir=self._listPath)
+        self._solver = Solver(np.array([random(), random()]))
+
+    def run(self):
         self._initiateAllValues()
-
-        frameAmount = numSteps / writeFrequency
-
-        # This is needed for proper sorting
-        # It is the amount of digits the suffix of each plot name will have
-        # Logic pulled from this stackoverflow post
-        # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
-
-        self._plotDigits = int(math.log10(frameAmount))+1
-        constvideotime = 5
-        frameduration = constvideotime / frameAmount
-
-        dt = endTime / numSteps
-
-        pbar = tqdm(total=numSteps, desc="Computing simulation")
-
+        dt = self._tEnd / self._nSteps
+        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
         elapsed = 0
-        while elapsed < numSteps:
+        while elapsed < self._nSteps:
             self._step(dt)
-            if (elapsed % writeFrequency == 0):
+            if (elapsed % self._writeFrequency == 0) and self._writeFrequency:
+                frameAmount = self._nSteps / self._writeFrequency
+                # This is needed for proper sorting
+                # It is the amount of digits the suffix of each plot name will have
+                # Logic pulled from this stackoverflow post
+                # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
+                self._plotDigits = int(math.log10(frameAmount))+1
                 self._plot.plot_current_values()
                 self._savePicture()
             elapsed += 1
             pbar.update(1)
         # after simulation is over, log the final result
         pbar.close()
-        self._plot.video_maker("simulation.mp4", frameduration)
-        self._plot.clean_up()
 
         for cell in self._mesh.cells:
             self._totalOilEnd += cell.oilValue
+
+
+    def saveVid(self):
+        if not self._writeFrequency:
+            return
+        frameAmount = self._nSteps / self._writeFrequency
+        constvideotime = 5
+        frameduration = constvideotime / frameAmount
+        if self._writeFrequency:
+            self._plot.video_maker(f"{self._simName}.mp4", frameduration)
+            self._plot.clean_up()
 
     def _step(self, dt):
         for cell in self._mesh.cells:
@@ -112,8 +130,8 @@ class Simulation:
 
     def _cellInFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
-        x_range = self._fishing_grounds[0]
-        y_range = self._fishing_grounds[1]
+        x_range = self._borders[0]
+        y_range = self._borders[1]
         return (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
@@ -156,6 +174,22 @@ class Simulation:
                 # add the flowValue to the neighbour pair
                 cell.updateFlowToNeighbour(ngh, flowValue)
                 ngh.updateFlowToNeighbour(cell, -flowValue)
+
+    def _readConfig(self):
+        with open(self._configFile, 'r') as file:
+            config = toml.load(file)
+        settings = config.get("settings", {})
+        self._nSteps = settings.get("nSteps", 500)
+        self._tEnd = settings.get("tEnd", 0.5)
+
+        geometry = config.get("geometry", {})
+        self._meshName = geometry.get("meshName", "meshes/bay.msh")
+        self._borders = geometry.get("borders", [[0, 0.45], 0, 0.2])
+
+        io = config.get("IO", {})
+        self._logName = io.get("logName", "log")
+        self._writeFrequency = io.get("writeFrequency", False)
+        
 
     @property
     def oilHitsFish(self):

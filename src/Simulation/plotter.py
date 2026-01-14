@@ -135,6 +135,8 @@ class Plotter:
         images = os.listdir(self._image_dir)  # Get all images in img folder
         for img in images:
             os.remove(os.path.join(self._image_dir, img))
+        os.rmdir(self._image_dir)
+        os.rmdir(self._list_dir)
 
     def _write_temp_images(self, frame_duration: float = 1):
         """

@@ -270,3 +270,4 @@ img/*
 *.png
 images.txt
 .vscode/*
+configs/*
