@@ -5,7 +5,6 @@ from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from tqdm import tqdm
 import math
-import threading
 
 
 class Simulation:
@@ -104,26 +103,9 @@ class Simulation:
 
     def _addAllNeighbours(self):
         exclude = 0
-        threads = []
-        pbar = tqdm(total=len(self._mesh.cells), desc="Finding neighbours")
-        for cell in self._mesh.cells:
-            t = threading.Thread(
-                target=self._mesh.findNeighboursOf,
-                args=(cell, exclude,)
-                )
-            threads.append(t)
-            exclude += 1
-        for t in threads:
-            t.start()
-            pbar.update(1)
-        for t in threads:
-            t.join()
-        pbar.close()
-        """
         for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
             self._mesh.findNeighboursOf(cell, exclude)
             exclude += 1
-        """
 
     def _updateCellFishBools(self):
         for cell in self._mesh.cells:
