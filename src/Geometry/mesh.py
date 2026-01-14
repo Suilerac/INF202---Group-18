@@ -23,7 +23,6 @@ class Mesh:
         self._cells = []  # List to store all cells as Cell objects
         self._factory = CellFactory()
         self._addCellsToList()
-        self._cellSet = set(self._cells)
 
     @property
     def cells(self) -> list[Cell]:
@@ -120,11 +119,10 @@ class Mesh:
         # The max amount of neighbours the cell can have
         maxNgh = len(cell.coordinates)
 
-        for ngh in list(self._cellSet):
+        for ngh in self.cells[exclude:]:
             # Check if all neighbours have already been added
             # That way we can avoid redundant loops
             if len(cell.neighbours) == maxNgh:
-                self._cellSet.discard(cell)
                 return
 
             # Store the ngh point indexes as a set for later comparison
@@ -137,6 +135,3 @@ class Mesh:
                 sharedCoords = [self._points[a], self._points[b]]
                 cell.addNeighbour(ngh, sharedCoords)
                 ngh.addNeighbour(cell, sharedCoords)
-
-                if len(ngh.neighbours) == len(ngh.coordinates):
-                    self._cellSet.discard(ngh)
