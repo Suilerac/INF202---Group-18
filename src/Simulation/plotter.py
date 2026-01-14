@@ -45,13 +45,6 @@ class Plotter:
         self._ensure_paths()
         self._list_path = f"{list_dir}/images.txt"
 
-        # Matplotlib initialization
-        self._u = np.array([0, 1])
-        self._sm = plt.cm.ScalarMappable(cmap='viridis')
-        self._sm.set_array(self._u)
-        self._cbar_ax = plt.gca().inset_axes([1, 0, 0.05, 1])
-        plt.colorbar(self._sm, cax=self._cbar_ax, label='oilValue')
-
     @property
     def image_dir(self) -> str:
         return self._image_dir
@@ -70,6 +63,11 @@ class Plotter:
         oil values of the cells in the mesh
         """
         plt.clf()
+        u = np.array([0, 1])
+        sm = plt.cm.ScalarMappable(cmap='viridis')
+        sm.set_array(u)
+        cbar_ax = plt.gca().inset_axes([1, 0, 0.05, 1])
+        plt.colorbar(sm, cax=cbar_ax, label='oilValue')
         line_coords = []
         line_values = []
         poly_coords = []
