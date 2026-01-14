@@ -1,6 +1,6 @@
 from Simulation.solver import Solver
-# from Geometry.triangle import Triangle
-# from Geometry.line import Line
+from Geometry.triangle import Triangle
+from Geometry.line import Line
 import numpy as np
 import pytest
 
@@ -35,7 +35,6 @@ def test_vector_field(solver, coord, expectedVector):
     assert np.allclose(result, expectedVector)
 
 
-"""
 # Create two trianlges that are neighbours and share point Pn1 and Pn2
 S = Solver()
 
@@ -57,7 +56,6 @@ print(S._averageVelocity(CellB, CellA))
 print(CellA.flow)
 
 
-
 @pytest.mark.parametrize("CellA, CellB, expectedAvgVelocity", [
     (CellA, CellB, np.array([0.4, -0.5])),
 ],
@@ -67,7 +65,7 @@ def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     assert np.allclose(result, expectedAvgVelocity)
 
 
-
+"""
 @pytest.mark.parametrize("Cell, expectedVelocity", [
     (CellA,)
     (CellB,)
@@ -79,7 +77,6 @@ def test_average_velocity_line():
     pass
 
 
-@pytest.mark.parametrize()
 def test_Flow_value_triangle():
     pass
 
