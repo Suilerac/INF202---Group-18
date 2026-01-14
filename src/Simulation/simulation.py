@@ -18,11 +18,13 @@ class Simulation:
         self._plotDigits = 0
         self._oilHitsFish = False
         self._fishing_grounds = [[0, 0.45], [0, 0.2]]
-        self._totalOilStart = 0
-        self._totalOilEnd = 0
 
     def run(self, endTime, writeFrequency, numSteps):
         self._initiateAllValues()
+        createVideo = (0 < writeFrequency)
+
+        if not createVideo:
+            writeFrequency = 1
 
         frameAmount = numSteps / writeFrequency
 
@@ -30,7 +32,6 @@ class Simulation:
         # It is the amount of digits the suffix of each plot name will have
         # Logic pulled from this stackoverflow post
         # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
-
         self._plotDigits = int(math.log10(frameAmount))+1
         constvideotime = 5
         frameduration = constvideotime / frameAmount
@@ -42,18 +43,17 @@ class Simulation:
         elapsed = 0
         while elapsed < numSteps:
             self._step(dt)
-            if (elapsed % writeFrequency == 0):
+            if (elapsed % writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
             elapsed += 1
             pbar.update(1)
         # after simulation is over, log the final result
-        pbar.close()
-        self._plot.video_maker("simulation.mp4", frameduration)
-        self._plot.clean_up()
 
-        for cell in self._mesh.cells:
-            self._totalOilEnd += cell.oilValue
+        if createVideo:
+            pbar.close()
+            self._plot.video_maker("simulation.mp4", frameduration)
+            self._plot.clean_up()
 
     def _step(self, dt):
         for cell in self._mesh.cells:
@@ -94,9 +94,7 @@ class Simulation:
     def _initiateAllValues(self):
         print("Updating initial oil values")
         self._initialCellValues()
-        for cell in self._mesh.cells:
-            self._totalOilStart += cell.oilValue
-
+        print("Checking if any cell is in the fishing area")
         self._updateCellFishBools()
         self._addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
@@ -157,14 +155,15 @@ class Simulation:
                 cell.updateFlowToNeighbour(ngh, flowValue)
                 ngh.updateFlowToNeighbour(cell, -flowValue)
 
+    def countAllOil(self):
+        """
+        Returns a value for the total amount of oil in all cells
+        """
+        totalOil = 0
+        for cell in self._mesh.cells:
+            totalOil += cell.oilValue
+        return totalOil
+
     @property
     def oilHitsFish(self):
         return self._oilHitsFish
-
-    @property
-    def totalOilStart(self):
-        return self._totalOilStart
-
-    @property
-    def totalOilEnd(self):
-        return self._totalOilEnd
