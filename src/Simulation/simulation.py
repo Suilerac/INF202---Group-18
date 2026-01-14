@@ -121,7 +121,7 @@ class Simulation:
             self._totalOilStart += cell.oilValue
 
         self._updateCellFishBools()
-        self._addAllNeighbours()
+        self._mesh.addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
         self._initialFlowValues()
 

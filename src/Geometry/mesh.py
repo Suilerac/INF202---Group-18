@@ -1,6 +1,7 @@
 import meshio
 from .cellfactory import CellFactory
 from .cells import Cell
+from tqdm import tqdm
 
 
 class Mesh:
@@ -135,3 +136,32 @@ class Mesh:
                 sharedCoords = [self._points[a], self._points[b]]
                 cell.addNeighbour(ngh, sharedCoords)
                 ngh.addNeighbour(cell, sharedCoords)
+
+    def addAllNeighbours(self):
+        """
+        Goes through all cells and adds all neighbours for each cell
+        """
+        # Dict for storing edges and cells together
+        # Key: Tuple of two pointIDs
+        # Value: Array of cells that have those pointIDs
+        edgemap = {}
+        for cell in tqdm(self._cells, desc="Finding neighbours"):
+            pointIDs = cell.pointIDs
+            point_amount = len(pointIDs)
+            # Goes through each point pair in pointIDs
+            for i in range(point_amount):
+                p1 = int(pointIDs[i])
+                p2 = int(pointIDs[(i + 1) % point_amount])
+                edge = tuple(sorted((p1, p2)))  # Key value of edgemap
+                # If the edge is already there, it has been added previously
+                # along with a cell which is this cell's neighbour
+                if edge in edgemap:
+                    sharedCoords = [self._points[p1], self._points[p2]]
+                    for ngh in edgemap[edge]:
+                        cell.addNeighbour(ngh, sharedCoords)
+                        ngh.addNeighbour(cell, sharedCoords)
+                # If the edge is not already there, we initialize it
+                else:
+                    edgemap[edge] = []
+                # And add this cell to its value
+                edgemap[edge].append(cell)
