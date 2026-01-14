@@ -18,6 +18,7 @@ class Simulation:
         self._plotDigits = 0
         self._oilHitsFish = False
         self._fishing_grounds = [[0, 0.45], [0, 0.2]]
+        self._faucets = []
 
     def run(self, endTime, writeFrequency, numSteps):
         self._initiateAllValues()
@@ -56,34 +57,16 @@ class Simulation:
             self._plot.clean_up()
 
     def _step(self, dt):
-        for cell in self._mesh.cells:
-            # In this loop we only consider oil flowing out from a main cell
-            # and into its neigbours
-
-            # There is no oil that can flow out of an empty cell
-            # there should not be any flow related to a line cell
-            if isinstance(cell, Line) or cell.oilValue < 0:
+        for sourceCell, targetCell, flowCoefficient in self._faucets:
+            # If the source is empty there will be no flow to neighbours
+            if sourceCell.oilValue < 0:
                 continue
+            # calculate the flow from A to B
+            flow = sourceCell.oilValue * flowCoefficient * dt
 
-            # calculate the flow into each neighbour
-            for neighbour, (_, flowValue) in cell.neighbours.items():
-                # We only consider the flow from the main cell
-                # to the neighbour. Not the oil absorbed
-                if (flowValue <= 0):
-                    continue  # Line Cells has flowValue = 0 by default
-
-                # calculate the flux
-                flux = self._solver.flux(
-                    cell.oilValue,
-                    neighbour.oilValue,
-                    flowValue
-                )
-                # Calculate flow out of the cell
-                flow = dt / cell.area * flux
-
-                # Add the flow to the update
-                cell.update = cell.update - flow
-                neighbour.update = neighbour.update + flow
+            # Add the flow to the update
+            sourceCell.update = sourceCell.update - flow
+            targetCell.update = targetCell.update + flow
 
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
@@ -100,13 +83,36 @@ class Simulation:
         print("Calculate flowvalue for each neighbour pair")
         self._initialFlowValues()
 
-    def _savePicture(self):
-        # Because the picture list is sorted alphabetically, it
-        # is important to have a naming scheme where alphabetical sorting
-        # and date sorting is identical
-        plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
-        self._plot.save_current_plot(plot_name)
-        self._plotNumber += 1
+    def _createFaucets(self):
+        """
+        Creates an array of tuples called faucets.
+        A faucet is a structure that describes the from one cell to another.
+        In this task the vector field does not change with respect to time
+        and the vertecies in the mesh will never their position.
+        We can therfore calculate a constant coefficient of flow between any
+        cell neighbour pair. The simulation will then turn into a simple lookup
+        of COF's, cell source, and cell target.
+        """
+        self._faucets = []
+        for sourceCell in self._mesh.cells:
+            # We only consider oil flowing out from a main cell
+            # and into its neigbours
+
+            # there should not be any flow related to a line cell
+            if isinstance(sourceCell, Line):
+                continue
+
+            # calculate the flow into each neighbour cell
+            for targetCell, (_, flowValue) in sourceCell.neighbours.items():
+                # We only consider the flow from the main cell
+                # to the neighbour. Not the oil absorbed
+                if (flowValue <= 0):
+                    continue  # Line Cells has flowValue = 0 by default
+
+                # Calculate flow out of the cell
+                flowCoefficient = flowValue / sourceCell.area
+                faucet = (sourceCell, targetCell, flowCoefficient)
+                self._faucets.append(faucet)
 
     def _cellInFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
@@ -163,6 +169,14 @@ class Simulation:
         for cell in self._mesh.cells:
             totalOil += cell.oilValue
         return totalOil
+
+    def _savePicture(self):
+        # Because the picture list is sorted alphabetically, it
+        # is important to have a naming scheme where alphabetical sorting
+        # and date sorting is identical
+        plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
+        self._plot.save_current_plot(plot_name)
+        self._plotNumber += 1
 
     @property
     def oilHitsFish(self):
