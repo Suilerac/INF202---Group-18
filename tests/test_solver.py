@@ -43,43 +43,39 @@ Pn2 = np.array([1, 0, 0])  # Neighbourpoint 2
 Pc1 = np.array([0, 0, 0])  # Corner 1
 Pc2 = np.array([1, 1, 0])  # Corner 2
 
-CellA = Triangle([Pn1, Pn2, Pc1], None)  # Triangle 1
-CellB = Triangle([Pn1, Pn2, Pc2], None)  # Triangle 2
-CellC = Line([Pc1, Pn1], None)           # Line)
+triangle1 = Triangle([Pn1, Pn2, Pc1], None)  # Triangle 1
+triangle2 = Triangle([Pn1, Pn2, Pc2], None)  # Triangle 2
+line1 = Line([Pc1, Pn1], None)           # Line)
 
 
-CellA.flow = S.vectorField(CellA.centerPoint)
-CellB.flow = S.vectorField(CellB.centerPoint)
-
-print(S._averageVelocity(CellB, CellA))
-
-print(CellA.flow)
+Cells = [triangle1, triangle2, line1]
+for cell in Cells:
+    cell.oilValue = S.initalOil(cell.centerPoint[:2])
+    cell.flow = S.vectorField(cell.centerPoint)
 
 
 @pytest.mark.parametrize("CellA, CellB, expectedAvgVelocity", [
-    (CellA, CellB, np.array([0.4, -0.5])),
-],
-)
+    (triangle1, triangle2, np.array([0.4, -0.5])),
+    (triangle1, line1, np.array([0.383333, -0.1666667]))
+])
 def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     result = solver._averageVelocity(CellA, CellB)
     assert np.allclose(result, expectedAvgVelocity)
 
 
-"""
-@pytest.mark.parametrize("Cell, expectedVelocity", [
-    (CellA,)
-    (CellB,)
+@pytest.mark.parametrize("CellA, CellB, SharedCoords, expectedFlow", [
+    (triangle1, triangle2, [Pn1, Pn2], -.0999999999999999),
+    (triangle1, line1, [Pc1, Pn1], 0),
 ])
-"""
+def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
+    result = solver.calculateFlowValue(CellA, CellB, SharedCoords)
+    assert result == pytest.approx(expectedFlow)
 
 
-def test_average_velocity_line():
-    pass
-
-
-def test_Flow_value_triangle():
-    pass
-
-
-def test_Flux():
-    pass
+@pytest.mark.parametrize("CellA, CellB, flowValue, expectedFlux", [
+    (triangle1, triangle2, -.0999999999999999, -4.0385003749177585e-08),
+    (triangle1, line1, 0, 0),
+])
+def test_Flux(solver, CellA, CellB, flowValue, expectedFlux):
+    result = solver.flux(CellA, CellB, flowValue)
+    assert result == pytest.approx(expectedFlux)
