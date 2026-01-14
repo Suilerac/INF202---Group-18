@@ -1,4 +1,6 @@
 from Simulation.solver import Solver
+# from Geometry.triangle import Triangle
+# from Geometry.line import Line
 import numpy as np
 import pytest
 
@@ -33,19 +35,52 @@ def test_vector_field(solver, coord, expectedVector):
     assert np.allclose(result, expectedVector)
 
 
-Cell1 = np.array([0, 0])
-Cell2 = np.array([0, 0])
+"""
+# Create two trianlges that are neighbours and share point Pn1 and Pn2
+S = Solver()
+
+Pn1 = np.array([0, 1, 0])  # Neighbourpoint 1
+Pn2 = np.array([1, 0, 0])  # Neighbourpoint 2
+Pc1 = np.array([0, 0, 0])  # Corner 1
+Pc2 = np.array([1, 1, 0])  # Corner 2
+
+CellA = Triangle([Pn1, Pn2, Pc1], None)  # Triangle 1
+CellB = Triangle([Pn1, Pn2, Pc2], None)  # Triangle 2
+CellC = Line([Pc1, Pn1], None)           # Line)
 
 
-@pytest.mark.parametrize("Cell, expectedFlow", [
-    (Cell1,)
-    (Cell2,)
+CellA.flow = S.vectorField(CellA.centerPoint)
+CellB.flow = S.vectorField(CellB.centerPoint)
+
+print(S._averageVelocity(CellB, CellA))
+
+print(CellA.flow)
+
+
+
+@pytest.mark.parametrize("CellA, CellB, expectedAvgVelocity", [
+    (CellA, CellB, np.array([0.4, -0.5])),
+],
+)
+def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
+    result = solver._averageVelocity(CellA, CellB)
+    assert np.allclose(result, expectedAvgVelocity)
+
+
+
+@pytest.mark.parametrize("Cell, expectedVelocity", [
+    (CellA,)
+    (CellB,)
 ])
-def test_average_velocity():
+"""
+
+
+def test_average_velocity_line():
     pass
 
 
-def test_Flow_value():
+@pytest.mark.parametrize()
+def test_Flow_value_triangle():
     pass
 
 
