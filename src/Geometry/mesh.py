@@ -110,6 +110,8 @@ class Mesh:
         Finds all neighbours of cell
 
         :param cell: The cell you want to find the neighbours of
+        :param exclude: If you want to exclude the first n cells in
+            the array of cells, then you can specify n with this parameter
         """
         # Store the point indexes as a set for later comparison
         cellPoints = set(cell.pointIDs)
