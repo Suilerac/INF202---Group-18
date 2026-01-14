@@ -41,72 +41,55 @@ class Simulation:
             y_range=self._mesh.y_range)
         self._solver = Solver()
 
+        self._faucets = []
+
     def run(self):
         self._initiateAllValues()
+        createVideo = (0 < self._writeFrequency)
+
+        if not createVideo:
+            self._writeFrequency = 1
+
+        frameAmount = self._nSteps / self._writeFrequency
+
+        # This is needed for proper sorting
+        # It is the amount of digits the suffix of each plot name will have
+        # Logic pulled from this stackoverflow post
+        # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
+        self._plotDigits = int(math.log10(frameAmount))+1
+        constvideotime = 5
+        frameduration = constvideotime / frameAmount
+
         dt = self._tEnd / self._nSteps
+
         pbar = tqdm(total=self._nSteps, desc="Computing simulation")
+
         elapsed = 0
         while elapsed < self._nSteps:
             self._step(dt)
-            if self._writeFrequency:
-                # Must be nested due to modulo by 0 error
-                if (elapsed % self._writeFrequency == 0):
-                    frameAmount = self._nSteps / self._writeFrequency
-                    # This is needed for proper sorting
-                    # It is the amount of digits the suffix of each plot name
-                    # needs for proper sorting
-                    # Logic pulled from this stackoverflow post
-                    # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
-                    self._plotDigits = int(math.log10(frameAmount))+1
-                    self._plot.plot_current_values()
-                    self._savePicture()
+            if (elapsed % self._writeFrequency == 0 and createVideo):
+                self._plot.plot_current_values()
+                self._savePicture()
             elapsed += 1
             pbar.update(1)
         # after simulation is over, log the final result
-        pbar.close()
 
-        for cell in self._mesh.cells:
-            self._totalOilEnd += cell.oilValue
-
-    def saveVid(self):
-        if not self._writeFrequency:
-            return
-        frameAmount = self._nSteps / self._writeFrequency
-        constvideotime = 5
-        frameduration = constvideotime / frameAmount
-        if self._writeFrequency:
+        if createVideo:
+            pbar.close()
             self._plot.video_maker(f"{self._simName}.mp4", frameduration)
             self._plot.clean_up()
 
     def _step(self, dt):
-        for cell in self._mesh.cells:
-            # In this loop we only consider oil flowing out from a main cell
-            # and into its neigbours
-
-            # There is no oil that can flow out of an empty cell
-            # there should not be any flow related to a line cell
-            if isinstance(cell, Line) or cell.oilValue < 0:
+        for sourceCell, targetCell, flowCoefficient in self._faucets:
+            # If the source is empty there will be no flow to neighbours
+            if sourceCell.oilValue < 0:
                 continue
+            # calculate the flow from A to B
+            flow = sourceCell.oilValue * flowCoefficient * dt
 
-            # calculate the flow into each neighbour
-            for neighbour, (_, flowValue) in cell.neighbours.items():
-                # We only consider the flow from the main cell
-                # to the neighbour. Not the oil absorbed
-                if (flowValue <= 0):
-                    continue  # Line Cells has flowValue = 0 by default
-
-                # calculate the flux
-                flux = self._solver.flux(
-                    cell.oilValue,
-                    neighbour.oilValue,
-                    flowValue
-                )
-                # Calculate flow out of the cell
-                flow = dt / cell.area * flux
-
-                # Add the flow to the update
-                cell.update = cell.update - flow
-                neighbour.update = neighbour.update + flow
+            # Add the flow to the update
+            sourceCell.update = sourceCell.update - flow
+            targetCell.update = targetCell.update + flow
 
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
@@ -117,21 +100,43 @@ class Simulation:
     def _initiateAllValues(self):
         print("Updating initial oil values")
         self._initialCellValues()
-        for cell in self._mesh.cells:
-            self._totalOilStart += cell.oilValue
-
+        print("Checking if any cell is in the fishing area")
         self._updateCellFishBools()
         self._mesh.addAllNeighbours()
         print("Calculate flowvalue for each neighbour pair")
         self._initialFlowValues()
+        self._createFaucets()
 
-    def _savePicture(self):
-        # Because the picture list is sorted alphabetically, it
-        # is important to have a naming scheme where alphabetical sorting
-        # and date sorting is identical
-        plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
-        self._plot.save_current_plot(plot_name)
-        self._plotNumber += 1
+    def _createFaucets(self):
+        """
+        Creates an array of tuples called faucets.
+        A faucet is a structure that describes the from one cell to another.
+        In this task the vector field does not change with respect to time
+        and the vertecies in the mesh will never their position.
+        We can therfore calculate a constant coefficient of flow between any
+        cell neighbour pair. The simulation will then turn into a simple lookup
+        of COF's, cell source, and cell target.
+        """
+        self._faucets = []
+        for sourceCell in self._mesh.cells:
+            # We only consider oil flowing out from a main cell
+            # and into its neigbours
+
+            # there should not be any flow related to a line cell
+            if isinstance(sourceCell, Line):
+                continue
+
+            # calculate the flow into each neighbour cell
+            for targetCell, (_, flowValue) in sourceCell.neighbours.items():
+                # We only consider the flow from the main cell
+                # to the neighbour. Not the oil absorbed
+                if (flowValue <= 0):
+                    continue  # Line Cells has flowValue = 0 by default
+
+                # Calculate flow out of the cell
+                flowCoefficient = flowValue / sourceCell.area
+                faucet = (sourceCell, targetCell, flowCoefficient)
+                self._faucets.append(faucet)
 
     def _cellInFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
@@ -148,7 +153,7 @@ class Simulation:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
     def _addAllNeighbours(self):
-        exclude = 0
+        exclude = 1
         for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
             self._mesh.findNeighboursOf(cell, exclude)
             exclude += 1
@@ -180,6 +185,27 @@ class Simulation:
                 cell.updateFlowToNeighbour(ngh, flowValue)
                 ngh.updateFlowToNeighbour(cell, -flowValue)
 
+    def countAllOil(self):
+        """
+        Returns a value for the total amount of oil in all cells
+        """
+        totalOil = 0
+        for cell in self._mesh.cells:
+            totalOil += cell.oilValue
+        return totalOil
+
+    def _savePicture(self):
+        # Because the picture list is sorted alphabetically, it
+        # is important to have a naming scheme where alphabetical sorting
+        # and date sorting is identical
+        plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
+        self._plot.save_current_plot(plot_name)
+        self._plotNumber += 1
+
+    @property
+    def oilHitsFish(self):
+        return self._oilHitsFish
+
     def _readConfig(self):
         with open(self._configFile, 'r') as file:
             config = toml.load(file)
@@ -194,15 +220,3 @@ class Simulation:
         io = config.get("IO", {})
         self._logName = io.get("logName", "log")
         self._writeFrequency = io.get("writeFrequency", False)
-
-    @property
-    def oilHitsFish(self):
-        return self._oilHitsFish
-
-    @property
-    def totalOilStart(self):
-        return self._totalOilStart
-
-    @property
-    def totalOilEnd(self):
-        return self._totalOilEnd

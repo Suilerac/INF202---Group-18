@@ -17,17 +17,17 @@ def main():
     for t in threads:
         t.join()
     for sim in sims:
+        break
         sim.saveVid()
 
 
 def single_sim():
     sim = Simulation("configs/default.toml")
     sim.run()
-    sim.saveVid()
 
 
 if __name__ == "__main__":
     start = time.time()
-    single_sim()
+    main()
     end = time.time()
     print(f"Simulation spent {end - start} seconds")
