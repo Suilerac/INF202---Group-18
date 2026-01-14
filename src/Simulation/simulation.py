@@ -50,15 +50,16 @@ class Simulation:
         elapsed = 0
         while elapsed < self._nSteps:
             self._step(dt)
-            if (elapsed % self._writeFrequency == 0) and self._writeFrequency:
-                frameAmount = self._nSteps / self._writeFrequency
-                # This is needed for proper sorting
-                # It is the amount of digits the suffix of each plot name will have
-                # Logic pulled from this stackoverflow post
-                # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
-                self._plotDigits = int(math.log10(frameAmount))+1
-                self._plot.plot_current_values()
-                self._savePicture()
+            if self._writeFrequency:
+                if (elapsed % self._writeFrequency == 0): # Must be nested, since if the previous check is false, then this code would crash
+                    frameAmount = self._nSteps / self._writeFrequency
+                    # This is needed for proper sorting
+                    # It is the amount of digits the suffix of each plot name will have
+                    # Logic pulled from this stackoverflow post
+                    # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
+                    self._plotDigits = int(math.log10(frameAmount))+1
+                    self._plot.plot_current_values()
+                    self._savePicture()
             elapsed += 1
             pbar.update(1)
         # after simulation is over, log the final result
