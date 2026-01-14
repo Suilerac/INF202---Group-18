@@ -49,10 +49,11 @@ class Cell(ABC):
         self._update = 0
 
     def addNeighbour(self, ngh, sharedCoords, flowValue=None):
-        self._neighbours[ngh] = [sharedCoords, flowValue]
+        self._neighbours[ngh] = (sharedCoords, flowValue)
 
     def updateFlowToNeighbour(self, ngh, flowValue):
-        self._neighbours[ngh][1] = flowValue
+        sharedCords, _ = self._neighbours[ngh]
+        self._neighbours[ngh] = (sharedCords, flowValue)
 
     @property
     def neighbours(self):

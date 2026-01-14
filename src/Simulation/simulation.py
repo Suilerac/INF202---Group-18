@@ -22,20 +22,15 @@ class Simulation:
         self._totalOilEnd = 0
 
     def run(self, endTime, writeFrequency, numSteps):
-        print("Updating initial oil values")
-        self._initialCellValues()
-        for cell in self._mesh.cells:
-            self._totalOilStart += cell.oilValue
-        self._updateCellFishBools()
-        self._addAllNeighbours()
-        print("Calculate flowvalue for each neighbour pair")
-        self._initialFlowValues()
+        self._initiateAllValues()
 
         frameAmount = numSteps / writeFrequency
+
         # This is needed for proper sorting
         # It is the amount of digits the suffix of each plot name will have
         # Logic pulled from this stackoverflow post
         # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
+
         self._plotDigits = int(math.log10(frameAmount))+1
         constvideotime = 5
         frameduration = constvideotime / frameAmount
@@ -56,8 +51,56 @@ class Simulation:
         pbar.close()
         self._plot.video_maker("simulation.mp4", frameduration)
         self._plot.clean_up()
+
         for cell in self._mesh.cells:
             self._totalOilEnd += cell.oilValue
+
+    def _step(self, dt):
+        for cell in self._mesh.cells:
+            # In this loop we only consider oil flowing out from a main cell
+            # and into its neigbours
+
+            # There is no oil that can flow out of an empty cell
+            # there should not be any flow related to a line cell
+            if isinstance(cell, Line) or cell.oilValue < 0:
+                continue
+
+            # calculate the flow into each neighbour
+            for neighbour, (_, flowValue) in cell.neighbours.items():
+                # We only consider the flow from the main cell
+                # to the neighbour. Not the oil absorbed
+                if (flowValue <= 0):
+                    continue  # Line Cells has flowValue = 0 by default
+
+                # calculate the flux
+                flux = self._solver.flux(
+                    cell.oilValue,
+                    neighbour.oilValue,
+                    flowValue
+                )
+                # Calculate flow out of the cell
+                flow = dt / cell.area * flux
+
+                # Add the flow to the update
+                cell.update = cell.update - flow
+                neighbour.update = neighbour.update + flow
+
+        for cell in self._mesh.cells:
+            # Update the Oilvalues and reset the update for every cell
+            cell.updateOilValue()
+            # Check if there is any oil in the fishing area
+            self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
+
+    def _initiateAllValues(self):
+        print("Updating initial oil values")
+        self._initialCellValues()
+        for cell in self._mesh.cells:
+            self._totalOilStart += cell.oilValue
+
+        self._updateCellFishBools()
+        self._addAllNeighbours()
+        print("Calculate flowvalue for each neighbour pair")
+        self._initialFlowValues()
 
     def _savePicture(self):
         # Because the picture list is sorted alphabetically, it
@@ -66,26 +109,6 @@ class Simulation:
         plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
         self._plot.save_current_plot(plot_name)
         self._plotNumber += 1
-
-    def _step(self, dt):
-        for cell in self._mesh.cells:
-            if isinstance(cell, Line):
-                continue
-            # calculate the incoming and outcoming flow for each neighbour
-            totalFlux = 0
-            for neighbour, values in cell.neighbours.items():
-                flowValue = values[1]
-                if (flowValue is None):
-                    continue
-                flux = self._solver.flux(cell, neighbour, flowValue)
-                totalFlux += flux
-
-            # update value calculatet from formula
-            cell.update = - dt / cell.area * totalFlux
-
-        for cell in self._mesh.cells:
-            cell.updateOilValue()
-            self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
 
     def _cellInFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
@@ -116,23 +139,23 @@ class Simulation:
             # nesting hell under this if statement.
             if isinstance(cell, Line):
                 continue
-            if (0 < cell.oilValue):
-                # code for activating a cell
-                # simply adds the neighboors and the related flow value
-                for neighbour, values in cell.neighbours.items():
-                    flowValue = values[1]
-                    if flowValue is None:
-                        # would be nice if the find neighboors method returned
-                        # a tuple = (neigboor cell object, shared coords)
-                        sharedCoords = values[0]
-                        # sharedflow value
-                        flowValue = self._solver.calculateFlowValue(
-                            cell,
-                            neighbour,
-                            sharedCoords
-                        )
-                    cell.updateFlowToNeighbour(neighbour, flowValue)
-                    neighbour.updateFlowToNeighbour(cell, -flowValue)
+
+            # code for activating a cell
+            # simply adds the neighboors and the related flow value
+            for ngh, (sharedCoords, flowValue) in cell.neighbours.items():
+                if flowValue is not None:
+                    continue
+
+                # calulate flow value
+                flowValue = self._solver.calculateFlowValue(
+                    cell,
+                    ngh,
+                    sharedCoords
+                )
+
+                # add the flowValue to the neighbour pair
+                cell.updateFlowToNeighbour(ngh, flowValue)
+                ngh.updateFlowToNeighbour(cell, -flowValue)
 
     @property
     def oilHitsFish(self):
