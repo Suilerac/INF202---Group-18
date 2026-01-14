@@ -13,7 +13,9 @@ class Plotter:
     def __init__(self, mesh: Mesh,
                  image_dir: str = 'temp/img',
                  video_dir: str = 'vids',
-                 list_dir: str = 'temp'):
+                 list_dir: str = 'temp',
+                 x_range: list[float] = [0, 1],
+                 y_range: list[float] = [0, 1]):
         """
         A class to handle matplotlib logic, and also handle
         file logic related to the matplotlib plots, such as
@@ -33,6 +35,8 @@ class Plotter:
         """
 
         self._msh = mesh
+        self._x_range = x_range
+        self._y_range = y_range
 
         # File paths
         self._image_dir = image_dir
@@ -90,8 +94,8 @@ class Plotter:
         plt.gca().add_collection(lincol)
         plt.xlabel('x-axis')
         plt.ylabel('y-axis')
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
+        plt.xlim(self._x_range[0], self._x_range[1])
+        plt.ylim(self._y_range[0], self._y_range[1])
         plt.gca().set_aspect('equal')
 
     def save_current_plot(self, fileName: str):

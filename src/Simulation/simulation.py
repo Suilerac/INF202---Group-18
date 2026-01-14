@@ -35,8 +35,13 @@ class Simulation:
         self._simName = configFile.split('.')[0].split('/')[1]
         self._imagePath = f"temp/{self._simName}/img"
         self._listPath = f"temp/{self._simName}"
-        self._plot = Plotter(self._mesh, image_dir=self._imagePath, list_dir=self._listPath)
-        self._solver = Solver(np.array([random(), random()]))
+        self._plot = Plotter(
+            self._mesh,
+            image_dir=self._imagePath,
+            list_dir=self._listPath,
+            x_range=self._mesh.x_range,
+            y_range=self._mesh.y_range)
+        self._solver = Solver()
 
     def run(self):
         self._initiateAllValues()
