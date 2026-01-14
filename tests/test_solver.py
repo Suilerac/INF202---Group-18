@@ -77,5 +77,5 @@ def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
     (triangle1, line1, 0, 0),
 ])
 def test_Flux(solver, CellA, CellB, flowValue, expectedFlux):
-    result = solver.flux(CellA, CellB, flowValue)
+    result = solver.flux(CellA.oilValue, CellB.oilValue, flowValue)
     assert result == pytest.approx(expectedFlux)
