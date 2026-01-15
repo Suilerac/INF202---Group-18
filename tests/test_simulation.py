@@ -5,7 +5,7 @@ import pytest
 @pytest.fixture
 def simulation():
     sim = Simulation("configs/test.toml")
-    sim._initiateAllValues()
+    sim._initialCellOil()
     return sim
 
 

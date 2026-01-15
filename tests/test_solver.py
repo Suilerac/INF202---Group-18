@@ -59,7 +59,7 @@ for cell in Cells:
     (triangle1, line1, np.array([0.383333, -0.1666667]))
 ])
 def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
-    result = solver._averageVelocity(CellA, CellB)
+    result = solver._averageVelocity(CellA.flow, CellB.flow)
     assert np.allclose(result, expectedAvgVelocity)
 
 
@@ -77,5 +77,6 @@ def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
     (triangle1, line1, 0, 0),
 ])
 def test_Flux(solver, CellA, CellB, flowValue, expectedFlux):
+    vAVG = 
     result = solver.flux(CellA.oilValue, CellB.oilValue, flowValue)
     assert result == pytest.approx(expectedFlux)
