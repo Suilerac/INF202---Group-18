@@ -4,7 +4,7 @@ import pytest
 
 @pytest.fixture
 def simulation():
-    sim = Simulation("")
+    sim = Simulation("configs/test.toml")
     sim._initiateAllValues()
     return sim
 
@@ -15,7 +15,7 @@ def test_oilCount(simulation):
 
 def test_constantOil(simulation):
     initialOil = simulation.countAllOil()
-    simulation.run(0.5, 0, 20)
+    simulation.run()
     finalOil = simulation.countAllOil()
 
     assert initialOil == pytest.approx(finalOil)

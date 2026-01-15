@@ -8,7 +8,7 @@ import os
 def plotter(tmp_path):
     image_dir = f"{tmp_path}/img"
     video_dir = f"{tmp_path}/vids"
-    list_dir = str(tmp_path)
+    list_dir = f"{tmp_path}/list"
     return Plotter(Mesh("meshes/simple_mesh.msh"),
                    image_dir, video_dir, list_dir)
 
