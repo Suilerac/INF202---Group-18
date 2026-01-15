@@ -6,6 +6,8 @@ from InputOutput.commandlineParser import CommandlineParser
 def clp(tmp_path):
     clp = CommandlineParser()
     clp._folder = str(tmp_path)
+    clp._findAll = False
+    clp._config_file = "input.toml"
     return clp
 
 

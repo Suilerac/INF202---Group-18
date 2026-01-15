@@ -10,7 +10,6 @@ class CommandlineParser:
         self._findAll = False
         self._configs = []
         self._addArguments()
-        self._parse()
 
     def setConfigList(self):
         """
@@ -58,7 +57,7 @@ class CommandlineParser:
         self._parser.add_argument("-f", "--folder", default='')
         self._parser.add_argument("-c", "--config_file", default="input.toml")
 
-    def _parse(self):
+    def parse(self):
         args = self._parser.parse_args()
         self._folder = args.folder
         self._config_file = args.config_file
