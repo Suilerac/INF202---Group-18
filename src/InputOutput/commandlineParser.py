@@ -2,7 +2,7 @@ import argparse
 import os
 
 
-class commandlineParser:
+class CommandlineParser:
     def __init__(self):
         self._parser = argparse.ArgumentParser()
         self._folder = None
