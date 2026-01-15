@@ -4,6 +4,7 @@ from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from tqdm import tqdm
+import numpy as np
 import toml
 import math
 
@@ -68,7 +69,7 @@ class Simulation:
         # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
         self._plotDigits = int(math.log10(frameAmount))+1
 
-        if (self._solver._vectorFieldIsTimedependent):
+        if (self._solver._fieldIsTimeDependent):
             # A time dependent vector field requires more
             # calculations per time step
             self._runStandardSimulation(createVideo)
@@ -84,7 +85,7 @@ class Simulation:
     def _runStandardSimulation(self, createVideo):
         dt = self._tEnd / self._nSteps
 
-        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
+        pbar = tqdm(total=self._nSteps, desc="Computing standard simulation")
         stepCount = 0
         elapsedTime = 0
         while stepCount < self._nSteps:
@@ -131,9 +132,9 @@ class Simulation:
         self._initialCellFlow()
 
         print("Calculate flowvalue for each neighbour pair")
-        self._createFaucets()
+        self._createFaucets(dt)
 
-        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
+        pbar = tqdm(total=self._nSteps, desc="Computing faucet simulation")
         stepCount = 0
 
         while stepCount < self._nSteps:
@@ -151,10 +152,10 @@ class Simulation:
     def _faucetStep(self, dt):
         for sourceCell, targetCell, flowCoefficient in self._faucets:
             # If the source is empty there will be no flow to neighbours
-            if sourceCell.oilValue < 0:
+            if sourceCell.oilValue <= 0:
                 continue
             # calculate the flow from A to B
-            flow = sourceCell.oilValue * flowCoefficient * dt
+            flow = sourceCell.oilValue * flowCoefficient
 
             # Add the flow to the update
             sourceCell.update = sourceCell.update - flow
@@ -176,7 +177,7 @@ class Simulation:
         self._initialFlowValues()
         self._createFaucets()
 
-    def _createFaucets(self):
+    def _createFaucets(self, dt):
         """
         Creates an array of tuples called faucets.
         A faucet is a structure that describes the from one cell to another.
@@ -196,14 +197,21 @@ class Simulation:
                 continue
 
             # calculate the flow into each neighbour cell
-            for targetCell, (_, flowValue) in sourceCell.neighbours.items():
+            for targetCell, scaledNormal in sourceCell.neighbours.items():
+                if isinstance(targetCell, Line):
+                    continue
                 # We only consider the flow from the main cell
                 # to the neighbour. Not the oil absorbed
+                velocityAVG = self._solver._averageVelocity(
+                    targetCell.flow,
+                    sourceCell.flow,
+                )
+                flowValue = np.dot(velocityAVG, scaledNormal)
                 if (flowValue <= 0):
                     continue  # Line Cells has flowValue = 0 by default
 
                 # Calculate flow out of the cell
-                flowCoefficient = flowValue / sourceCell.area
+                flowCoefficient = dt * flowValue / sourceCell.area
                 faucet = (sourceCell, targetCell, flowCoefficient)
                 self._faucets.append(faucet)
 

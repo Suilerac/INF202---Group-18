@@ -7,7 +7,7 @@ la = np.linalg
 class Solver:
     def __init__(self, initialOilPoint=np.array([0.35, 0.45])):
         self._initialOilSpatialPoint = initialOilPoint
-        self._fieldIsTimeDependent = self._vectorFieldIsTimedependent
+        self._fieldIsTimeDependent = self._vectorFieldIsTimedependent()
 
     def initalOil(self, position):
         """
@@ -29,7 +29,7 @@ class Solver:
         y = position[1]
 
         fieldX = y - 0.2 * x
-        fieldY = (t - 0.2) * 5  # -x
+        fieldY = -x
         return np.array([fieldX, fieldY])
 
     def _vectorFieldIsTimedependent(self):
