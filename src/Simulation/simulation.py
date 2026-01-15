@@ -42,42 +42,113 @@ class Simulation:
         self._faucets = []
 
     def run(self):
-        self._initiateAllValues()
-        createVideo = (0 < self._writeFrequency)
+        # Initial cell values
+        print("Updating initial Oil")
+        self._initialCellOil()
+        print("Checking if any cell is in the fishing area")
+        self._updateCellFishBools()
 
+        # find neighbour
+        self._mesh.addAllNeighbours()
+
+        # if Writefrequency is = 0, no video will be created
+        createVideo = (0 < self._writeFrequency)
         if not createVideo:
+            # avoid div and divmod by 0
             self._writeFrequency = 1
 
+        # Constants for video creation
+        constvideotime = 5
         frameAmount = self._nSteps / self._writeFrequency
+        frameduration = constvideotime / frameAmount
 
         # This is needed for proper sorting
         # It is the amount of digits the suffix of each plot name will have
         # Logic pulled from this stackoverflow post
         # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
         self._plotDigits = int(math.log10(frameAmount))+1
-        constvideotime = 5
-        frameduration = constvideotime / frameAmount
 
-        dt = self._tEnd / self._nSteps
-
-        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
-
-        elapsed = 0
-        while elapsed < self._nSteps:
-            self._step(dt)
-            if (elapsed % self._writeFrequency == 0 and createVideo):
-                self._plot.plot_current_values()
-                self._savePicture()
-            elapsed += 1
-            pbar.update(1)
-        # after simulation is over, log the final result
+        if (self._solver._vectorFieldIsTimedependent):
+            # A time dependent vector field requires more
+            # calculations per time step
+            self._runStandardSimulation(createVideo)
+        else:
+            # if the vectorField is not related to time,
+            # then we can use the faucet optimisation
+            self._runFaucetOptimisedSimulation(createVideo)
 
         if createVideo:
-            pbar.close()
             self._plot.video_maker(f"{self._simName}.mp4", frameduration)
             self._plot.clean_up()
 
-    def _step(self, dt):
+    def _runStandardSimulation(self, createVideo):
+        dt = self._tEnd / self._nSteps
+
+        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
+        stepCount = 0
+        elapsedTime = 0
+        while stepCount < self._nSteps:
+            self._standardStep(dt, elapsedTime)
+            if (stepCount % self._writeFrequency == 0 and createVideo):
+                self._plot.plot_current_values()
+                self._savePicture()
+
+            stepCount += 1
+            elapsedTime += dt
+
+            pbar.update(1)
+        # after simulation is over, log the final result
+        pbar.close()
+
+    def _standardStep(self, dt, t):
+        for cell in self._mesh.cells:
+            if isinstance(cell, Line):
+                continue
+            for neighbour, scaledNormal in cell.neighbours.items():
+                if isinstance(neighbour, Line):
+                    continue
+
+                vA = self._solver.vectorField(cell.centerPoint, t)
+                vB = self._solver.vectorField(neighbour.centerPoint, t)
+                vAVG = self._solver._averageVelocity(vA, vB)
+
+                flux = self._solver.flux(
+                    cell.oilValue,
+                    neighbour.oilValue,
+                    vAVG,
+                    scaledNormal,
+                )
+
+                cell.update -= dt * flux / cell.area
+
+        for cell in self._mesh.cells:
+            cell.updateOilValue()
+
+    def _runFaucetOptimisedSimulation(self, createVideo):
+        dt = self._tEnd / self._nSteps
+
+        print("Initialize constant velocity vectors for all cells")
+        self._initialCellFlow()
+
+        print("Calculate flowvalue for each neighbour pair")
+        self._createFaucets()
+
+        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
+        stepCount = 0
+
+        while stepCount < self._nSteps:
+            self._faucetStep(dt)
+
+            if (stepCount % self._writeFrequency == 0 and createVideo):
+                self._plot.plot_current_values()
+                self._savePicture()
+
+            stepCount += 1
+            pbar.update(1)
+        # after simulation is over, log the final result
+        pbar.close()
+
+    def _faucetStep(self, dt):
         for sourceCell, targetCell, flowCoefficient in self._faucets:
             # If the source is empty there will be no flow to neighbours
             if sourceCell.oilValue < 0:
@@ -145,9 +216,12 @@ class Simulation:
             (y_range[0] <= center2d[1] <= y_range[1])
             )
 
-    def _initialCellValues(self):
+    def _initialCellOil(self):
         for cell in self._mesh.cells:
             cell.oilValue = self._solver.initalOil(cell.centerPoint[:-1])
+
+    def _initialCellFlow(self):
+        for cell in self._mesh.cells:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
     def _addAllNeighbours(self):
