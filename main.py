@@ -2,7 +2,6 @@ from Simulation.simulation import Simulation
 import time
 from multiprocessing import Process
 
-
 def main():
     sims = [Simulation("configs/default.toml"),
             Simulation("configs/test1.toml"),
