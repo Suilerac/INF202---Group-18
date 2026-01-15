@@ -1,10 +1,12 @@
-from InputOutput.commandlineParser import commandlineParser
+from InputOutput.log import Log
 
 
 def main():
-    clp = commandlineParser()
-    clp.setConfigList()
-    print(clp.configs)
+    log = Log("log")
+    log.debug("Debug")
+    log.info("Info")
+    log.error("Error")
+    log.critical("Critical")
 
 
 if __name__ == "__main__":
