@@ -28,6 +28,6 @@ def single_sim():
 
 if __name__ == "__main__":
     start = time.time()
-    main()
+    single_sim()
     end = time.time()
     print(f"Simulation spent {end - start} seconds")

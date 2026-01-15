@@ -69,46 +69,29 @@ class Plotter:
         cbar_ax = plt.gca().inset_axes([1, 0, 0.05, 1])
         plt.colorbar(sm, cax=cbar_ax, label='oilValue')
         line_coords_normal = []
-        line_coords_fish = []
         line_values = []
         poly_coords_normal = []
-        poly_coords_fish = []
         poly_values = []
         for cell in self._msh.cells:
             # Make the points two dimensional
             coord = np.array([point[:2] for point in cell.coordinates])
             if isinstance(cell, Line):
-                if cell.inFishingGround:
-                    line_coords_fish.append(coord)
-                else:
-                    line_coords_normal.append(coord)
-                    line_values.append(cell.oilValue)
+                line_coords_normal.append(coord)
+                line_values.append(cell.oilValue)
             else:
-                if cell.inFishingGround:
-                    poly_coords_fish.append(coord)
-                else:
-                    poly_coords_normal.append(coord)
-                    poly_values.append(cell.oilValue)
+                poly_coords_normal.append(coord)
+                poly_values.append(cell.oilValue)
         polcol_normal = PolyCollection(
             verts=poly_coords_normal,
             array=poly_values,
             cmap='viridis',
             alpha=0.9
         )
-        polcol_fish = PolyCollection(
-            verts=poly_coords_fish,
-            facecolors='cyan',
-            edgecolors='cyan',
-            alpha=0.9
-        )
         lincol_normal = LineCollection(
             segments=line_coords_normal, linewidths=line_values
             )
-        lincol_fish = LineCollection(segments=line_coords_fish, colors='cyan')
         plt.gca().add_collection(polcol_normal)
-        plt.gca().add_collection(polcol_fish)
         plt.gca().add_collection(lincol_normal)
-        plt.gca().add_collection(lincol_fish)
         plt.xlabel('x-axis')
         plt.ylabel('y-axis')
         plt.xlim(self._x_range[0], self._x_range[1])
