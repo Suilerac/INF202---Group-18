@@ -9,9 +9,9 @@
 \thirdauthor{Johannes Husevåg Standal}
 
 % Report Title & Subtitle
-\title{Report: Simulation of an oil spill}
+\title{Bay City oil spill simulation}
 
-\subtitle{Funker dette? \\ with a line break}
+\subtitle{Course: \textbf{INF202}\\ Project assignment in advanced programming}
 
 % Filiations
 \university{Norwegian University of Life Sciences (NMBU)}
@@ -37,163 +37,44 @@
 \pagenumbering{arabic}
 
 % Chapters
-\chapter{Introduction}
-\label{ch:introduction}
-Computer simulations are widely used in science and engineering to model complex systems and phenomena. They allow researchers to analyze and predict the behavior of systems under various conditions, providing insights that may be difficult or impossible to obtain through traditional experimental methods. 
-\\In this report, we will explore the simulation of an oil spill using computational simulation. 
-The problem of oil spills has a real world implementation and are of significant for environmental concern. There are multiple examples like the Deepwater Horizon oil spill in 2010, where computational simulations was crucial in order to predict where surface oil would go, aiding skimming, booming, and shoreline protection.
+\chapter{Introduction}\label{ch:introduction}
+Computer simulations are widely used in science and engineering to model complex systems and phenomena. 
+They allow researchers to analyze and predict the behavior of systems under various conditions, providing insights that may be difficult or impossible to obtain through traditional experimental methods. 
+The problem given an of oil spills has a real world implementation and are of significant for environmental concern. There are multiple examples like the Deepwater Horizon oil spill in 2010, where computational simulations was crucial in order to predict where surface oil would go, aiding skimming, booming, and shoreline protection.
 \begin{figure}[H]
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=1.1\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
-  \captionof{figure}{Deepwater Horizon BP oil spill\\ Public domain media}
-  \label{fig:Deepwater Horizon BP oil spill}
+  \includegraphics[width=1.14\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
+  \captionof{figure}{Deepwater Horizon BP oil spill\parencite{deepwater-horizon-oil-spill}}\label{fig:Deepwater Horizon BP oil spill}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{Figures/BayCity.png}
-  \captionof{figure}{Bay city}
-  \label{fig:Bay city from task}
+  \captionof{figure}{Bay city\parencite{Bay-city}}\label{fig:Bay city from task}
 \end{minipage}
 \end{figure}
 
 Our simulation aims to model oil trajectory and spread forecasting in Bay city. Outside Bay city is a fishing ground that are voulnerable to oil spills.
-We will discuss the mathematical models used to represent the oil spill dynamics, the numerical methods employed to solve these models, and the implementation of the simulation.
-\cite{khodak2021initialization, vaswani2017attention} 
+\\This report will discuss the mathematical models used to represent the oil spill dynamics, the numerical methods to solve these models, and the implementation of the simulation.
+\newpage
+
+\chapter{Overall problem}
+
+
+\chapter{User guide}
 
 
 
+\chapter{Code structre}
 
 
-A list of bullet points can be created with
-\begin{itemize}
-    \item item A,
-    \item item B.
-\end{itemize}
+\chapter{Agile development}
 
-A list of numbered items can be created with
-\begin{enumerate}
-    \item item C.
-    \item item D.
-\end{enumerate}
 
-Now, let us create a new section.
+\chapter{Results}
 
-% This here is a comment. It will not affect the text produced in the PDF file.
-\section{Hei}
-Use the formula environment to include formulas like $f(x) = x$. You can also use the formula as a separate line via
-\begin{align*}
-    f(x) = x.
-\end{align*}
-You can also use multiple formulas in one align statement:
-\begin{align*}
-    f(x) =& x \\
-    g(x,y) =& x + y.
-\end{align*}
-If you want to assign a label to a formula, leave the star after \texttt{align}. That is, use
-\begin{align}\label{eq:ref1}
-    v(x) = \sin(x)
-\end{align}
-You can reference this formula by \eqref{eq:ref1} or as \autoref{eq:ref1}. Use one reference style and stick to it. Subscripts are written as $x_n$, and superscripts are written as $x^n$. Several Greek characters can be used, like $\Delta$, $\alpha$, $\beta$, etc. Fractions are expressed by $\frac{a}{b}$. If you want to find the correct command for a given formula, use the internet or ChatGPT. Let us now start a new subsection to define vector operations:
 
-\subsection{Linear algebra}
-
-To define matrices and vectors, use the \texttt{pmatrix} environment. Use
-\begin{align*}
-    b = \begin{pmatrix} 
-    1 \\ 2 \\ 3
-  \end{pmatrix}
-\end{align*}
-for vectors. We can for example use
-\begin{align}
-    v(\vec{x}) = \begin{pmatrix}
-        y-0.2 x \\
-        -x
-    \end{pmatrix}.
-\end{align}
-
-\section{Pseudo-Code}
-
-You can include pseudo-code and reference it as Algorithm~\ref{alg:cap}.
-
-\begin{algorithm}[H]
-\caption{An algorithm with caption}\label{alg:cap}
-\begin{algorithmic}
-\Require $n \geq 0$
-\Ensure $y = x^n$
-\State $y \gets 1$
-\State $X \gets x$
-\State $N \gets n$
-\While{$N \neq 0$}
-\If{$N$ is even}
-    \State $X \gets X \times X$
-    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
-\ElsIf{$N$ is odd}
-    \State $y \gets y \times X$
-    \State $N \gets N - 1$
-\EndIf
-\EndWhile
-\end{algorithmic}
-\end{algorithm}
-
-The positioning of the pseudo-code and images can sometimes jump around.
-
-\chapter{Images}
-\label{ch:images}
-To include images use
-\begin{figure}[H]
-    \centering % This puts the image in the center
-    \includegraphics[width=0.7\linewidth]{Figures/example_image.png}
-    \caption{Caption}
-    \label{fig:example_image}
-\end{figure}
-
-You can also include multiple images:
-
-\begin{figure}[H]
-    \centering % This puts the image in the center
-    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}%
-    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}%
-    \includegraphics[width=0.3\linewidth]{Figures/ex1.png}
-    \caption{Three images with the same caption}
-    \label{fig:example_image2}
-\end{figure}
-
-If you want to have multiple captions use
-\begin{figure}[H]
-\centering
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.6\linewidth]{Figures/ex1.png}
-  \captionof{figure}{A figure}
-  \label{fig:test1}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.6\linewidth]{Figures/ex2.png}
-  \captionof{figure}{Another figure}
-  \label{fig:test2}
-\end{minipage}
-\end{figure}
-
-\chapter{Tables}
-\label{ch:tables}
-
-Tables should be used to for example define simulation parameters. Include tables in the following way:
-\begin{center}
-\begin{tabular}{ |c|c|c| } 
-\hline
-col1 & col2 & col3 \\
-\hline
-\multirow{3}{4em}{Multiple row} & cell2 & cell3 \\ 
-& cell5 & cell6 \\ 
-& cell8 & cell9 \\ 
-\hline
-Single row & cell10 & cell11 \\ 
-\hline
-\end{tabular}
-\end{center}
 
 % Bibliography
 \blankpage\printbibliography
