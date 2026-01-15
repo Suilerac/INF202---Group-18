@@ -1,6 +1,7 @@
 import meshio
 from .cellfactory import CellFactory
 from .cells import Cell
+from tqdm import tqdm
 
 
 class Mesh:
@@ -17,6 +18,9 @@ class Mesh:
         """
         self._mesh = meshio.read(meshFile)
         self._points = self._mesh.points
+        self._x_range = [self._points[:, 0].min(), self._points[:, 0].max()]
+        self._y_range = [self._points[:, 1].min(), self._points[:, 1].max()]
+
         self._cells = []  # List to store all cells as Cell objects
         self._factory = CellFactory()
         self._addCellsToList()
@@ -28,6 +32,14 @@ class Mesh:
     @property
     def points(self):
         return self._points
+
+    @property
+    def x_range(self):
+        return self._x_range
+
+    @property
+    def y_range(self):
+        return self._y_range
 
     def _addCellsToList(self):
         """
@@ -99,6 +111,8 @@ class Mesh:
         Finds all neighbours of cell
 
         :param cell: The cell you want to find the neighbours of
+        :param exclude: If you want to exclude the first n cells in
+            the array of cells, then you can specify n with this parameter
         """
         # Store the point indexes as a set for later comparison
         cellPoints = set(cell.pointIDs)
@@ -122,3 +136,32 @@ class Mesh:
                 sharedCoords = [self._points[a], self._points[b]]
                 cell.addNeighbour(ngh, sharedCoords)
                 ngh.addNeighbour(cell, sharedCoords)
+
+    def addAllNeighbours(self):
+        """
+        Goes through all cells and adds all neighbours for each cell
+        """
+        # Dict for storing edges and cells together
+        # Key: Tuple of two pointIDs
+        # Value: Array of cells that have those pointIDs
+        edgemap = {}
+        for cell in tqdm(self._cells, desc="Finding neighbours"):
+            pointIDs = cell.pointIDs
+            point_amount = len(pointIDs)
+            # Goes through each point pair in pointIDs
+            for i in range(point_amount):
+                p1 = int(pointIDs[i])
+                p2 = int(pointIDs[(i + 1) % point_amount])
+                edge = tuple(sorted((p1, p2)))  # Key value of edgemap
+                # If the edge is already there, it has been added previously
+                # along with a cell which is this cell's neighbour
+                if edge in edgemap:
+                    sharedCoords = [self._points[p1], self._points[p2]]
+                    for ngh in edgemap[edge]:
+                        cell.addNeighbour(ngh, sharedCoords)
+                        ngh.addNeighbour(cell, sharedCoords)
+                # If the edge is not already there, we initialize it
+                else:
+                    edgemap[edge] = []
+                # And add this cell to its value
+                edgemap[edge].append(cell)
