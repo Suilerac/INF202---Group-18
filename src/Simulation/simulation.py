@@ -15,8 +15,6 @@ class Simulation:
         self._plotNumber = 1
         self._plotDigits = 0
         self._oilHitsFish = False
-        self._totalOilStart = 0
-        self._totalOilEnd = 0
 
         # Config values
         self._configFile = configFile
