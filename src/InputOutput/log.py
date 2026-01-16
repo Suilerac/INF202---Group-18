@@ -1,9 +1,15 @@
 import logging
+from pathlib import Path
 
 
 class Log:
     def __init__(self, logName):
+        path = Path(logName)
         self._logName = logName
+        path.parent.mkdir(exist_ok=True)
+        self._logger = logging.getLogger(logName)
+        self._logger.setLevel(logging.DEBUG)
+        self._configureLogger()
 
     def debug(self, message):
         """
@@ -11,8 +17,7 @@ class Log:
 
         :param message: The message to log
         """
-        self._configureLogger()
-        logging.debug(message)
+        self._logger.debug(message)
 
     def info(self, message):
         """
@@ -20,8 +25,7 @@ class Log:
 
         :param message: The message to log
         """
-        self._configureLogger()
-        logging.info(message)
+        self._logger.info(message)
 
     def error(self, message):
         """
@@ -29,8 +33,7 @@ class Log:
 
         :param message: The message to log
         """
-        self._configureLogger()
-        logging.error(message)
+        self._logger.error(message)
 
     def critical(self, message):
         """
@@ -38,20 +41,13 @@ class Log:
 
         :param message: The message to log
         """
-        self._configureLogger()
-        logging.critical(message)
+        self._logger.critical(message)
 
     def _configureLogger(self):
-        """
-        Configures the logger for the current log file.
-        This is done in every method because logging is global.
-        This is problematic if we're dealing with multiple log files at once.
-        That happens when running multiple simulations,
-        as we utilize multiprocessing.
-        As such we need to reset it to the correct file every time.
-        """
-        logging.basicConfig(
-            filename=self._logName,
-            level=logging.DEBUG,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        if not self._logger.handlers:
+            handler = logging.FileHandler(self._logName)
+            formatter = logging.Formatter(
+                "%(asctime)s - %(levelname)s - %(message)s"
+            )
+            handler.setFormatter(formatter)
+            self._logger.addHandler(handler)
