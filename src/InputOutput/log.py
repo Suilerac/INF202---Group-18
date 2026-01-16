@@ -4,6 +4,11 @@ from pathlib import Path
 
 class Log:
     def __init__(self, logName):
+        """
+        A class for handling logging
+
+        :param logName: Name or path description of output file
+        """
         path = Path(logName)
         self._logName = logName
         path.parent.mkdir(exist_ok=True)
@@ -44,6 +49,9 @@ class Log:
         self._logger.critical(message)
 
     def _configureLogger(self):
+        """
+        Ensures that the logger has a file to write to
+        """
         if not self._logger.handlers:
             handler = logging.FileHandler(self._logName)
             formatter = logging.Formatter(
