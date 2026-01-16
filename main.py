@@ -1,6 +1,4 @@
-from Simulation.simulation import Simulation
-import time
-from multiprocessing import Process
+from InputOutput.log import Log
 
 
 def main():
@@ -34,7 +32,4 @@ def single_sim():
 
 
 if __name__ == "__main__":
-    start = time.time()
-    single_sim()
-    end = time.time()
-    print(f"Simulation spent {end - start} seconds")
+    main()
