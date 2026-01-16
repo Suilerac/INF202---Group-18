@@ -24,8 +24,13 @@ def main():
 
 
 def single_sim():
-    sim = Simulation("configs/default.toml")
+    sim = Simulation("configs/test.toml")
+    sim._initialCellOil()
+    oilStart = sim.countAllOil()
+    sim._solver._fieldIsTimeDependent = True
     sim.run()
+    oilEnd = sim.countAllOil()
+    print(oilStart, oilEnd)
 
 
 if __name__ == "__main__":

@@ -114,13 +114,13 @@ class Simulation:
                 vAVG = self._solver._averageVelocity(vA, vB)
 
                 flux = self._solver.flux(
-                    cell.oilValue,
-                    neighbour.oilValue,
+                    cell,
+                    neighbour,
                     vAVG,
                     scaledNormal,
                 )
 
-                cell.update -= dt * flux / cell.area
+                cell.update += - dt * flux / cell.area
 
         for cell in self._mesh.cells:
             cell.updateOilValue()
@@ -138,7 +138,7 @@ class Simulation:
         stepCount = 0
 
         while stepCount < self._nSteps:
-            self._faucetStep(dt)
+            self._faucetStep()
 
             if (stepCount % self._writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
@@ -149,7 +149,7 @@ class Simulation:
         # after simulation is over, log the final result
         pbar.close()
 
-    def _faucetStep(self, dt):
+    def _faucetStep(self):
         for sourceCell, targetCell, flowCoefficient in self._faucets:
             # If the source is empty there will be no flow to neighbours
             if sourceCell.oilValue <= 0:
@@ -166,16 +166,6 @@ class Simulation:
             cell.updateOilValue()
             # Check if there is any oil in the fishing area
             self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
-
-    def _initiateAllValues(self):
-        print("Updating initial oil values")
-        self._initialCellValues()
-        print("Checking if any cell is in the fishing area")
-        self._updateCellFishBools()
-        self._mesh.addAllNeighbours()
-        print("Calculate flowvalue for each neighbour pair")
-        self._initialFlowValues()
-        self._createFaucets()
 
     def _createFaucets(self, dt):
         """
@@ -232,38 +222,9 @@ class Simulation:
         for cell in self._mesh.cells:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
-    def _addAllNeighbours(self):
-        exclude = 1
-        for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
-            self._mesh.findNeighboursOf(cell, exclude)
-            exclude += 1
-
     def _updateCellFishBools(self):
         for cell in self._mesh.cells:
             cell.inFishingGround = self._cellInFishingGrounds(cell)
-
-    def _initialFlowValues(self):
-        for cell in self._mesh.cells:
-            # nesting hell under this if statement.
-            if isinstance(cell, Line):
-                continue
-
-            # code for activating a cell
-            # simply adds the neighboors and the related flow value
-            for ngh, (sharedCoords, flowValue) in cell.neighbours.items():
-                if flowValue is not None:
-                    continue
-
-                # calulate flow value
-                flowValue = self._solver.calculateFlowValue(
-                    cell,
-                    ngh,
-                    sharedCoords
-                )
-
-                # add the flowValue to the neighbour pair
-                cell.updateFlowToNeighbour(ngh, flowValue)
-                ngh.updateFlowToNeighbour(cell, -flowValue)
 
     def countAllOil(self):
         """
@@ -271,7 +232,7 @@ class Simulation:
         """
         totalOil = 0
         for cell in self._mesh.cells:
-            totalOil += cell.oilValue
+            totalOil += cell.oilValue * cell.area
         return totalOil
 
     def _savePicture(self):

@@ -68,23 +68,25 @@ class Solver:
 
         # Since the vector field is constant at a given position.
         # Therefore the average velocity between cells is constant as well
-        averageVelocity = self._averageVelocity(cellA, cellB)
+        averageVelocity = self._averageVelocity(cellA.flow, cellB.flow)
 
         # The scaled normals of the shared edge between cellA and cellB
         # are parallell to each other, with opposite direction.
         # They have the same lenght s the relation between them is given as
         # "scaledNormalA = - scaledNormalB"
-        scaledNormal = cellA._calculateScaledNormal(sharedCoordinates)
+        scaledNormal = cellA.calculateScaledNormal(sharedCoordinates)
 
         # since both the averageVelocity and the scaledNormal is constant
         # we only have to calculate this value once during the simulation.
         # this saves a lot of time
         return np.dot(averageVelocity, scaledNormal)
 
-    def flux(self, oilInCellA, oilInCellB, averageVelocity, scaledNormal):
-        dot = np.dot(averageVelocity, scaledNormal)
+    def flux(self, mainCell, nghCell, averageVelocity, scaledNormal):
+        if isinstance(mainCell, Line) or isinstance(nghCell, Line):
+            return 0
 
+        dot = np.dot(averageVelocity, scaledNormal)
         if (0 <= dot):
-            return oilInCellA * dot
+            return mainCell.oilValue * dot
         else:
-            return oilInCellB * dot
+            return nghCell.oilValue * dot
