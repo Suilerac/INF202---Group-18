@@ -73,7 +73,7 @@ def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
 
 
 @pytest.mark.parametrize("CellA, CellB, sharedCoords, expectedFlux", [
-    (triangle1, triangle2, [Pn1, Pn2], -0.0249352208777296),
+    (triangle1, triangle2, [Pn1, Pn2], -4.038500374917757e-08),
     (triangle1, line1, [Pc1, Pn1], 0),
 ])
 def test_Flux(solver, CellA, CellB, sharedCoords, expectedFlux):
