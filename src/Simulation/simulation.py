@@ -3,9 +3,10 @@ from Geometry.line import Line
 from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
+from InputOutput.tomlParser import TomlParser
+from InputOutput.log import Log
 from tqdm import tqdm
 import numpy as np
-import toml
 import math
 
 
@@ -19,16 +20,12 @@ class Simulation:
 
         # Config values
         self._configFile = configFile
-        self._nSteps = 0
-        self._tEnd = 0
-        self._meshName = ""
-        self._borders = []
-        self._logName = ""
-        self._writeFrequency = 0
-        self._readConfig()
+        self._toml = TomlParser(configFile)
+        self._log = Log(self._toml.logName)
+        self._logParameters()
 
         # Object creations
-        self._mesh = Mesh(self._meshName)
+        self._mesh = Mesh(self._toml.meshName)
         self._simName = configFile.split('.')[0].split('/')[1]
         self._imagePath = f"temp/{self._simName}/img"
         self._listPath = f"temp/{self._simName}"
@@ -53,14 +50,14 @@ class Simulation:
         self._mesh.addAllNeighbours()
 
         # if Writefrequency is = 0, no video will be created
-        createVideo = (0 < self._writeFrequency)
+        createVideo = (0 < self._toml.writeFrequency)
         if not createVideo:
             # avoid div and divmod by 0
-            self._writeFrequency = 1
+            self._toml.writeFrequency = 1
 
         # Constants for video creation
         constvideotime = 5
-        frameAmount = self._nSteps / self._writeFrequency
+        frameAmount = self._toml.nSteps / self._toml.writeFrequency
         frameduration = constvideotime / frameAmount
 
         # This is needed for proper sorting
@@ -83,14 +80,14 @@ class Simulation:
             self._plot.clean_up()
 
     def _runStandardSimulation(self, createVideo):
-        dt = self._tEnd / self._nSteps
+        dt = self._toml.tEnd / self._toml.nSteps
 
-        pbar = tqdm(total=self._nSteps, desc="Computing standard simulation")
+        pbar = tqdm(total=self._toml.nSteps, desc="Computing standard sim")
         stepCount = 0
         elapsedTime = 0
-        while stepCount < self._nSteps:
+        while stepCount < self._toml.nSteps:
             self._standardStep(dt, elapsedTime)
-            if (stepCount % self._writeFrequency == 0 and createVideo):
+            if (stepCount % self._toml.writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
 
@@ -126,7 +123,7 @@ class Simulation:
             cell.updateOilValue()
 
     def _runFaucetOptimisedSimulation(self, createVideo):
-        dt = self._tEnd / self._nSteps
+        dt = self._toml.tEnd / self._toml.nSteps
 
         print("Initialize constant velocity vectors for all cells")
         self._initialCellFlow()
@@ -134,13 +131,13 @@ class Simulation:
         print("Calculate flowvalue for each neighbour pair")
         self._createFaucets(dt)
 
-        pbar = tqdm(total=self._nSteps, desc="Computing faucet simulation")
+        pbar = tqdm(total=self._toml.nSteps, desc="Computing faucet sim")
         stepCount = 0
 
-        while stepCount < self._nSteps:
+        while stepCount < self._toml.nSteps:
             self._faucetStep()
 
-            if (stepCount % self._writeFrequency == 0 and createVideo):
+            if (stepCount % self._toml.writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
 
@@ -207,8 +204,8 @@ class Simulation:
 
     def _cellInFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
-        x_range = self._borders[0]
-        y_range = self._borders[1]
+        x_range = self._toml.borders[0]
+        y_range = self._toml.borders[1]
         return (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
@@ -247,17 +244,10 @@ class Simulation:
     def oilHitsFish(self):
         return self._oilHitsFish
 
-    def _readConfig(self):
-        with open(self._configFile, 'r') as file:
-            config = toml.load(file)
-        settings = config.get("settings", {})
-        self._nSteps = settings.get("nSteps", 500)
-        self._tEnd = settings.get("tEnd", 0.5)
-
-        geometry = config.get("geometry", {})
-        self._meshName = geometry.get("meshName", "meshes/bay.msh")
-        self._borders = geometry.get("borders", [[0, 0.45], 0, 0.2])
-
-        io = config.get("IO", {})
-        self._logName = io.get("logName", "log")
-        self._writeFrequency = io.get("writeFrequency", False)
+    def _logParameters(self):
+        self._log.info(f"nSteps: {self._toml.nSteps}")
+        self._log.info(f"tEnd: {self._toml.tEnd}")
+        self._log.info(f"meshName: {self._toml.meshName}")
+        self._log.info(f"borders: {self._toml.borders}")
+        self._log.info(f"logName: {self._toml.logName}")
+        self._log.info(f"writeFrequency: {self._toml.writeFrequency}")

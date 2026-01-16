@@ -1,4 +1,5 @@
-from InputOutput.log import Log
+from Simulation.simulation import Simulation
+from multiprocessing import Process
 
 
 def main():
@@ -32,4 +33,4 @@ def single_sim():
 
 
 if __name__ == "__main__":
-    main()
+    single_sim()
