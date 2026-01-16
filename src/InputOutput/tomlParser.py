@@ -1,7 +1,7 @@
 import toml
 
 
-class tomlParser:
+class TomlParser:
     def __init__(self, configFile: str):
         # Config values
         self._configFile = configFile
