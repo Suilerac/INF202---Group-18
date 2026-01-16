@@ -1,36 +1,26 @@
 from Simulation.simulation import Simulation
+from InputOutput.commandlineParser import CommandlineParser
 from multiprocessing import Process
+from tqdm import tqdm
 
 
 def main():
-    sims = [
-        Simulation("configs/default.toml"),
-        Simulation("configs/test1.toml"),
-        Simulation("configs/test2.toml"),
-        Simulation("configs/test3.toml"),
-    ]
+    clp = CommandlineParser()
+    clp.parse()
+    clp.setConfigList()
+    sims = [Simulation(config) for config in clp.configs]
     threads = []
-    for sim in sims:
-        t = Process(target=sim.run)
-        threads.append(t)
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-    for sim in sims:
-        break
-        sim.saveVid()
-
-
-def single_sim():
-    sim = Simulation("configs/default.toml")
-    sim._initialCellOil()
-    oilStart = sim.countAllOil()
-    sim._solver._fieldIsTimeDependent = False
-    sim.run()
-    oilEnd = sim.countAllOil()
-    print(oilStart - oilEnd)
+    if len(sims) > 1:  # If more than one, then we use multithreading
+        for sim in sims:
+            t = Process(target=sim.run)
+            threads.append(t)
+        for t in tqdm(threads, desc="Computing simulations"):
+            t.start()
+        for t in threads:
+            t.join()
+    else:
+        sims[0].run()
 
 
 if __name__ == "__main__":
-    single_sim()
+    main()

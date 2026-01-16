@@ -5,7 +5,6 @@ from Simulation.solver import Solver
 from Simulation.plotter import Plotter
 from InputOutput.tomlParser import TomlParser
 from InputOutput.log import Log
-from tqdm import tqdm
 import numpy as np
 import math
 
@@ -25,7 +24,7 @@ class Simulation:
 
         # Object creations
         self._mesh = Mesh(self._toml.meshName)
-        self._simName = configFile.split('.')[0].split('/')[1]
+        self._simName = configFile.split('.')[0].split('/')[-1]
         self._imagePath = f"temp/{self._simName}/img"
         self._listPath = f"temp/{self._simName}"
         self._plot = Plotter(
@@ -82,7 +81,6 @@ class Simulation:
     def _runStandardSimulation(self, createVideo):
         dt = self._toml.tEnd / self._toml.nSteps
 
-        pbar = tqdm(total=self._toml.nSteps, desc="Computing standard sim")
         stepCount = 0
         while stepCount < self._toml.nSteps:
             t = dt * stepCount
@@ -99,10 +97,6 @@ class Simulation:
             self._log.info(
                 f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
-
-            pbar.update(1)
-        # after simulation is over, log the final result
-        pbar.close()
 
     def _standardStep(self, dt, t):
         for cell in self._mesh.cells:
@@ -137,7 +131,6 @@ class Simulation:
         print("Calculate flowvalue for each neighbour pair")
         self._createFaucets(dt)
 
-        pbar = tqdm(total=self._toml.nSteps, desc="Computing faucet sim")
         stepCount = 0
 
         while stepCount < self._toml.nSteps:
@@ -148,14 +141,12 @@ class Simulation:
                 self._savePicture()
 
             stepCount += 1
-            pbar.update(1)
             # after simulation is over, log the final result
             fishOil = self._countOilInFishingGrounds()
             t = dt * stepCount
             self._log.info(
                 f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
-        pbar.close()
 
     def _faucetStep(self):
         for sourceCell, targetCell, flowCoefficient in self._faucets:

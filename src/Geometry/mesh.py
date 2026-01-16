@@ -1,7 +1,6 @@
 import meshio
 from .cellfactory import CellFactory
 from .cells import Cell
-from tqdm import tqdm
 
 
 class Mesh:
@@ -114,7 +113,7 @@ class Mesh:
         # Key: Tuple of two pointIDs
         # Value: Array of cells that have those pointIDs
         edgemap = {}
-        for cell in tqdm(self._cells, desc="Finding neighbours"):
+        for cell in self._cells:
             pointIDs = cell.pointIDs
             point_amount = len(pointIDs)
             # Goes through each point pair in pointIDs
