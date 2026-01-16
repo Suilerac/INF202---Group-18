@@ -120,7 +120,7 @@ class Simulation:
                     scaledNormal,
                 )
 
-                cell.update += - dt * flux / cell.area
+                cell.update -= dt * flux / cell.area
 
         for cell in self._mesh.cells:
             cell.updateOilValue()
