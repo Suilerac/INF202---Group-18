@@ -158,8 +158,8 @@ class Simulation:
             flow = sourceCell.oilValue * flowCoefficient
 
             # Add the flow to the update
-            sourceCell.update = sourceCell.update - flow
-            targetCell.update = targetCell.update + flow
+            sourceCell.update = sourceCell.update - flow / sourceCell.area
+            targetCell.update = targetCell.update + flow / targetCell.area
 
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
@@ -201,7 +201,7 @@ class Simulation:
                     continue  # Line Cells has flowValue = 0 by default
 
                 # Calculate flow out of the cell
-                flowCoefficient = dt * flowValue / sourceCell.area
+                flowCoefficient = dt * flowValue
                 faucet = (sourceCell, targetCell, flowCoefficient)
                 self._faucets.append(faucet)
 
