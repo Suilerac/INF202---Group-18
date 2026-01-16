@@ -84,15 +84,21 @@ class Simulation:
 
         pbar = tqdm(total=self._toml.nSteps, desc="Computing standard sim")
         stepCount = 0
-        elapsedTime = 0
         while stepCount < self._toml.nSteps:
-            self._standardStep(dt, elapsedTime)
+            t = dt * stepCount
+
+            self._standardStep(dt, t)
             if (stepCount % self._toml.writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
 
             stepCount += 1
-            elapsedTime += dt
+
+            # after simulation is over, log the final result
+            fishOil = self._countOilInFishingGrounds()
+            self._log.info(
+                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                )
 
             pbar.update(1)
         # after simulation is over, log the final result
@@ -143,7 +149,12 @@ class Simulation:
 
             stepCount += 1
             pbar.update(1)
-        # after simulation is over, log the final result
+            # after simulation is over, log the final result
+            fishOil = self._countOilInFishingGrounds()
+            t = dt * stepCount
+            self._log.info(
+                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                )
         pbar.close()
 
     def _faucetStep(self):
@@ -221,6 +232,9 @@ class Simulation:
         return [
             cell for cell in self._mesh.cells if self._inFishingGrounds(cell)
             ]
+
+    def _countOilInFishingGrounds(self):
+        return sum(cell.oilValue for cell in self._fishingCells)
 
     def countAllOil(self):
         """
