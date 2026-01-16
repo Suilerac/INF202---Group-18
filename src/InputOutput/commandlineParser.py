@@ -29,8 +29,8 @@ class CommandlineParser:
             self._configs = [
                 f"{path}{file}" for file in files if file.endswith(".toml")
                 ]
-            if "pyproject.toml" in self._configs:
-                self._configs.remove("pyproject.toml")
+            if f"{path}pyproject.toml" in self._configs:
+                self._configs.remove(f"{path}pyproject.toml")
         # Gets specific config file if it's supposed to
         else:
             file = f"{path}{self._config_file}"
