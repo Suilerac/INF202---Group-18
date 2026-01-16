@@ -16,7 +16,6 @@ class Simulation:
         self._outPutPath = "file path"
         self._plotNumber = 1
         self._plotDigits = 0
-        self._oilHitsFish = False
 
         # Config values
         self._configFile = configFile
@@ -37,14 +36,15 @@ class Simulation:
             y_range=self._mesh.y_range)
         self._solver = Solver()
 
+        # List creations
         self._faucets = []
+        self._fishingCells = self._initiateFishingCells()
 
     def run(self):
         # Initial cell values
         print("Updating initial Oil")
         self._initialCellOil()
         print("Checking if any cell is in the fishing area")
-        self._updateCellFishBools()
 
         # find neighbour
         self._mesh.addAllNeighbours()
@@ -161,8 +161,6 @@ class Simulation:
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
             cell.updateOilValue()
-            # Check if there is any oil in the fishing area
-            self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
 
     def _createFaucets(self, dt):
         """
@@ -202,7 +200,7 @@ class Simulation:
                 faucet = (sourceCell, targetCell, flowCoefficient)
                 self._faucets.append(faucet)
 
-    def _cellInFishingGrounds(self, cell: Cell) -> bool:
+    def _inFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
         x_range = self._toml.borders[0]
         y_range = self._toml.borders[1]
@@ -219,9 +217,10 @@ class Simulation:
         for cell in self._mesh.cells:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
-    def _updateCellFishBools(self):
-        for cell in self._mesh.cells:
-            cell.inFishingGround = self._cellInFishingGrounds(cell)
+    def _initiateFishingCells(self):
+        return [
+            cell for cell in self._mesh.cells if self._inFishingGrounds(cell)
+            ]
 
     def countAllOil(self):
         """
@@ -239,10 +238,6 @@ class Simulation:
         plot_name = f"plot{self._plotNumber:0{self._plotDigits}d}.png"
         self._plot.save_current_plot(plot_name)
         self._plotNumber += 1
-
-    @property
-    def oilHitsFish(self):
-        return self._oilHitsFish
 
     def _logParameters(self):
         self._log.info(f"nSteps: {self._toml.nSteps}")
