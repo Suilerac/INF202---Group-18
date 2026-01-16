@@ -106,37 +106,6 @@ class Mesh:
             i += 1
         return indexes
 
-    def findNeighboursOf(self, cell: Cell, exclude: int = 0):
-        """
-        Finds all neighbours of cell
-
-        :param cell: The cell you want to find the neighbours of
-        :param exclude: If you want to exclude the first n cells in
-            the array of cells, then you can specify n with this parameter
-        """
-        # Store the point indexes as a set for later comparison
-        cellPoints = set(cell.pointIDs)
-
-        # The max amount of neighbours the cell can have
-        maxNgh = len(cell.coordinates)
-
-        for ngh in self.cells[exclude:]:
-            # Check if all neighbours have already been added
-            # That way we can avoid redundant loops
-            if len(cell.neighbours) == maxNgh:
-                return
-
-            # Store the ngh point indexes as a set for later comparison
-            nghPoints = set(ngh.pointIDs)
-            # Find the intersection leaving us with the shared point indexes
-            sharedPoints = cellPoints & nghPoints
-            # If they share exactly two points, then they are neighbours
-            if len(sharedPoints) == 2:
-                a, b = sharedPoints
-                sharedCoords = [self._points[a], self._points[b]]
-                cell.addNeighbour(ngh, sharedCoords)
-                ngh.addNeighbour(cell, sharedCoords)
-
     def addAllNeighbours(self):
         """
         Goes through all cells and adds all neighbours for each cell
@@ -158,8 +127,10 @@ class Mesh:
                 if edge in edgemap:
                     sharedCoords = [self._points[p1], self._points[p2]]
                     for ngh in edgemap[edge]:
-                        cell.addNeighbour(ngh, sharedCoords)
-                        ngh.addNeighbour(cell, sharedCoords)
+
+                        scaledNormal = cell.calculateScaledNormal(sharedCoords)
+                        cell.addNeighbour(ngh, scaledNormal)
+                        ngh.addNeighbour(cell, -scaledNormal)
                 # If the edge is not already there, we initialize it
                 else:
                     edgemap[edge] = []

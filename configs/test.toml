@@ -1,6 +1,6 @@
 [settings]
-nSteps = 500
-tEnd = 0.5
+nSteps = 100
+tEnd = 0.1
 
 [geometry]
 meshName = "meshes/simple.msh"
@@ -8,4 +8,4 @@ borders = [[0.0, 0.45], [0.0, 0.2]]
 
 [IO]
 logName = "log"
-writeFrequency = 20
+writeFrequency = 0

@@ -7,6 +7,7 @@ la = np.linalg
 class Solver:
     def __init__(self, initialOilPoint=np.array([0.35, 0.45])):
         self._initialOilSpatialPoint = initialOilPoint
+        self._fieldIsTimeDependent = self._vectorFieldIsTimedependent()
 
     def initalOil(self, position):
         """
@@ -18,7 +19,7 @@ class Solver:
         oilValue = math.exp(- (distance * distance / 0.01))
         return oilValue
 
-    def vectorField(self, position):
+    def vectorField(self, position, t=0):
         """
         calculating the vector field from a position vector
 
@@ -31,10 +32,24 @@ class Solver:
         fieldY = -x
         return np.array([fieldX, fieldY])
 
-    def _averageVelocity(self, cellA, cellB):
-        vA = cellA.flow
-        vB = cellB.flow
-        return 0.5 * (vA + vB)
+    def _vectorFieldIsTimedependent(self):
+        """
+        Checks if the partial derivative of the vectorField with
+        respect to time equals [0, 0].
+        If it is true then we can use the faucet optimisation
+        """
+        testPos = np.array([1, 1])
+        for t in range(10):
+            vI = self.vectorField(testPos, t)
+            vF = self.vectorField(testPos, t + 1)
+
+            if la.norm(vI - vF) != 0:
+                return True
+
+        return False
+
+    def _averageVelocity(self, velocityA, velocityB):
+        return 0.5 * (velocityA + velocityB)
 
     def calculateFlowValue(self, cellA, cellB, sharedCoordinates):
         if isinstance(cellB, Line):
@@ -53,24 +68,25 @@ class Solver:
 
         # Since the vector field is constant at a given position.
         # Therefore the average velocity between cells is constant as well
-        averageVelocity = self._averageVelocity(cellA, cellB)
+        averageVelocity = self._averageVelocity(cellA.flow, cellB.flow)
 
         # The scaled normals of the shared edge between cellA and cellB
         # are parallell to each other, with opposite direction.
         # They have the same lenght s the relation between them is given as
         # "scaledNormalA = - scaledNormalB"
-        scaledNormal = cellA._calculateScaledNormal(sharedCoordinates)
+        scaledNormal = cellA.calculateScaledNormal(sharedCoordinates)
 
         # since both the averageVelocity and the scaledNormal is constant
         # we only have to calculate this value once during the simulation.
         # this saves a lot of time
         return np.dot(averageVelocity, scaledNormal)
 
-    def flux(self, oilInCellA, oilInCellB, flowValue):
-        # the flowvalue is the dot product of
-        # the average velocity between two neighbours
-        # and the scaled normal of the shared edge
-        if (0 <= flowValue):
-            return oilInCellA * flowValue
+    def flux(self, mainCell, nghCell, averageVelocity, scaledNormal):
+        if isinstance(mainCell, Line) or isinstance(nghCell, Line):
+            return 0
+
+        dot = np.dot(averageVelocity, scaledNormal)
+        if (0 <= dot):
+            return mainCell.oilValue * dot
         else:
-            return oilInCellB * flowValue
+            return nghCell.oilValue * dot
