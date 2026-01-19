@@ -78,15 +78,24 @@ class Plotter:
         plt.ylim(self._y_range[0], self._y_range[1])
         plt.gca().set_aspect('equal')
 
-    def save_current_plot(self, fileName: str):
+    def save_current_plot(self, fileName: str, image_dir=''):
         """
         Saves the currently generated plot as a file
 
         :param fileName: Desired name of the image file.
             Must include file type.
             Example: "image.png"
+
+        :param image_dir: Desired image directory.
+            By default it is the image directory
+            specified on object creation, but
+            you can overwrite it here.
         """
-        plt.savefig(f"{self._image_dir}/{fileName}")
+        if image_dir == '':
+            image_dir = self._image_dir
+        else:
+            Path(image_dir).mkdir(parents=True, exist_ok=True)
+        plt.savefig(f"{image_dir}/{fileName}")
         plt.close
 
     def video_maker(self,
@@ -116,9 +125,10 @@ class Plotter:
         """
         # Clean up the temporary images list
         os.remove(self._list_path)
-        images = sorted(os.listdir(self._image_dir))  # Get all images
-        for img in images[:-1]:  # Keep the last picture per the task desc
+        images = os.listdir(self._image_dir)  # Get all images
+        for img in images:  # Keep the last picture per the task desc
             os.remove(os.path.join(self._image_dir, img))
+        os.rmdir(self._image_dir)
         os.rmdir(self._list_dir)
 
     def _get_normal_poly_collection(self):
