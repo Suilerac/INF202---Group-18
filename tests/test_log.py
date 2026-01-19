@@ -5,7 +5,7 @@ from InputOutput.log import Log
 
 @pytest.fixture
 def log(tmp_path):
-    return Log(f"{tmp_path}/log.log")
+    return Log("log.log", str(tmp_path))
 
 
 def test_existance(log, tmp_path):
