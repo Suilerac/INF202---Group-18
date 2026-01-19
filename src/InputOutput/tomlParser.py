@@ -56,15 +56,39 @@ class TomlParser:
             config = toml.load(file)
         # [settings]
         settings = config.get("settings", {})
-        self._nSteps = settings.get("nSteps")
-        self._tEnd = settings.get("tEnd")
+        self._nSteps = self._setValueWithNoneHandling(
+            "nSteps",
+            settings.get("nSteps"),
+            int
+            )
+        self._tEnd = self._setValueWithNoneHandling(
+            "tEnd",
+            settings.get("tEnd"),
+            float
+            )
 
         # [geometry]
         geometry = config.get("geometry", {})
-        self._meshName = geometry.get("meshName")
-        self._borders = geometry.get("borders")
+        self._meshName = self._setValueWithNoneHandling(
+            "meshName",
+            geometry.get("meshName"),
+            str
+            )
+        self._borders = self._setValueWithNoneHandling(
+            "borders",
+            geometry.get("borders"),
+            list
+            )
 
         # [IO]
         io = config.get("IO", {})
         self._logName = io.get("logName", "logfile")
         self._writeFrequency = io.get("writeFrequency", 0)
+
+    def _setValueWithNoneHandling(self, name, value, type):
+        if value is None or not isinstance(value, type):
+            raise ValueError(
+                f"Error parsing config: {name} not given correctly as {type}"
+                )
+        else:
+            return value
