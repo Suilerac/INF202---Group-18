@@ -18,7 +18,7 @@ class Log:
         # Truncate the log in case it exists to avoid clutter
         with open(self._logPath, 'w') as f:
             f.close()
-        self._logger = logging.getLogger(logName)
+        self._logger = logging.getLogger(self._logPath)
         self._logger.setLevel(logging.DEBUG)
         self._configureLogger()
 
