@@ -19,18 +19,21 @@ class Simulation:
         # Config values
         self._configFile = configFile
         self._toml = TomlParser(configFile)
-        self._log = Log(self._toml.logName)
-        self._logParameters()
 
-        # Object creations
-        self._mesh = Mesh(self._toml.meshName)
+        # Various variables
         self._simName = configFile.split('.')[0].split('/')[-1]
         self._imagePath = f"temp/{self._simName}/img"
         self._listPath = f"temp/{self._simName}"
+
+        # Object creations
+        self._log = Log(self._toml.logName, self._simName)
+        self._logParameters()
+        self._mesh = Mesh(self._toml.meshName)
         self._plot = Plotter(
             self._mesh,
             image_dir=self._imagePath,
             list_dir=self._listPath,
+            video_dir=self._simName,
             x_range=self._mesh.x_range,
             y_range=self._mesh.y_range)
         self._solver = Solver()
@@ -74,7 +77,7 @@ class Simulation:
 
         # Save final plot
         self._plot.plot_current_values
-        self._plot.save_current_plot(self._simName, "img")
+        self._plot.save_current_plot(self._simName, self._simName)
 
         if createVideo:
             self._plot.video_maker(f"{self._simName}.mp4", frameduration)

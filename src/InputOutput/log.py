@@ -3,17 +3,20 @@ from pathlib import Path
 
 
 class Log:
-    def __init__(self, logName):
+    def __init__(self, logName, logDir='logs'):
         """
         A class for handling logging
 
-        :param logName: Name or path description of output file
+        :param logName: Name of logfile
         """
         path = Path(logName)
         self._logName = logName
+        self._logDir = logDir
+        Path(self._logDir).mkdir(parents=True, exist_ok=True)
+        self._logPath = f"{logDir}/{logName}"
         path.parent.mkdir(exist_ok=True)
         # Truncate the log in case it exists to avoid clutter
-        with open(self._logName, 'w') as f:
+        with open(self._logPath, 'w') as f:
             f.close()
         self._logger = logging.getLogger(logName)
         self._logger.setLevel(logging.DEBUG)
@@ -56,7 +59,7 @@ class Log:
         Ensures that the logger has a file to write to
         """
         if not self._logger.handlers:
-            handler = logging.FileHandler(self._logName)
+            handler = logging.FileHandler(self._logPath)
             formatter = logging.Formatter(
                 "%(asctime)s - %(levelname)s - %(message)s"
             )
