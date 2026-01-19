@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-la = np.linalg
+import numpy.linalg as la
 
 
 class Cell(ABC):
