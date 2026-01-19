@@ -12,6 +12,9 @@ class Log:
         path = Path(logName)
         self._logName = logName
         path.parent.mkdir(exist_ok=True)
+        # Truncate the log in case it exists to avoid clutter
+        with open(self._logName, 'w') as f:
+            f.close()
         self._logger = logging.getLogger(logName)
         self._logger.setLevel(logging.DEBUG)
         self._configureLogger()

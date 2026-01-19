@@ -41,9 +41,7 @@ class Simulation:
 
     def run(self):
         # Initial cell values
-        print("Updating initial Oil")
         self._initialCellOil()
-        print("Checking if any cell is in the fishing area")
 
         # find neighbour
         self._mesh.addAllNeighbours()
@@ -124,13 +122,8 @@ class Simulation:
 
     def _runFaucetOptimisedSimulation(self, createVideo):
         dt = self._toml.tEnd / self._toml.nSteps
-
-        print("Initialize constant velocity vectors for all cells")
         self._initialCellFlow()
-
-        print("Calculate flowvalue for each neighbour pair")
         self._createFaucets(dt)
-
         stepCount = 0
 
         while stepCount < self._toml.nSteps:

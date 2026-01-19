@@ -37,6 +37,10 @@ class TomlParser:
     def writeFrequency(self):
         return self._writeFrequency
 
+    @writeFrequency.setter
+    def writeFrequency(self, value):
+        self._writeFrequency = value
+
     def _readConfig(self):
         with open(self._configFile, 'r') as file:
             config = toml.load(file)
