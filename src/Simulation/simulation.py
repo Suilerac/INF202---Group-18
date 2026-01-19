@@ -142,16 +142,14 @@ class Simulation:
                 )
 
     def _faucetStep(self):
-        for sourceCell, targetCell, velocityCoefficient in self._faucets:
+        for sourceCell, targetCell, flowAB, flowBA in self._faucets:
             # If the source is empty there will be no velocity to neighbours
             if sourceCell.oilDensity <= 0:
                 continue
-            # calculate the velocity from A to B
-            velocity = sourceCell.oilDensity * velocityCoefficient
 
             # Add the velocity to the update
-            sourceCell.update = sourceCell.update - velocity / sourceCell.area
-            targetCell.update = targetCell.update + velocity / targetCell.area
+            sourceCell.update -= sourceCell.oilDensity * flowAB
+            targetCell.update += sourceCell.oilDensity * flowBA
 
         for cell in self._mesh.cells:
             # Update the oil densitiess and reset the update for every cell
@@ -187,13 +185,15 @@ class Simulation:
                     targetCell.velocity,
                     sourceCell.velocity,
                 )
-                velocityValue = np.dot(velocityAVG, scaledNormal)
-                if (velocityValue <= 0):
+                flowValue = np.dot(velocityAVG, scaledNormal)
+                if (flowValue <= 0):
                     continue  # Line Cells has velocityValue = 0 by default
 
                 # Calculate velocity out of the cell
-                velocityCoefficient = dt * velocityValue
-                faucet = (sourceCell, targetCell, velocityCoefficient)
+                flowAB = dt * flowValue / sourceCell.area
+                flowBA = dt * flowValue / targetCell.area
+
+                faucet = (sourceCell, targetCell, flowAB, flowBA)
                 self._faucets.append(faucet)
 
     def _inFishingGrounds(self, cell: Cell) -> bool:
