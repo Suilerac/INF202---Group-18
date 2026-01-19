@@ -205,7 +205,7 @@ cell \(I\) and one of its neighbors \(\text{ngh}\), the edge-averaged velocity i
 which is constant in time. Likewise, the scaled normal vector \(\vec{\nu}_{I,\text{ngh}}\) is
 precomputed and does not change.
 
-The standard upwind flux from cell \(I\) to neighbor \(\text{ngh}\) is
+The standard flux from cell \(I\) to neighbor \(\text{ngh}\) is
 \[
 \text{Flux}_{I \rightarrow \text{ngh}} =
 \begin{cases}
@@ -214,32 +214,43 @@ The standard upwind flux from cell \(I\) to neighbor \(\text{ngh}\) is
 \end{cases}
 \]
 
-Since the velocity field is constant, we can precompute the outgoing flow
+However if we only consider the outgoing flux then
 \[
-\phi_{I \rightarrow \text{ngh}} = \max\!\big(0, \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \big)
+\phi_{I \rightarrow \text{ngh}} = \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \cdot u_I
 \]
 for every cell-neighbor pair. The oil leaving cell \(I\) over a time step \(\Delta t\)
 is
 \[
-\Delta u_I = - \frac{\Delta t}{A_I} \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \, u_I,
-\]
-while the neighboring cell receives a corresponding contribution scaled by its area
-\[
-\Delta u_{\text{ngh}} = \frac{\Delta t}{A_{\text{ngh}}} \, \phi_{I \rightarrow \text{ngh}} \, u_I.
+\Delta u_I = 
+- \frac{\Delta t}{A_I} \sum_{\text{ngh}} (\phi_{I \rightarrow \text{ngh}} \ \cdot u_I)
+= u_I \cdot -\frac{\Delta t}{A_I} \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \,
 \]
 
+while the neighboring cell receives a corresponding contribution scaled by its area
+\[
+\Delta u_{\text{ngh}} = u_I \cdot \frac{\Delta t}{A_{\text{ngh}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \
+\]
+
+Since u is the only time dependent variable we can factor out two constants from the formulas
+\[
+Flow_{I \rightarrow \text{ngh}} = \frac{\Delta t}{A_{\text{I}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} 
+\]
+\[
+Flow_{ngh \rightarrow \text{I}} = \frac{\Delta t}{A_{\text{ngh}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} 
+\]
 By precomputing these coefficients for every cell-neighbor pair (the \emph{faucets}),
 the simulation reduces to a simple lookup at each time step:
 \[
-u_I^{n+1} = u_I^n - \sum_{\text{ngh}} C_{I \rightarrow \text{ngh}} \, u_I^n,
+u_I^{n+1} = u_I^n - Flow_{ngh \rightarrow \text{I}} \cdot  u_I^n,
 \qquad
-u_{\text{ngh}}^{\,n+1} = u_{\text{ngh}}^n + C_{\text{ngh} \leftarrow I} \, u_I^n,
 \]
-where \(C_{I \rightarrow \text{ngh}} = \frac{\Delta t}{A_I} \phi_{I \rightarrow \text{ngh}}\)
-and \(C_{\text{ngh} \leftarrow I} = \frac{\Delta t}{A_{\text{ngh}}} \phi_{I \rightarrow \text{ngh}}\).
+\[
+u_{\text{ngh}}^{\,n+1} = u_I^n + Flow_{ngh \rightarrow \text{I}} \cdot  u_I^n,
+\]
 
 This formulation guarantees conservation of the total oil amount, since all outgoing flux
-from a main cell is redistributed to its neighbors, scaled by the respective cell areas.
+from a main cell is redistributed to its neighbors and is scaled by their areas.
+
 
 
 
