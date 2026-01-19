@@ -124,7 +124,7 @@ class Plotter:
         # Reads the arguments in image.txt through the input function
         # Writes the video file in the output function
         ffmpeg.input(
-            self._list_path, format='concat', safe=0
+            self._list_path, format='concat', safe=0, loglevel='quiet'
             ).output(
                 output_loc, vcodec='libx264', pix_fmt='yuv420p'
                 ).run()

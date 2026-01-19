@@ -3,8 +3,9 @@ from Geometry.line import Line
 from Geometry.cells import Cell
 from Simulation.solver import Solver
 from Simulation.plotter import Plotter
-from tqdm import tqdm
-import toml
+from InputOutput.tomlParser import TomlParser
+from InputOutput.log import Log
+import numpy as np
 import math
 
 
@@ -14,21 +15,16 @@ class Simulation:
         self._outPutPath = "file path"
         self._plotNumber = 1
         self._plotDigits = 0
-        self._oilHitsFish = False
 
         # Config values
         self._configFile = configFile
-        self._nSteps = 0
-        self._tEnd = 0
-        self._meshName = ""
-        self._borders = []
-        self._logName = ""
-        self._writeFrequency = 0
-        self._readConfig()
+        self._toml = TomlParser(configFile)
+        self._log = Log(self._toml.logName)
+        self._logParameters()
 
         # Object creations
-        self._mesh = Mesh(self._meshName)
-        self._simName = configFile.split('.')[0].split('/')[1]
+        self._mesh = Mesh(self._toml.meshName)
+        self._simName = configFile.split('.')[0].split('/')[-1]
         self._imagePath = f"temp/{self._simName}/img"
         self._listPath = f"temp/{self._simName}"
         self._plot = Plotter(
@@ -39,73 +35,129 @@ class Simulation:
             y_range=self._mesh.y_range)
         self._solver = Solver()
 
+        # List creations
         self._faucets = []
+        self._fishingCells = self._initiateFishingCells()
 
     def run(self):
-        self._initiateAllValues()
-        createVideo = (0 < self._writeFrequency)
+        # Initial cell values
+        self._initialCellOil()
 
+        # find neighbour
+        self._mesh.addAllNeighbours()
+
+        # if Writefrequency is = 0, no video will be created
+        createVideo = (0 < self._toml.writeFrequency)
         if not createVideo:
-            self._writeFrequency = 1
+            # avoid div and divmod by 0
+            self._toml.writeFrequency = 1
 
-        frameAmount = self._nSteps / self._writeFrequency
+        # Constants for video creation
+        constvideotime = 5
+        frameAmount = self._toml.nSteps / self._toml.writeFrequency
+        frameduration = constvideotime / frameAmount
 
         # This is needed for proper sorting
         # It is the amount of digits the suffix of each plot name will have
         # Logic pulled from this stackoverflow post
         # https://stackoverflow.com/questions/2189800/how-to-find-length-of-digits-in-an-integer
         self._plotDigits = int(math.log10(frameAmount))+1
-        constvideotime = 5
-        frameduration = constvideotime / frameAmount
 
-        dt = self._tEnd / self._nSteps
-
-        pbar = tqdm(total=self._nSteps, desc="Computing simulation")
-
-        elapsed = 0
-        while elapsed < self._nSteps:
-            self._step(dt)
-            if (elapsed % self._writeFrequency == 0 and createVideo):
-                self._plot.plot_current_values()
-                self._savePicture()
-            elapsed += 1
-            pbar.update(1)
-        # after simulation is over, log the final result
+        if (self._solver._fieldIsTimeDependent):
+            # A time dependent vector field requires more
+            # calculations per time step
+            self._runStandardSimulation(createVideo)
+        else:
+            # if the vectorField is not related to time,
+            # then we can use the faucet optimisation
+            self._runFaucetOptimisedSimulation(createVideo)
 
         if createVideo:
-            pbar.close()
             self._plot.video_maker(f"{self._simName}.mp4", frameduration)
             self._plot.clean_up()
 
-    def _step(self, dt):
+    def _runStandardSimulation(self, createVideo):
+        dt = self._toml.tEnd / self._toml.nSteps
+
+        stepCount = 0
+        while stepCount < self._toml.nSteps:
+            t = dt * stepCount
+
+            self._standardStep(dt, t)
+            if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+                self._plot.plot_current_values()
+                self._savePicture()
+
+            stepCount += 1
+
+            # after simulation is over, log the final result
+            fishOil = self._countOilInFishingGrounds()
+            self._log.info(
+                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                )
+
+    def _standardStep(self, dt, t):
+        for cell in self._mesh.cells:
+            if isinstance(cell, Line):
+                continue
+            for neighbour, scaledNormal in cell.neighbours.items():
+                if isinstance(neighbour, Line):
+                    continue
+
+                vA = self._solver.vectorField(cell.centerPoint, t)
+                vB = self._solver.vectorField(neighbour.centerPoint, t)
+                vAVG = self._solver._averageVelocity(vA, vB)
+
+                flux = self._solver.flux(
+                    cell,
+                    neighbour,
+                    vAVG,
+                    scaledNormal,
+                )
+
+                cell.update -= dt * flux / cell.area
+
+        for cell in self._mesh.cells:
+            cell.updateOilValue()
+
+    def _runFaucetOptimisedSimulation(self, createVideo):
+        dt = self._toml.tEnd / self._toml.nSteps
+        self._initialCellFlow()
+        self._createFaucets(dt)
+        stepCount = 0
+
+        while stepCount < self._toml.nSteps:
+            self._faucetStep()
+
+            if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+                self._plot.plot_current_values()
+                self._savePicture()
+
+            stepCount += 1
+            # after simulation is over, log the final result
+            fishOil = self._countOilInFishingGrounds()
+            t = dt * stepCount
+            self._log.info(
+                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                )
+
+    def _faucetStep(self):
         for sourceCell, targetCell, flowCoefficient in self._faucets:
             # If the source is empty there will be no flow to neighbours
-            if sourceCell.oilValue < 0:
+            if sourceCell.oilValue <= 0:
                 continue
             # calculate the flow from A to B
-            flow = sourceCell.oilValue * flowCoefficient * dt
+            flow = sourceCell.oilValue * flowCoefficient
 
             # Add the flow to the update
-            sourceCell.update = sourceCell.update - flow
-            targetCell.update = targetCell.update + flow
+            sourceCell.update = sourceCell.update - flow / sourceCell.area
+            targetCell.update = targetCell.update + flow / targetCell.area
 
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
             cell.updateOilValue()
-            # Check if there is any oil in the fishing area
-            self._oilHitsFish = cell.inFishingGround and cell.oilValue > 0
 
-    def _initiateAllValues(self):
-        print("Updating initial oil values")
-        self._initialCellValues()
-        print("Checking if any cell is in the fishing area")
-        self._updateCellFishBools()
-        self._mesh.addAllNeighbours()
-        print("Calculate flowvalue for each neighbour pair")
-        self._initialFlowValues()
-        self._createFaucets()
-
-    def _createFaucets(self):
+    def _createFaucets(self, dt):
         """
         Creates an array of tuples called faucets.
         A faucet is a structure that describes the from one cell to another.
@@ -125,63 +177,48 @@ class Simulation:
                 continue
 
             # calculate the flow into each neighbour cell
-            for targetCell, (_, flowValue) in sourceCell.neighbours.items():
+            for targetCell, scaledNormal in sourceCell.neighbours.items():
+                if isinstance(targetCell, Line):
+                    continue
                 # We only consider the flow from the main cell
                 # to the neighbour. Not the oil absorbed
+                velocityAVG = self._solver._averageVelocity(
+                    targetCell.flow,
+                    sourceCell.flow,
+                )
+                flowValue = np.dot(velocityAVG, scaledNormal)
                 if (flowValue <= 0):
                     continue  # Line Cells has flowValue = 0 by default
 
                 # Calculate flow out of the cell
-                flowCoefficient = flowValue / sourceCell.area
+                flowCoefficient = dt * flowValue
                 faucet = (sourceCell, targetCell, flowCoefficient)
                 self._faucets.append(faucet)
 
-    def _cellInFishingGrounds(self, cell: Cell) -> bool:
+    def _inFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
-        x_range = self._borders[0]
-        y_range = self._borders[1]
+        x_range = self._toml.borders[0]
+        y_range = self._toml.borders[1]
         return (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
             )
 
-    def _initialCellValues(self):
+    def _initialCellOil(self):
         for cell in self._mesh.cells:
             cell.oilValue = self._solver.initalOil(cell.centerPoint[:-1])
+
+    def _initialCellFlow(self):
+        for cell in self._mesh.cells:
             cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
 
-    def _addAllNeighbours(self):
-        exclude = 1
-        for cell in tqdm(self._mesh.cells, desc="Finding neighbours"):
-            self._mesh.findNeighboursOf(cell, exclude)
-            exclude += 1
+    def _initiateFishingCells(self):
+        return [
+            cell for cell in self._mesh.cells if self._inFishingGrounds(cell)
+            ]
 
-    def _updateCellFishBools(self):
-        for cell in self._mesh.cells:
-            cell.inFishingGround = self._cellInFishingGrounds(cell)
-
-    def _initialFlowValues(self):
-        for cell in self._mesh.cells:
-            # nesting hell under this if statement.
-            if isinstance(cell, Line):
-                continue
-
-            # code for activating a cell
-            # simply adds the neighboors and the related flow value
-            for ngh, (sharedCoords, flowValue) in cell.neighbours.items():
-                if flowValue is not None:
-                    continue
-
-                # calulate flow value
-                flowValue = self._solver.calculateFlowValue(
-                    cell,
-                    ngh,
-                    sharedCoords
-                )
-
-                # add the flowValue to the neighbour pair
-                cell.updateFlowToNeighbour(ngh, flowValue)
-                ngh.updateFlowToNeighbour(cell, -flowValue)
+    def _countOilInFishingGrounds(self):
+        return sum(cell.oilValue for cell in self._fishingCells)
 
     def countAllOil(self):
         """
@@ -189,7 +226,7 @@ class Simulation:
         """
         totalOil = 0
         for cell in self._mesh.cells:
-            totalOil += cell.oilValue
+            totalOil += cell.oilValue * cell.area
         return totalOil
 
     def _savePicture(self):
@@ -200,21 +237,10 @@ class Simulation:
         self._plot.save_current_plot(plot_name)
         self._plotNumber += 1
 
-    @property
-    def oilHitsFish(self):
-        return self._oilHitsFish
-
-    def _readConfig(self):
-        with open(self._configFile, 'r') as file:
-            config = toml.load(file)
-        settings = config.get("settings", {})
-        self._nSteps = settings.get("nSteps", 500)
-        self._tEnd = settings.get("tEnd", 0.5)
-
-        geometry = config.get("geometry", {})
-        self._meshName = geometry.get("meshName", "meshes/bay.msh")
-        self._borders = geometry.get("borders", [[0, 0.45], 0, 0.2])
-
-        io = config.get("IO", {})
-        self._logName = io.get("logName", "log")
-        self._writeFrequency = io.get("writeFrequency", False)
+    def _logParameters(self):
+        self._log.info(f"nSteps: {self._toml.nSteps}")
+        self._log.info(f"tEnd: {self._toml.tEnd}")
+        self._log.info(f"meshName: {self._toml.meshName}")
+        self._log.info(f"borders: {self._toml.borders}")
+        self._log.info(f"logName: {self._toml.logName}")
+        self._log.info(f"writeFrequency: {self._toml.writeFrequency}")
