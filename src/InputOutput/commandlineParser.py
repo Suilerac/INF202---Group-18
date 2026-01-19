@@ -40,6 +40,13 @@ class CommandlineParser:
             file = f"{path}{self._config_file}"
             self._configs.append(file)
 
+        # Error handling
+        if len(self._configs) == 0:
+            raise FileExistsError("Found no files as specified")
+        for config in self._configs:
+            if not os.path.isfile(config):
+                raise FileNotFoundError(f"Found no file {config}")
+
     @property
     def configs(self):
         return self._configs
