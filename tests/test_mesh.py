@@ -16,8 +16,10 @@ def test_list_filling(mesh):
 
 # Assert that correct indexes are found
 def test_index_search(mesh):
-    assert mesh._findTriangleIndexes() == [8]
-    assert mesh._findLineIndexes() == [4, 5, 6, 7]
+    indexes = []
+    for cell, index in mesh._findCellIndexes().items():
+        indexes.append(index)
+    assert indexes == [4, 5, 6, 7, 8]
 
 
 def test_points(mesh):
