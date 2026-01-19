@@ -3,6 +3,12 @@ import toml
 
 class TomlParser:
     def __init__(self, configFile: str):
+        """
+        A class to read and handle values provided by a .toml
+        file in relation to the simulation.
+
+        :param configFile: A path string to the toml file
+        """
         # Config values
         self._configFile = configFile
         self._nSteps = 0
@@ -42,16 +48,23 @@ class TomlParser:
         self._writeFrequency = value
 
     def _readConfig(self):
+        """
+        Sets the object properties based on the
+        values provided by the toml file
+        """
         with open(self._configFile, 'r') as file:
             config = toml.load(file)
+        # [settings]
         settings = config.get("settings", {})
         self._nSteps = settings.get("nSteps", 500)
         self._tEnd = settings.get("tEnd", 0.5)
 
+        # [geometry]
         geometry = config.get("geometry", {})
         self._meshName = geometry.get("meshName", "meshes/bay.msh")
         self._borders = geometry.get("borders", [[0, 0.45], 0, 0.2])
 
+        # [IO]
         io = config.get("IO", {})
         self._logName = io.get("logName", "log")
         self._writeFrequency = io.get("writeFrequency", False)

@@ -4,6 +4,10 @@ import os
 
 class CommandlineParser:
     def __init__(self):
+        """
+        A class for handling the command line arguments
+        for the simulation.
+        """
         self._parser = argparse.ArgumentParser()
         self._folder = None
         self._config_file = None
@@ -53,11 +57,17 @@ class CommandlineParser:
         return self._findAll
 
     def _addArguments(self):
+        """
+        Adds all the command line arguments for parsing
+        """
         self._parser.add_argument("--find_all", action='store_true')
         self._parser.add_argument("-f", "--folder", default='')
         self._parser.add_argument("-c", "--config_file", default="input.toml")
 
     def parse(self):
+        """
+        Parses the arguments and sets the class properties accordingly
+        """
         args = self._parser.parse_args()
         self._folder = args.folder
         self._config_file = args.config_file
