@@ -25,8 +25,8 @@ def test_points(mesh):
 
 
 def test_neighbours(mesh):
+    mesh.addAllNeighbours()
     cell = mesh.cells[0]
-    mesh.findNeighboursOf(cell)
     ngh = cell.neighbours
     assert len(ngh) > 0
     assert len(ngh) <= 3

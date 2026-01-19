@@ -100,5 +100,5 @@ def test_normals(triangle, edgeCoords, expectedNormals):
     (coords3, np.array([0, -2])),
 ])
 def test_scaledNormals(triangle, edgeCoords, expectedScaledNormals):
-    result = triangle._calculateScaledNormal(edgeCoords)
+    result = triangle.calculateScaledNormal(edgeCoords)
     assert np.allclose(result, expectedScaledNormals)

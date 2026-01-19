@@ -59,7 +59,7 @@ for cell in Cells:
     (triangle1, line1, np.array([0.383333, -0.1666667]))
 ])
 def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
-    result = solver._averageVelocity(CellA, CellB)
+    result = solver._averageVelocity(CellA.flow, CellB.flow)
     assert np.allclose(result, expectedAvgVelocity)
 
 
@@ -72,10 +72,21 @@ def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
     assert result == pytest.approx(expectedFlow)
 
 
-@pytest.mark.parametrize("CellA, CellB, flowValue, expectedFlux", [
-    (triangle1, triangle2, -.0999999999999999, -4.0385003749177585e-08),
-    (triangle1, line1, 0, 0),
+@pytest.mark.parametrize("CellA, CellB, sharedCoords, expectedFlux", [
+    (triangle1, triangle2, [Pn1, Pn2], -4.038500374917757e-08),
+    (triangle1, line1, [Pc1, Pn1], 0),
 ])
-def test_Flux(solver, CellA, CellB, flowValue, expectedFlux):
-    result = solver.flux(CellA.oilValue, CellB.oilValue, flowValue)
+def test_Flux(solver, CellA, CellB, sharedCoords, expectedFlux):
+    CellA.flow = solver.vectorField(CellA.centerPoint)
+    CellB.flow = solver.vectorField(CellB.centerPoint)
+    avgVelocity = solver._averageVelocity(CellA.flow, CellB.flow)
+    scaledNormal = CellA.calculateScaledNormal(sharedCoords)
+
+    result = solver.flux(
+        CellA,
+        CellB,
+        avgVelocity,
+        scaledNormal
+    )
+
     assert result == pytest.approx(expectedFlux)
