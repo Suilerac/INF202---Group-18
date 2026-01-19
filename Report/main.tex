@@ -110,8 +110,9 @@ y - 0.2x \\
 \end{pmatrix}.
 \]
 This vector field defines the direction and magnitude of oil flow at each cell. 
-The simulation supports parameter for time (t) in order to acoount for any change in the ocean currents,
-and this reduce the effectiveness of precomputated values for the simulation. 
+The simulation supports parameter for time (t) in order to account for any development in the ocean currents.
+If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values. 
+Hence giving birth to the optimized faucet simulation. 
 
 \section{Oil transfer}
 
@@ -156,7 +157,7 @@ g(a,b,\vec{\nu},\vec{v}) =
 a \, \langle \vec{v}, \vec{\nu} \rangle,
 & \text{if } \langle \vec{v}, \vec{\nu} \rangle > 0, \\
 b \, \langle \vec{v}, \vec{\nu} \rangle,
-& \text{otherwise}.
+& \text{else}.
 \end{cases}
 \]
 
