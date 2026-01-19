@@ -3,7 +3,14 @@ from numpy import linalg as la
 
 
 class Triangle(Cell):
+    """
+    A class for handeling triangle cells
+    """
     def __init__(self, coordinates, pointIDs):
+        """
+        :param coordinates: coordinates as an np.array for x and y value
+        :param pointIDs: pointIDs that make up the triangle
+        """
         super().__init__(coordinates, pointIDs)
 
         self._area = self._calculateArea()
