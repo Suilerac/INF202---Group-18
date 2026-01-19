@@ -21,7 +21,15 @@ It will guide you from installation to actually simulating oil trajectory.
 1. Select a folder, or create one (not /system32). Once you're in that folder, you can right-click it and select, 'Open in Terminal'
 
 2. Clone the repository to your folder:
-<pre style="background: #0d1117; color: #c9d1d9; padding: 16px; border-radius: 6px; font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; margin: 8px 0; overflow-x: auto; white-space: pre;">
+<pre style="background: #0d1117; 
+color: #c9d1d9; 
+padding: 16px; 
+border-radius: 6px; 
+font-family: 'Monaco', 'Menlo', monospace; 
+font-size: 14px; 
+margin: 8px 0; 
+overflow-x: auto; 
+white-space: pre;">
 <span style="color: #58a6ff;">$</span> git clone https://github.com/Suilerac/INF202---Group-18.git
 <span style="color: #58a6ff;">$</span> cd INF202---Group-18
 </pre>
@@ -29,27 +37,26 @@ It will guide you from installation to actually simulating oil trajectory.
 
 3. Set up a local venv. Inside CMD, make sure you are in the INF202--Group-18 folder
 
-<textarea readonly style="
-    background: #0d1117;
-    color: #c9d1d9;
-    border: none;
-    padding: 16px;
-    border-radius: 6px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    width: 100%;
-    max-width: 600px;
-    resize: none;
-    margin: 8px 0;
-    tab-size: 4;
-"># create the virtual environment
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+"># create virtual environment
 python -m venv venv
-# activate the local venv  
-source venv/bin/activate
-# install dependencies for simulation
-pip install -r requirements.txt
-</textarea>
+# activate local venv
+source venv/bin/activate  
+# install dependencies
+pip install -r requirements.txt</pre>
 
 
 
@@ -92,3 +99,5 @@ finally verify with <b>ffmpeg -version</b>
 </div>
 
 <h1> How to use the simulation </h1>
+
+More 
