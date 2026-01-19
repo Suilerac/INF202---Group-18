@@ -65,7 +65,184 @@ This report will discuss the mathematical models used to represent the oil spill
 the numerical methods to solve these models, and the implementation of the simulation.
 \newpage
 
-\chapter{Overall problem}
+\chapter{Overall problem and solution}
+
+\section{Problem Description}
+
+The fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
+The objective of the simulation is to assess the impact of the oil spill on the surrounding
+fishing grounds and to determine appropriate measures to protect the local fish population.
+
+An external group of researchers has provided a simplified two-dimensional flow field that is used
+to approximate ocean currents in the region. In addition there is provided a two-dimensional map
+of Bay City is from the file  \texttt{bay.msh}. The data includes the coastline and ocean for the region.
+
+The spatial domain is described using Cartesian coordinates $(x,y)$, where the point
+$(0,0)^{\top}$ corresponds to the lower-left corner of the map.
+
+\section{Initialisation}
+
+When a new simulation object is created, a mesh file is loaded from the configuration folder.
+The mesh consists of a collection of cells (triangles for the ocean and lines for the coastline). 
+Each cell stores a scalar value representing the oil density within
+the area of the cell.
+
+The initial oil distribution is centered at the spatial point
+\begin{align*}
+\vec{x}^{\star} = (x^{\star}, y^{\star})^{\top} &= (0.35, 0.45)^{\top},
+\intertext{and is defined by the function}
+u(t=0,\vec{x}) &= \exp\left(-\frac{\|\vec{x}-\vec{x}^{\star}\|^{2}}{0.01}\right),
+\end{align*}
+where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ and time $t$.
+This formulation produces a localized oil spill with maximum concentration at $\vec{x}^{\star}$
+and exponential decay with distance.
+
+The oil density is evaluated at the centerpoint of each cell and stored as the initial oil density value.
+
+\section{Velocity field}
+
+The simplified ocean currents are given by this formula
+\[
+\vec{v}(\vec{x}, t) =
+\begin{pmatrix}
+y - 0.2x \\
+-x
+\end{pmatrix}.
+\]
+This vector field defines the direction and magnitude of oil flow at each cell. 
+The simulation supports parameter for time (t) in order to acoount for any change in the ocean currents,
+and this reduce the effectiveness of precomputated values for the simulation. 
+
+\section{Oil Exchange}
+
+Oil transport is modeled using a finite-volume formulation on a triangular mesh.
+Only triangle cells carry oil; line cells represent boundaries and have identically
+zero oil content.
+
+Let $u_i^n$ denote the oil density in triangle cell $i$ at time $t^n$ with area $A_i$.
+Let $\vec{\nu}_{i,\ell}$ be the scaled outward normal associated with edge $\ell$ of
+cell $i$, and let $\text{ngh}_\ell$ denote the neighboring cell across this edge.
+The velocity field is denoted by $\vec{v}(\vec{x},t)$. Note that the scaled normals can be precomputated
+for every cell edge before running the simulation. We store this in a dictionary in the cell
+using the neighbour object as its key. 
+
+For each edge, the numerical flux contribution is
+\[
+F_i^{(\text{ngh}_\ell,n)}
+=
+- \frac{\Delta t}{A_i}
+\, g\!\left(
+u_i^n,\,
+u_{\text{ngh}_\ell}^n,\,
+\vec{\nu}_{i,\ell},\,
+\vec{v}_{i,\ell}^n
+\right),
+\]
+where the edge velocity is defined as the midpoint average
+\[
+\vec{v}_{i,\ell}^n
+=
+\frac{1}{2}
+\left(
+\vec{v}(\vec{x}_i,t^n)
++
+\vec{v}(\vec{x}_{\text{ngh}_\ell},t^n)
+\right),
+\]
+and the upwind flux function $g$ is given by
+\[
+g(a,b,\vec{\nu},\vec{v}) =
+\begin{cases}
+a \, \langle \vec{v}, \vec{\nu} \rangle,
+& \text{if } \langle \vec{v}, \vec{\nu} \rangle > 0, \\
+b \, \langle \vec{v}, \vec{\nu} \rangle,
+& \text{otherwise}.
+\end{cases}
+\]
+
+The oil density update for cell $i$ is then
+\[
+up_i^{n}
+=
+\sum_{\ell=1}^{3}
+F_i^{(\text{ngh}_\ell,n)}
+\]
+
+After every cell has calculated their update value
+they will apply it to their own density
+\[
+u_i^{n+1} = u_i^{n} + up_i^{n}
+\]
+then the update value will be reset for the next timestep
+\[
+up_i^{n} = 0
+\]
+
+\section{Standard Simulation}
+
+For a time-dependent velocity field $\vec{v}(\vec{x},t)$, the above fluxes are
+recomputed at every time step. Given a total simulation time $t_{\text{end}}$ and
+$N$ time steps, the time step size is
+\[
+\Delta t = \frac{t_{\text{end}}}{N}.
+\]
+
+At each timestep $t^n = n\Delta t$, fluxes are evaluated for all triangle cells,
+and the change in oil densities are stored in a buffer variable. After all the cells has calculated
+their update value, they add 
+
+\section{Faucet Simulation}
+
+When the velocity field is time-independent, its time derivative is zero:
+\[
+\frac{\partial \vec{v}}{\partial t} = \ [0, 0].
+\]
+As a consequence, the velocity at each cell remains constant for all times. For a triangle
+cell \(I\) and one of its neighbors \(\text{ngh}\), the edge-averaged velocity is
+\[
+\vec{v}_{I,\text{ngh}} = \frac{1}{2}\Big(\vec{v}(\vec{x}_I) + \vec{v}(\vec{x}_{\text{ngh}})\Big),
+\]
+which is constant in time. Likewise, the scaled normal vector \(\vec{\nu}_{I,\text{ngh}}\) is
+precomputed and does not change.
+
+The standard upwind flux from cell \(I\) to neighbor \(\text{ngh}\) is
+\[
+\text{Flux}_{I \rightarrow \text{ngh}} =
+\begin{cases}
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \, u_I, & \text{if } \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle > 0,\\[2mm]
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \, u_{\text{ngh}}, & \text{otherwise.}
+\end{cases}
+\]
+
+Since the velocity field is constant, we can precompute the outgoing flow
+\[
+\phi_{I \rightarrow \text{ngh}} = \max\!\big(0, \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \big)
+\]
+for every cell-neighbor pair. The oil leaving cell \(I\) over a time step \(\Delta t\)
+is
+\[
+\Delta u_I = - \frac{\Delta t}{A_I} \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \, u_I,
+\]
+while the neighboring cell receives a corresponding contribution scaled by its area
+\[
+\Delta u_{\text{ngh}} = \frac{\Delta t}{A_{\text{ngh}}} \, \phi_{I \rightarrow \text{ngh}} \, u_I.
+\]
+
+By precomputing these coefficients for every cell-neighbor pair (the \emph{faucets}),
+the simulation reduces to a simple lookup at each time step:
+\[
+u_I^{n+1} = u_I^n - \sum_{\text{ngh}} C_{I \rightarrow \text{ngh}} \, u_I^n,
+\qquad
+u_{\text{ngh}}^{\,n+1} = u_{\text{ngh}}^n + C_{\text{ngh} \leftarrow I} \, u_I^n,
+\]
+where \(C_{I \rightarrow \text{ngh}} = \frac{\Delta t}{A_I} \phi_{I \rightarrow \text{ngh}}\)
+and \(C_{\text{ngh} \leftarrow I} = \frac{\Delta t}{A_{\text{ngh}}} \phi_{I \rightarrow \text{ngh}}\).
+
+This formulation guarantees conservation of the total oil amount, since all outgoing flux
+from a main cell is redistributed to its neighbors, scaled by the respective cell areas.
+
+
+
 
 
 \chapter{User guide}
