@@ -142,16 +142,14 @@ class Simulation:
                 )
 
     def _faucetStep(self):
-        for sourceCell, targetCell, flowCoefficient in self._faucets:
+        for sourceCell, targetCell, decrease, increase in self._faucets:
             # If the source is empty there will be no flow to neighbours
             if sourceCell.oilValue <= 0:
                 continue
-            # calculate the flow from A to B
-            flow = sourceCell.oilValue * flowCoefficient
 
             # Add the flow to the update
-            sourceCell.update = sourceCell.update - flow / sourceCell.area
-            targetCell.update = targetCell.update + flow / targetCell.area
+            sourceCell.update -= sourceCell.oilValue * decrease
+            targetCell.update += sourceCell.oilValue * increase
 
         for cell in self._mesh.cells:
             # Update the Oilvalues and reset the update for every cell
@@ -160,9 +158,9 @@ class Simulation:
     def _createFaucets(self, dt):
         """
         Creates an array of tuples called faucets.
-        A faucet is a structure that describes the from one cell to another.
-        In this task the vector field does not change with respect to time
-        and the vertecies in the mesh will never their position.
+        A faucet is a structure that describes flow from one cell to another.
+        In the given task the vector field does not change over time
+        and the vertecies in the mesh have a fixed position.
         We can therfore calculate a constant coefficient of flow between any
         cell neighbour pair. The simulation will then turn into a simple lookup
         of COF's, cell source, and cell target.
@@ -191,8 +189,9 @@ class Simulation:
                     continue  # Line Cells has flowValue = 0 by default
 
                 # Calculate flow out of the cell
-                flowCoefficient = dt * flowValue
-                faucet = (sourceCell, targetCell, flowCoefficient)
+                decrease = dt * flowValue / sourceCell.area
+                increase = dt * flowValue / targetCell.area
+                faucet = (sourceCell, targetCell, decrease, increase)
                 self._faucets.append(faucet)
 
     def _inFishingGrounds(self, cell: Cell) -> bool:
