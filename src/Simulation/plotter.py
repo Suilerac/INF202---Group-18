@@ -67,7 +67,7 @@ class Plotter:
         sm = plt.cm.ScalarMappable(cmap='viridis')
         sm.set_array(u)
         cbar_ax = plt.gca().inset_axes([1, 0, 0.05, 1])
-        plt.colorbar(sm, cax=cbar_ax, label='oilValue')
+        plt.colorbar(sm, cax=cbar_ax, label='oilDensity')
         plt.gca().add_collection(self._get_fishing_line_collection())
         plt.gca().add_collection(self._get_fishing_poly_collection())
         plt.gca().add_collection(self._get_normal_line_collection())
@@ -126,7 +126,7 @@ class Plotter:
         """
         Gets a matplotlib PolyCollection of
         patches outside the fishing grounds.
-        These patches follow viridis colormap based on the cell oilvalues
+        These patches follow viridis colormap based on the cell oil densities
         """
         coords = []
         values = []
@@ -135,7 +135,7 @@ class Plotter:
             coord = np.array([point[:2] for point in cell.coordinates])
             if not isinstance(cell, Line) and not cell.inFishingGround:
                 coords.append(coord)
-                values.append(cell.oilValue)
+                values.append(cell.oilDensity)
         polcol = PolyCollection(
             verts=coords,
             array=values,
@@ -167,7 +167,7 @@ class Plotter:
         """
         Gets a matplotlib LineCollection of
         lines outside the fishing grounds.
-        These lines follow viridis colormap based on the cell oilvalues
+        These lines follow viridis colormap based on the cell oil densities
         """
         coords = []
         values = []
@@ -176,7 +176,7 @@ class Plotter:
             coord = np.array([point[:2] for point in cell.coordinates])
             if isinstance(cell, Line) and not cell.inFishingGround:
                 coords.append(coord)
-                values.append(cell.oilValue)
+                values.append(cell.oilDensity)
         linecol = LineCollection(
             segments=coords,
             array=values,

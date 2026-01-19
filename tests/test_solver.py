@@ -23,9 +23,9 @@ def solver():
     (P2, 1),
     (P3, .000203468369010),
 ])
-def test_inital_oilValue(solver, coord, expected):
+def test_inital_oilDensity(solver, coord, expected):
     """
-    Tests that initial oil value is correct
+    Tests that initial oil density is correct
     """
     result = solver.initalOil(coord)
     assert (result) == pytest.approx(expected)
@@ -59,8 +59,8 @@ line1 = Line([Pc1, Pn1], None)           # Line)
 
 Cells = [triangle1, triangle2, line1]
 for cell in Cells:
-    cell.oilValue = S.initalOil(cell.centerPoint[:2])
-    cell.flow = S.vectorField(cell.centerPoint)
+    cell.oilDensity = S.initalOil(cell.centerPoint[:2])
+    cell.velocity = S.vectorField(cell.centerPoint)
 
 
 @pytest.mark.parametrize("CellA, CellB, expectedAvgVelocity", [
@@ -71,20 +71,22 @@ def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     """
     Tests that the average velocity calculation returns expected values
     """
-    result = solver._averageVelocity(CellA.flow, CellB.flow)
+    result = solver._averageVelocity(CellA.velocity, CellB.velocity)
     assert np.allclose(result, expectedAvgVelocity)
 
 
-@pytest.mark.parametrize("CellA, CellB, SharedCoords, expectedFlow", [
+@pytest.mark.parametrize("CellA, CellB, SharedCoords, expectedVelocity", [
     (triangle1, triangle2, [Pn1, Pn2], -.0999999999999999),
     (triangle1, line1, [Pc1, Pn1], 0),
 ])
-def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
+def test_velocity_value_triangle(
+    solver, CellA, CellB, SharedCoords, expectedVelocity
+):
     """
-    Test that flow calculation returns expected value
+    Test that velocity calculation returns expected value
     """
-    result = solver.calculateFlowValue(CellA, CellB, SharedCoords)
-    assert result == pytest.approx(expectedFlow)
+    result = solver.calculateVelocityValue(CellA, CellB, SharedCoords)
+    assert result == pytest.approx(expectedVelocity)
 
 
 @pytest.mark.parametrize("CellA, CellB, sharedCoords, expectedFlux", [
@@ -95,9 +97,9 @@ def test_Flux(solver, CellA, CellB, sharedCoords, expectedFlux):
     """
     Tests that flux calculation returns expected value
     """
-    CellA.flow = solver.vectorField(CellA.centerPoint)
-    CellB.flow = solver.vectorField(CellB.centerPoint)
-    avgVelocity = solver._averageVelocity(CellA.flow, CellB.flow)
+    CellA.velocity = solver.vectorField(CellA.centerPoint)
+    CellB.velocity = solver.vectorField(CellB.centerPoint)
+    avgVelocity = solver._averageVelocity(CellA.velocity, CellB.velocity)
     scaledNormal = CellA.calculateScaledNormal(sharedCoords)
 
     result = solver.flux(

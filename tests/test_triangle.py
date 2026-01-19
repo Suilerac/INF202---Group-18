@@ -34,14 +34,14 @@ def triangle():
     )
 
 
-def test_updateOilValue(triangle):
+def test_updateOilDensity(triangle):
     """
-    Tests that oilValue updates as expected
+    Tests that oilDensity updates as expected
     """
-    flowIn = 10
-    triangle.update = flowIn
-    triangle.updateOilValue()
-    assert triangle.oilValue == flowIn
+    velocityIn = 10
+    triangle.update = velocityIn
+    triangle.updateOilDensity()
+    assert triangle.oilDensity == velocityIn
 
 
 @pytest.mark.parametrize("expectedArea", [

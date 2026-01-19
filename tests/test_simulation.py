@@ -66,5 +66,5 @@ def test_compareResults(faucetSim, standardSim):
     # compare the final result in each cell
     zipped = zip(faucetSim._mesh.cells, standardSim._mesh.cells)
     for cellFaucet, cellStandard in zipped:
-        # oilvalues should be the same
-        assert cellFaucet.oilValue == pytest.approx(cellStandard.oilValue)
+        # oil densities should be the same
+        assert cellFaucet.oilDensity == pytest.approx(cellStandard.oilDensity)

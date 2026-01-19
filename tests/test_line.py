@@ -60,9 +60,9 @@ def coordniates_test3(line3, Line, expectedcoord):
     (0),])
 def test_oil_value1(line1, expectedOil):
     """
-    Tests that oilvalue is set correctly for line1
+    Tests that oil density is set correctly for line1
     """
-    result = line1.oilValue
+    result = line1.oilDensity
     assert result == expectedOil
 
 
@@ -70,9 +70,9 @@ def test_oil_value1(line1, expectedOil):
     (0),])
 def test_oil_value2(line2, expectedOil):
     """
-    Tests that oilvalue is set correctly for line2
+    Tests that oil density is set correctly for line2
     """
-    result = line2.oilValue
+    result = line2.oilDensity
     assert result == expectedOil
 
 
@@ -80,9 +80,9 @@ def test_oil_value2(line2, expectedOil):
     (0),])
 def test_oil_value3(line3, expectedOil):
     """
-    Tests that oilvalue is set correctly for line3
+    Tests that oil density is set correctly for line3
     """
-    result = line3.oilValue
+    result = line3.oilDensity
     assert result == expectedOil
 
 
@@ -102,7 +102,7 @@ def test_area_value2(line2, expectedArea):
     """
     Tests that area is set correctly for line2
     """
-    result = line2.oilValue
+    result = line2.area
     assert result == expectedArea
 
 
@@ -112,7 +112,7 @@ def test_area_value3(line3, expectedArea):
     """
     Tests that area is set correctly for line3
     """
-    result = line3.oilValue
+    result = line3.area
     assert result == expectedArea
 
 
@@ -147,37 +147,37 @@ def test_area_calculation3(line3, expectedArea):
     assert result == expectedArea
 
 
-@pytest.mark.parametrize("expectedFlow", [
+@pytest.mark.parametrize("expectedVelocity", [
     ([0, 0]),
 ])
-def test_flow_value1(line1, expectedFlow):
+def test_velocity_value1(line1, expectedVelocity):
     """
-    Tests that flow is set correctly for line1
+    Tests that velocity is set correctly for line1
     """
-    result = line1.flow
-    assert result == expectedFlow
+    result = line1.velocity
+    assert result == expectedVelocity
 
 
-@pytest.mark.parametrize("expectedFlow", [
+@pytest.mark.parametrize("expectedVelocity", [
     ([0, 0]),
 ])
-def test_flow_value2(line2, expectedFlow):
+def test_velocity_value2(line2, expectedVelocity):
     """
-    Tests that flow is set correctly for line2
+    Tests that velocity is set correctly for line2
     """
-    result = line2.flow
-    assert result == expectedFlow
+    result = line2.velocity
+    assert result == expectedVelocity
 
 
-@pytest.mark.parametrize("expectedFlow", [
+@pytest.mark.parametrize("expectedVelocity", [
     ([0, 0]),
 ])
-def test_flow_value3(line3, expectedFlow):
+def test_velocity_value3(line3, expectedVelocity):
     """
-    Tests that flow is set correctly for line3
+    Tests that velocity is set correctly for line3
     """
-    result = line3.flow
-    assert result == expectedFlow
+    result = line3.velocity
+    assert result == expectedVelocity
 
 
 @pytest.mark.parametrize("expectedString", [
@@ -212,11 +212,11 @@ def test_string_conversion3(line3, expectedString):
     assert result == expectedString
 
 
-@pytest.mark.parametrize("oilassert, expectedOilValue", [
+@pytest.mark.parametrize("oilassert, expectedOilDensity", [
     (4, 4),])
-def test_oil_setter(line3, oilassert, expectedOilValue):
+def test_oil_setter(line3, oilassert, expectedOilDensity):
     """
     Tests that the oil setter works
     """
-    line3.oilValue = oilassert
-    assert line3.oilValue == expectedOilValue
+    line3.oilDensity = oilassert
+    assert line3.oilDensity == expectedOilDensity
