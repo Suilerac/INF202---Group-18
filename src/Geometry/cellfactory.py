@@ -5,6 +5,9 @@ import numpy as np
 
 class CellFactory:
     def __init__(self):
+        """
+        A factory class for cell creation
+        """
         self._types = {
             "line": Line,
             "triangle": Triangle

@@ -21,6 +21,9 @@ coords3 = [
 
 @pytest.fixture
 def triangle():
+    """
+    Returns triangle object
+    """
     return Triangle(
         np.array([
             [2, 0, 0],
@@ -32,6 +35,9 @@ def triangle():
 
 
 def test_updateOilValue(triangle):
+    """
+    Tests that oilValue updates as expected
+    """
     flowIn = 10
     triangle.update = flowIn
     triangle.updateOilValue()
@@ -42,6 +48,9 @@ def test_updateOilValue(triangle):
     (1.0),
 ])
 def test_area(triangle, expectedArea):
+    """
+    Tests that area calculation returns expected value
+    """
     assert triangle.area == expectedArea
 
 
@@ -49,6 +58,9 @@ def test_area(triangle, expectedArea):
     (np.array([5/3, 1/3, 0])),
 ])
 def test_centerPoint(triangle, expectedCenterPoint):
+    """
+    Tests that centerpoint calculation returns expected value
+    """
     assert np.allclose(triangle.centerPoint, expectedCenterPoint)
 
 
@@ -58,6 +70,9 @@ def test_centerPoint(triangle, expectedCenterPoint):
     (coords3, np.array([2, 0, 0])),
 ])
 def test_edgeVectors(triangle, edgeCoords, expectedEdgeVectors):
+    """
+    Tests that edge vector calculation returns expected value
+    """
     result = triangle._calculateEdgeVector(edgeCoords)
     assert np.allclose(result, expectedEdgeVectors)
 
@@ -68,6 +83,9 @@ def test_edgeVectors(triangle, edgeCoords, expectedEdgeVectors):
     (coords3, 2),
 ])
 def test_edgeLength(triangle, edgeCoords, expectedEdgeLength):
+    """
+    Tests that edge length calculation returns expected value
+    """
     edgeVector = triangle._calculateEdgeVector(edgeCoords)
     result = triangle._calculateEdgeLength(edgeVector)
     assert result == expectedEdgeLength
@@ -79,6 +97,9 @@ def test_edgeLength(triangle, edgeCoords, expectedEdgeLength):
     (coords3, np.array([1.0, 0, 0])),
 ])
 def test_midPoints(triangle, edgeCoords, expectedMidpoints):
+    """
+    Tests that midpoint calculation returns expected value
+    """
     edgeVector = triangle._calculateEdgeVector(edgeCoords)
     result = triangle._calculateEdgeMidPoint(edgeCoords, edgeVector)
     assert np.allclose(result, expectedMidpoints)
@@ -90,6 +111,9 @@ def test_midPoints(triangle, edgeCoords, expectedMidpoints):
     (coords3, np.array([0, -1, 0])),
 ])
 def test_normals(triangle, edgeCoords, expectedNormals):
+    """
+    Tests that normal calculation returns expected value
+    """
     result = triangle._calculateNormal(edgeCoords)
     assert np.allclose(result, expectedNormals)
 
@@ -100,5 +124,8 @@ def test_normals(triangle, edgeCoords, expectedNormals):
     (coords3, np.array([0, -2])),
 ])
 def test_scaledNormals(triangle, edgeCoords, expectedScaledNormals):
+    """
+    Tests that scaled normal calculation returns expected value
+    """
     result = triangle.calculateScaledNormal(edgeCoords)
     assert np.allclose(result, expectedScaledNormals)

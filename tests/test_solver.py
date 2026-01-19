@@ -12,6 +12,9 @@ P3 = np.array([.2, .2])
 
 @pytest.fixture
 def solver():
+    """
+    Returns a solver object
+    """
     return Solver()
 
 
@@ -21,6 +24,9 @@ def solver():
     (P3, .000203468369010),
 ])
 def test_inital_oilValue(solver, coord, expected):
+    """
+    Tests that initial oil value is correct
+    """
     result = solver.initalOil(coord)
     assert (result) == pytest.approx(expected)
 
@@ -31,6 +37,9 @@ def test_inital_oilValue(solver, coord, expected):
     (P3, np.array([.16, -.2])),
 ])
 def test_vector_field(solver, coord, expectedVector):
+    """
+    Tests that vector field returns expected values
+    """
     result = solver.vectorField(coord)
     assert np.allclose(result, expectedVector)
 
@@ -59,6 +68,9 @@ for cell in Cells:
     (triangle1, line1, np.array([0.383333, -0.1666667]))
 ])
 def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
+    """
+    Tests that the average velocity calculation returns expected values
+    """
     result = solver._averageVelocity(CellA.flow, CellB.flow)
     assert np.allclose(result, expectedAvgVelocity)
 
@@ -68,6 +80,9 @@ def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     (triangle1, line1, [Pc1, Pn1], 0),
 ])
 def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
+    """
+    Test that flow calculation returns expected value
+    """
     result = solver.calculateFlowValue(CellA, CellB, SharedCoords)
     assert result == pytest.approx(expectedFlow)
 
@@ -77,6 +92,9 @@ def test_Flow_value_triangle(solver, CellA, CellB, SharedCoords, expectedFlow):
     (triangle1, line1, [Pc1, Pn1], 0),
 ])
 def test_Flux(solver, CellA, CellB, sharedCoords, expectedFlux):
+    """
+    Tests that flux calculation returns expected value
+    """
     CellA.flow = solver.vectorField(CellA.centerPoint)
     CellB.flow = solver.vectorField(CellB.centerPoint)
     avgVelocity = solver._averageVelocity(CellA.flow, CellB.flow)
