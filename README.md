@@ -35,20 +35,22 @@ It will guide you from installation to actually simulating oil trajectory.
     border: none;
     padding: 16px;
     border-radius: 6px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.5;
     width: 100%;
     max-width: 600px;
     resize: none;
     margin: 8px 0;
-"># create the virtual enviroment
+    tab-size: 4;
+"># create the virtual environment
 python -m venv venv
-# activate the local venv
+# activate the local venv  
 source venv/bin/activate
 # install dependencies for simulation
 pip install -r requirements.txt
 </textarea>
+
 
 
 4. Download and install 3rd-party dependencies
