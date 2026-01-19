@@ -25,7 +25,7 @@ class Simulation:
         # Object creations
         self._mesh = Mesh(self._toml.meshName)
         self._simName = configFile.split('.')[0].split('/')[-1]
-        self._imagePath = f"temp/{self._simName}/img"
+        self._imagePath = f"img/{self._simName}"
         self._listPath = f"temp/{self._simName}"
         self._plot = Plotter(
             self._mesh,

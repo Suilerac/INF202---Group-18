@@ -116,10 +116,9 @@ class Plotter:
         """
         # Clean up the temporary images list
         os.remove(self._list_path)
-        images = os.listdir(self._image_dir)  # Get all images in img folder
-        for img in images:
+        images = sorted(os.listdir(self._image_dir))  # Get all images
+        for img in images[:-1]:  # Keep the last picture per the task desc
             os.remove(os.path.join(self._image_dir, img))
-        os.rmdir(self._image_dir)
         os.rmdir(self._list_dir)
 
     def _get_normal_poly_collection(self):
