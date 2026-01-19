@@ -75,7 +75,7 @@ fishing grounds and to determine appropriate measures to protect the local fish 
 
 An external group of researchers has provided a simplified two-dimensional flow field that is used
 to approximate ocean currents in the region. In addition there is provided a two-dimensional map
-of Bay City is from the file  \texttt{bay.msh}. The data includes the coastline and ocean for the region.
+of Bay City from the file  \texttt{bay.msh}. The data includes the coastline and ocean for the region.
 
 The spatial domain is described using Cartesian coordinates $(x,y)$, where the point
 $(0,0)^{\top}$ corresponds to the lower-left corner of the map.
@@ -190,7 +190,7 @@ $N$ time steps, the time step size is
 
 At each timestep $t^n = n\Delta t$, fluxes are evaluated for all triangle cells,
 and the change in oil densities are stored in a buffer variable. After all the cells has calculated
-their update value, they add 
+their update value, they add it to their stored oil density
 
 \section{Faucet Simulation}
 
@@ -291,6 +291,12 @@ the entire computational domain.
 
 
 \section{UML-diagram}
+
+\begin{figure}[H]
+    \includegraphics[width=1.2\textwidth]{Figures/UML-diagram-final.png}
+    \caption{Final UML diagram}
+\end{figure}
+
 
 \chapter{Agile development}
 Agile development is an iterative approach to software creation that emphasizes flexibility and
