@@ -199,10 +199,11 @@ class Simulation:
         center2d = cell.centerPoint[:2]
         x_range = self._toml.borders[0]
         y_range = self._toml.borders[1]
-        return (
+        cell.inFishingGround = (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
             )
+        return cell.inFishingGround
 
     def _initialCellOil(self):
         for cell in self._mesh.cells:
