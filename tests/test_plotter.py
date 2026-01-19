@@ -82,6 +82,7 @@ def test_cleanup(plotter):
     """
     plotter.plot_current_values()
     plotter.save_current_plot("test.png")
+    plotter.save_current_plot("ztest.png")  # Cleanup keeps the last image
     plotter.video_maker()
     plotter.clean_up()
     assert not os.path.isfile(f"{plotter.image_dir}/test.png")

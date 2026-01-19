@@ -66,5 +66,5 @@ class TomlParser:
 
         # [IO]
         io = config.get("IO", {})
-        self._logName = io.get("logName", "log")
-        self._writeFrequency = io.get("writeFrequency", False)
+        self._logName = io.get("logName", "logfile")
+        self._writeFrequency = io.get("writeFrequency", 0)
