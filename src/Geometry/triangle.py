@@ -8,8 +8,8 @@ class Triangle(Cell):
     """
     def __init__(self, coordinates, pointIDs):
         """
-        :param self: coordinates as an np.array for x and y value,
-        and pointIDs that make up the triangle
+        :param coordinates: coordinates as an np.array for x and y value
+        :param pointIDs: pointIDs that make up the triangle
         """
         super().__init__(coordinates, pointIDs)
 

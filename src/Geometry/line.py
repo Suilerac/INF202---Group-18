@@ -10,8 +10,8 @@ class Line(Cell):
     """
     def __init__(self, coordinates, pointIDs):
         """
-        :param self: coordinates as an np.array for x and y value,
-        and pointIDs that make up the line
+        :param coordinates: coordinates as an np.array for x and y value,
+        :param pointIDs: PointIDs that make up the line
         """
         super().__init__(coordinates, pointIDs)
         self._flow = [0, 0]
