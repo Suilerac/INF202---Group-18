@@ -113,7 +113,7 @@ This vector field defines the direction and magnitude of oil flow at each cell.
 The simulation supports parameter for time (t) in order to acoount for any change in the ocean currents,
 and this reduce the effectiveness of precomputated values for the simulation. 
 
-\section{Oil Exchange}
+\section{Oil transfer}
 
 Oil transport is modeled using a finite-volume formulation on a triangular mesh.
 Only triangle cells carry oil; line cells represent boundaries and have identically
@@ -193,68 +193,73 @@ their update value, they add
 
 \section{Faucet Simulation}
 
-When the velocity field is time-independent, its time derivative is zero:
+When the velocity field is time-independent, its time derivative vanishes,
 \[
-\frac{\partial \vec{v}}{\partial t} = \ [0, 0].
+\frac{\partial \vec{v}}{\partial t} = [0,0],
 \]
-As a consequence, the velocity at each cell remains constant for all times. For a triangle
-cell \(I\) and one of its neighbors \(\text{ngh}\), the edge-averaged velocity is
-\[
-\vec{v}_{I,\text{ngh}} = \frac{1}{2}\Big(\vec{v}(\vec{x}_I) + \vec{v}(\vec{x}_{\text{ngh}})\Big),
-\]
-which is constant in time. Likewise, the scaled normal vector \(\vec{\nu}_{I,\text{ngh}}\) is
-precomputed and does not change.
+and the velocity at each cell remains constant for all times.
+Consequently, all geometric and kinematic quantities associated with a cell
+interface can be precomputed before the simulation starts.
 
-The standard flux from cell \(I\) to neighbor \(\text{ngh}\) is
+For a triangle cell \(I\) and one of its neighboring cells \(\text{ngh}\),
+the edge-averaged velocity is defined as
 \[
-\text{Flux}_{I \rightarrow \text{ngh}} =
-\begin{cases}
-\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \, u_I, & \text{if } \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle > 0,\\[2mm]
-\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \, u_{\text{ngh}}, & \text{otherwise.}
-\end{cases}
+\vec{v}_{I,\text{ngh}}
+= \frac{1}{2}\Big( \vec{v}(\vec{x}_I) + \vec{v}(\vec{x}_{\text{ngh}}) \Big),
 \]
+which is constant in time.  
+The scaled outward normal vector \(\vec{\nu}_{I,\text{ngh}}\) associated with
+the common edge is also precomputed and fixed.
 
-However if we only consider the outgoing flux then
+The flux direction across the edge is determined by
 \[
-\phi_{I \rightarrow \text{ngh}} = \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle \cdot u_I
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle.
 \]
-for every cell-neighbor pair. The oil leaving cell \(I\) over a time step \(\Delta t\)
-is
-\[
-\Delta u_I = 
-- \frac{\Delta t}{A_I} \sum_{\text{ngh}} (\phi_{I \rightarrow \text{ngh}} \ \cdot u_I)
-= u_I \cdot -\frac{\Delta t}{A_I} \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \,
-\]
+Only edges for which this quantity is positive are considered, corresponding
+to oil flowing out of cell \(I\).
 
-while the neighboring cell receives a corresponding contribution scaled by its area
-\[
-\Delta u_{\text{ngh}} = u_I \cdot \frac{\Delta t}{A_{\text{ngh}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} \
-\]
+\subsection*{Faucets}
 
-Since u is the only time dependent variable we can factor out two constants from the formulas
+For each such outgoing edge, a \emph{faucet} from cell \(I\) to cell
+\(\text{ngh}\) is defined.  
+Each faucet is characterized by two constant coefficients,
 \[
-Flow_{I \rightarrow \text{ngh}} = \frac{\Delta t}{A_{\text{I}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} 
-\]
-\[
-Flow_{ngh \rightarrow \text{I}} = \frac{\Delta t}{A_{\text{ngh}}} \, \sum_{\text{ngh}} \phi_{I \rightarrow \text{ngh}} 
-\]
-By precomputing these coefficients for every cell-neighbor pair (the \emph{faucets}),
-the simulation reduces to a simple lookup at each time step:
-\[
-u_I^{n+1} = u_I^n - Flow_{ngh \rightarrow \text{I}} \cdot  u_I^n,
+\text{flow}_{I\to\text{ngh}}
+= \frac{\Delta t}{A_I}
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle,
 \qquad
+\text{flow}_{\text{ngh}\to I}
+= \frac{\Delta t}{A_{\text{ngh}}}
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle,
+\]
+where \(A_I\) and \(A_{\text{ngh}}\) denote the areas of the source and
+neighboring cells, respectively.
+
+These coefficients remain constant throughout the simulation and are
+precomputed once during initialization.
+
+\subsection*{Time stepping}
+
+During a single time step, the oil density update induced by one faucet
+\((I \rightarrow \text{ngh})\) is given by
+\[
+u_I^{n+1} = u_I^n - u_I^n\,\text{flow}_{I\to\text{ngh}},
 \]
 \[
-u_{\text{ngh}}^{\,n+1} = u_I^n + Flow_{ngh \rightarrow \text{I}} \cdot  u_I^n,
+u_{\text{ngh}}^{n+1} = u_{\text{ngh}}^n + u_I^n\,\text{flow}_{\text{ngh}\to I}.
 \]
 
-This formulation guarantees conservation of the total oil amount, since all outgoing flux
-from a main cell is redistributed to its neighbors and is scaled by their areas.
+The total update of a cell is obtained by applying all faucets connected to it.
+After all faucet contributions have been accumulated, the oil densities of all
+cells are updated simultaneously.
 
+\subsection*{Conservation}
 
-
-
-
+This formulation guarantees conservation of the total oil amount.
+For each faucet, the oil removed from the source cell is exactly redistributed
+to the neighboring cell, with changes scaled by the corresponding cell areas.
+Since conservation holds locally for every faucet, it also holds globally over
+the entire computational domain.
 
 \chapter{User guide}
 
