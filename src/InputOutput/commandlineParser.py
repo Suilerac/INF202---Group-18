@@ -43,9 +43,16 @@ class CommandlineParser:
         # Error handling
         if len(self._configs) == 0:
             raise FileExistsError("Found no files as specified")
+        # This obviously doesn't cover all possible cases, but if someone
+        # wants to overwrite system32 or something, be my guest
+        dontOverwrite = ["src", "tests", "examples", "temp", "configs"]
         for config in self._configs:
             if not os.path.isfile(config):
                 raise FileNotFoundError(f"Found no file {config}")
+            file = config.split('/')[-1]
+            name = file.split('.')[0]
+            if name in dontOverwrite:
+                raise PermissionError(f"{config} can't overwrite {name}")
 
     @property
     def configs(self):
