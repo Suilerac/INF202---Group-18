@@ -14,7 +14,7 @@ class Line(Cell):
         :param pointIDs: PointIDs that make up the line
         """
         super().__init__(coordinates, pointIDs)
-        self._flow = [0, 0]
+        self._velocity = [0, 0]
 
     def _calculateArea(self):
         return 0

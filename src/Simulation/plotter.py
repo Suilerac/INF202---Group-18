@@ -67,31 +67,11 @@ class Plotter:
         sm = plt.cm.ScalarMappable(cmap='viridis')
         sm.set_array(u)
         cbar_ax = plt.gca().inset_axes([1, 0, 0.05, 1])
-        plt.colorbar(sm, cax=cbar_ax, label='oilValue')
-        line_coords_normal = []
-        line_values = []
-        poly_coords_normal = []
-        poly_values = []
-        for cell in self._msh.cells:
-            # Make the points two dimensional
-            coord = np.array([point[:2] for point in cell.coordinates])
-            if isinstance(cell, Line):
-                line_coords_normal.append(coord)
-                line_values.append(cell.oilValue)
-            else:
-                poly_coords_normal.append(coord)
-                poly_values.append(cell.oilValue)
-        polcol_normal = PolyCollection(
-            verts=poly_coords_normal,
-            array=poly_values,
-            cmap='viridis',
-            alpha=0.9
-        )
-        lincol_normal = LineCollection(
-            segments=line_coords_normal, linewidths=line_values
-            )
-        plt.gca().add_collection(polcol_normal)
-        plt.gca().add_collection(lincol_normal)
+        plt.colorbar(sm, cax=cbar_ax, label='oilDensity')
+        plt.gca().add_collection(self._get_fishing_line_collection())
+        plt.gca().add_collection(self._get_fishing_poly_collection())
+        plt.gca().add_collection(self._get_normal_line_collection())
+        plt.gca().add_collection(self._get_normal_poly_collection())
         plt.xlabel('x-axis')
         plt.ylabel('y-axis')
         plt.xlim(self._x_range[0], self._x_range[1])
@@ -136,11 +116,92 @@ class Plotter:
         """
         # Clean up the temporary images list
         os.remove(self._list_path)
-        images = os.listdir(self._image_dir)  # Get all images in img folder
-        for img in images:
+        images = sorted(os.listdir(self._image_dir))  # Get all images
+        for img in images[:-1]:  # Keep the last picture per the task desc
             os.remove(os.path.join(self._image_dir, img))
-        os.rmdir(self._image_dir)
         os.rmdir(self._list_dir)
+
+    def _get_normal_poly_collection(self):
+        """
+        Gets a matplotlib PolyCollection of
+        patches outside the fishing grounds.
+        These patches follow viridis colormap based on the cell oil densities
+        """
+        coords = []
+        values = []
+        for cell in self._msh.cells:
+            # Make the points two dimensional
+            coord = np.array([point[:2] for point in cell.coordinates])
+            if not isinstance(cell, Line) and not cell.inFishingGround:
+                coords.append(coord)
+                values.append(cell.oilDensity)
+        polcol = PolyCollection(
+            verts=coords,
+            array=values,
+            cmap='viridis',
+            alpha=0.9
+        )
+        return polcol
+
+    def _get_fishing_poly_collection(self):
+        """
+        Gets a matplotlib PolyCollection of
+        patches inside the fishing grounds.
+        These patches are all cyan.
+        """
+        coords = []
+        for cell in self._msh.cells:
+            # Make the points two dimensional
+            coord = np.array([point[:2] for point in cell.coordinates])
+            if not isinstance(cell, Line) and cell.inFishingGround:
+                coords.append(coord)
+        polcol = PolyCollection(
+            verts=coords,
+            color='cyan',
+            alpha=0.9
+        )
+        return polcol
+
+    def _get_normal_line_collection(self):
+        """
+        Gets a matplotlib LineCollection of
+        lines outside the fishing grounds.
+        These lines follow viridis colormap based on the cell oil densities
+        """
+        coords = []
+        values = []
+        for cell in self._msh.cells:
+            # Make the points two dimensional
+            coord = np.array([point[:2] for point in cell.coordinates])
+            if isinstance(cell, Line) and not cell.inFishingGround:
+                coords.append(coord)
+                values.append(cell.oilDensity)
+        linecol = LineCollection(
+            segments=coords,
+            array=values,
+            cmap='viridis',
+            alpha=0.9
+        )
+        return linecol
+
+    def _get_fishing_line_collection(self):
+        """
+        Gets a matplotlib LineCollection of
+        lines inside the fishing grounds.
+        These lines are all cyan.
+        """
+        coords = []
+        for cell in self._msh.cells:
+            # Make the points two dimensional
+            coord = np.array([point[:2] for point in cell.coordinates])
+            if isinstance(cell, Line) and cell.inFishingGround:
+                coords.append(coord)
+        linecol = LineCollection(
+            segments=coords,
+            color='cyan',
+            alpha=0.9
+        )
+        return linecol
 
     def _write_temp_images(self, frame_duration: float = 1):
         """

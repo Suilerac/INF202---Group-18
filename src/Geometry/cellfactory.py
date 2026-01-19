@@ -4,6 +4,15 @@ import numpy as np
 
 
 class CellFactory:
+    def __init__(self):
+        """
+        A factory class for cell creation
+        """
+        self._types = {
+            "line": Line,
+            "triangle": Triangle
+            }
+
     def createCell(self, type, cell, points):
         """
         A function for creating a list of new Cell objects based
@@ -16,12 +25,12 @@ class CellFactory:
         cells = []
         data = cell.data
         coordinates = [points[i] for i in data]
-        types = {
-            "line": Line,
-            "triangle": Triangle
-        }
         for i in range(len(coordinates)):
             finalObjectCoords = np.array(coordinates[i])
             pointIDs = data[i]
-            cells.append(types[type](finalObjectCoords, pointIDs))
+            cells.append(self._types[type](finalObjectCoords, pointIDs))
         return cells
+
+    @property
+    def types(self):
+        return self._types

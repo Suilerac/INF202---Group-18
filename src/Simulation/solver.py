@@ -16,8 +16,8 @@ class Solver:
         :param position: A numpy array with two elements (x, y)
         """
         distance = la.norm(position - self._initialOilSpatialPoint)
-        oilValue = math.exp(- (distance * distance / 0.01))
-        return oilValue
+        oilDensity = math.exp(- (distance * distance / 0.01))
+        return oilDensity
 
     def vectorField(self, position, t=0):
         """
@@ -51,11 +51,12 @@ class Solver:
     def _averageVelocity(self, velocityA, velocityB):
         return 0.5 * (velocityA + velocityB)
 
-    def calculateFlowValue(self, cellA, cellB, sharedCoordinates):
+    def calculateVelocityValue(self, cellA, cellB, sharedCoordinates):
         if isinstance(cellB, Line):
             return 0
         """
-        Calculates a scalar value that gives the flow from cell A to cell B.
+        Calculates a scalar value that gives
+        the velocity from cell A to cell B.
         This is calculated from the dot product of the average velocity
         between cellA and cellB and the scaled normal pointing
         from cellA to cellB.
@@ -68,7 +69,7 @@ class Solver:
 
         # Since the vector field is constant at a given position.
         # Therefore the average velocity between cells is constant as well
-        averageVelocity = self._averageVelocity(cellA.flow, cellB.flow)
+        averageVelocity = self._averageVelocity(cellA.velocity, cellB.velocity)
 
         # The scaled normals of the shared edge between cellA and cellB
         # are parallell to each other, with opposite direction.
@@ -87,6 +88,6 @@ class Solver:
 
         dot = np.dot(averageVelocity, scaledNormal)
         if (0 <= dot):
-            return mainCell.oilValue * dot
+            return mainCell.oilDensity * dot
         else:
-            return nghCell.oilValue * dot
+            return nghCell.oilDensity * dot
