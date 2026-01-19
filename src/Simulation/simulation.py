@@ -93,7 +93,7 @@ class Simulation:
             # after simulation is over, log the final result
             fishOil = self._countOilInFishingGrounds()
             self._log.info(
-                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
 
     def _standardStep(self, dt, t):
@@ -118,11 +118,11 @@ class Simulation:
                 cell.update -= dt * flux / cell.area
 
         for cell in self._mesh.cells:
-            cell.updateOilValue()
+            cell.updateOilDensity()
 
     def _runFaucetOptimisedSimulation(self, createVideo):
         dt = self._toml.tEnd / self._toml.nSteps
-        self._initialCellFlow()
+        self._initialCellVelocity()
         self._createFaucets(dt)
         stepCount = 0
 
@@ -138,78 +138,81 @@ class Simulation:
             fishOil = self._countOilInFishingGrounds()
             t = dt * stepCount
             self._log.info(
-                f"Amount of oil in fishing grounds at t={t:.2f}: {fishOil:.2f}"
+                f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
 
     def _faucetStep(self):
-        for sourceCell, targetCell, decrease, increase in self._faucets:
-            # If the source is empty there will be no flow to neighbours
-            if sourceCell.oilValue <= 0:
+        for sourceCell, targetCell, velocityCoefficient in self._faucets:
+            # If the source is empty there will be no velocity to neighbours
+            if sourceCell.oilDensity <= 0:
                 continue
+            # calculate the velocity from A to B
+            velocity = sourceCell.oilDensity * velocityCoefficient
 
-            # Add the flow to the update
-            sourceCell.update -= sourceCell.oilValue * decrease
-            targetCell.update += sourceCell.oilValue * increase
+            # Add the velocity to the update
+            sourceCell.update = sourceCell.update - velocity / sourceCell.area
+            targetCell.update = targetCell.update + velocity / targetCell.area
 
         for cell in self._mesh.cells:
-            # Update the Oilvalues and reset the update for every cell
-            cell.updateOilValue()
+            # Update the oil densitiess and reset the update for every cell
+            cell.updateOilDensity()
 
     def _createFaucets(self, dt):
         """
         Creates an array of tuples called faucets.
-        A faucet is a structure that describes flow from one cell to another.
-        In the given task the vector field does not change over time
-        and the vertecies in the mesh have a fixed position.
-        We can therfore calculate a constant coefficient of flow between any
+        A faucet is a structure that describes the from one cell to another.
+        In this task the vector field does not change with respect to time
+        and the vertecies in the mesh will never their position.
+        We can therfore calculate a constant
+        coefficient of velocity between any
         cell neighbour pair. The simulation will then turn into a simple lookup
         of COF's, cell source, and cell target.
         """
         self._faucets = []
         for sourceCell in self._mesh.cells:
-            # We only consider oil flowing out from a main cell
+            # We only consider oil velocitying out from a main cell
             # and into its neigbours
 
-            # there should not be any flow related to a line cell
+            # there should not be any velocity related to a line cell
             if isinstance(sourceCell, Line):
                 continue
 
-            # calculate the flow into each neighbour cell
+            # calculate the velocity into each neighbour cell
             for targetCell, scaledNormal in sourceCell.neighbours.items():
                 if isinstance(targetCell, Line):
                     continue
-                # We only consider the flow from the main cell
+                # We only consider the velocity from the main cell
                 # to the neighbour. Not the oil absorbed
                 velocityAVG = self._solver._averageVelocity(
-                    targetCell.flow,
-                    sourceCell.flow,
+                    targetCell.velocity,
+                    sourceCell.velocity,
                 )
-                flowValue = np.dot(velocityAVG, scaledNormal)
-                if (flowValue <= 0):
-                    continue  # Line Cells has flowValue = 0 by default
+                velocityValue = np.dot(velocityAVG, scaledNormal)
+                if (velocityValue <= 0):
+                    continue  # Line Cells has velocityValue = 0 by default
 
-                # Calculate flow out of the cell
-                decrease = dt * flowValue / sourceCell.area
-                increase = dt * flowValue / targetCell.area
-                faucet = (sourceCell, targetCell, decrease, increase)
+                # Calculate velocity out of the cell
+                velocityCoefficient = dt * velocityValue
+                faucet = (sourceCell, targetCell, velocityCoefficient)
                 self._faucets.append(faucet)
 
     def _inFishingGrounds(self, cell: Cell) -> bool:
         center2d = cell.centerPoint[:2]
         x_range = self._toml.borders[0]
         y_range = self._toml.borders[1]
-        return (
+        cell.inFishingGround = (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
             )
+        return cell.inFishingGround
 
     def _initialCellOil(self):
         for cell in self._mesh.cells:
-            cell.oilValue = self._solver.initalOil(cell.centerPoint[:-1])
+            cell.oilDensity = self._solver.initalOil(cell.centerPoint[:-1])
 
-    def _initialCellFlow(self):
+    def _initialCellVelocity(self):
         for cell in self._mesh.cells:
-            cell.flow = self._solver.vectorField(cell.centerPoint[:-1])
+            cell.velocity = self._solver.vectorField(cell.centerPoint[:-1])
 
     def _initiateFishingCells(self):
         return [
@@ -217,7 +220,7 @@ class Simulation:
             ]
 
     def _countOilInFishingGrounds(self):
-        return sum(cell.oilValue for cell in self._fishingCells)
+        return sum(cell.oilDensity for cell in self._fishingCells)
 
     def countAllOil(self):
         """
@@ -225,7 +228,7 @@ class Simulation:
         """
         totalOil = 0
         for cell in self._mesh.cells:
-            totalOil += cell.oilValue * cell.area
+            totalOil += cell.oilDensity * cell.area
         return totalOil
 
     def _savePicture(self):

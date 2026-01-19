@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-la = np.linalg
+import numpy.linalg as la
 
 
 class Cell(ABC):
@@ -14,11 +14,11 @@ class Cell(ABC):
         in the form of numpy arrays
         """
         self._pointIDs = pointIDs
-        self._oilValue = 0
+        self._oilDensity = 0
         self._update = 0
 
         self._area = 0
-        self._flow = None
+        self._velocity = None
         self._neighbours = {}
         self._coordinates = coordinates
         self._centerPoint = sum(self._coordinates) / len(self._coordinates)
@@ -46,8 +46,8 @@ class Cell(ABC):
         cellStr += ']'
         return cellStr
 
-    def updateOilValue(self):
-        self._oilValue += self._update
+    def updateOilDensity(self):
+        self._oilDensity += self._update
         self._update = 0
 
     def addNeighbour(self, ngh, scaledNormal):
@@ -140,12 +140,12 @@ class Cell(ABC):
         return self._area
 
     @property
-    def oilValue(self):
-        return self._oilValue
+    def oilDensity(self):
+        return self._oilDensity
 
     @property
-    def flow(self):
-        return self._flow
+    def velocity(self):
+        return self._velocity
 
     @property
     def pointIDs(self):
@@ -163,13 +163,13 @@ class Cell(ABC):
     def update(self, value):
         self._update = value
 
-    @oilValue.setter
-    def oilValue(self, value):
-        self._oilValue = value
+    @oilDensity.setter
+    def oilDensity(self, value):
+        self._oilDensity = value
 
-    @flow.setter
-    def flow(self, value):
-        self._flow = value
+    @velocity.setter
+    def velocity(self, value):
+        self._velocity = value
 
     @inFishingGround.setter
     def inFishingGround(self, value: bool):
