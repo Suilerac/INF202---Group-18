@@ -56,13 +56,13 @@ class TomlParser:
             config = toml.load(file)
         # [settings]
         settings = config.get("settings", {})
-        self._nSteps = settings.get("nSteps", 500)
-        self._tEnd = settings.get("tEnd", 0.5)
+        self._nSteps = settings.get("nSteps")
+        self._tEnd = settings.get("tEnd")
 
         # [geometry]
         geometry = config.get("geometry", {})
-        self._meshName = geometry.get("meshName", "meshes/bay.msh")
-        self._borders = geometry.get("borders", [[0, 0.45], 0, 0.2])
+        self._meshName = geometry.get("meshName")
+        self._borders = geometry.get("borders")
 
         # [IO]
         io = config.get("IO", {})
