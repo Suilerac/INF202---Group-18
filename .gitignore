@@ -273,3 +273,4 @@ images.txt
 log
 configs/*
 logs/*
+.vscode/*
