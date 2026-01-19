@@ -13,4 +13,5 @@ Homepage = "https://github.com/Suilerac/INF202---Group-18"
 Issues = "https://github.com/Suilerac/INF202---Group-18/issues"
 
 [tool.setuptools.data-files]
-"tests" = ["tests/*"]
+"tests" = ["tests/*.py"]
+"examples" = ["examples/*"]
