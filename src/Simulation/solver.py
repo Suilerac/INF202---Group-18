@@ -1,7 +1,7 @@
 import math
 import numpy as np
+import numpy.linalg as la
 from Geometry.line import Line
-la = np.linalg
 
 
 class Solver:
