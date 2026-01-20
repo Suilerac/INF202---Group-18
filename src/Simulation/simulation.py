@@ -87,7 +87,7 @@ class Simulation:
             self._runFaucetOptimisedSimulation(createVideo)
 
         # Save final plot
-        self._plot.plot_current_values
+        self._plot.plot_current_values()
         self._plot.save_current_plot(self._simName, self._simName)
 
         if createVideo:
