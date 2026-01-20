@@ -69,7 +69,6 @@ the numerical methods to solve these models, and the implementation of the simul
 \chapter{Overall problem and solution}
 
 \section{Problem Description}
-
 The fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
 The objective of the simulation is to assess the impact of the oil spill on the surrounding
 fishing grounds and to determine appropriate measures to protect the local fish population.
@@ -94,14 +93,11 @@ The initial oil distribution is centered at the spatial point
 \intertext{and is defined by the function}
 u(t=0,\vec{x}) &= \exp\left(-\frac{\|\vec{x}-\vec{x}^{\star}\|^{2}}{0.01}\right),
 \end{align*}
-where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ and time $t$.
-This formulation produces a localized oil spill with maximum concentration at $\vec{x}^{\star}$
-and exponential decay with distance.
-
+where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ at time $t$.
 The oil density is evaluated at the centerpoint of each cell and stored as the initial oil density value.
 
 \section{Velocity field}
-
+The vector field defines the direction and magnitude of oil flow at each cell.
 The simplified ocean currents are given by this formula
 \[
 \vec{v}(\vec{x}, t) =
@@ -110,22 +106,18 @@ y - 0.2x \\
 -x
 \end{pmatrix}.
 \]
-This vector field defines the direction and magnitude of oil flow at each cell. 
-The simulation supports parameter for time (t) in order to account for any development in the ocean currents.
-If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values. 
-Hence giving birth to the optimized faucet simulation. 
+ 
+Altough it is not used the simulation supports a parameter for time $t$ to account for any development in the ocean currents.
+If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values.
+This assumption is the backbone of the optimized faucet simulation. 
 
 \section{Oil transfer}
 
-Oil transport is modeled using a finite-volume formulation on a triangular mesh.
-Only triangle cells carry oil; line cells represent boundaries and have identically
-zero oil content.
-
-Let $u_i^n$ denote the oil density in triangle cell $i$ at time $t^n$ with area $A_i$.
-Let $\vec{\nu}_{i,\ell}$ be the scaled outward normal associated with edge $\ell$ of
-cell $i$, and let $\text{ngh}_\ell$ denote the neighboring cell across this edge.
-The velocity field is denoted by $\vec{v}(\vec{x},t)$. Note that the scaled normals can be precomputated
-for every cell edge before running the simulation. We store this in a dictionary in the cell
+Let $u_i^n$ denote the oil density in triangle cell $i$ with area $A_i$, at time $t^n$ .
+The scaled outward normal $\vec{\nu}_{i,\ell}$ associated with edge $\ell$ of
+cell $i$, pointing into its neighbour cell $\text{ngh}_\ell$.
+The velocity field is denoted by $\vec{v}(\vec{x},t)$. The scaled normals are fixed and precomputated
+for every cell edge, and stored in a dictionary related to 
 using the neighbour object as its key. 
 
 For each edge, the numerical flux contribution is
