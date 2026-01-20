@@ -12,8 +12,13 @@ from tqdm import tqdm
 
 class Simulation:
     def __init__(self, configFile):
-        # Desired folder for video output (optional)
-        self._outPutPath = "file path"
+        """
+        Simulates oil transport over a mesh as a results of applying
+        a velocity field
+
+        :param configFile: String describing path to config.toml file
+        """
+        # plot data for ordering images
         self._plotNumber = 1
         self._plotDigits = 0
 
@@ -44,6 +49,11 @@ class Simulation:
         self._fishingCells = self._initiateFishingCells()
 
     def run(self):
+        """
+        Run the simulation based on the parameters specified
+        by the config.toml file. Creates a folder containing a
+        video (optional), log and a picture of the final result
+        """
         # Initial cell values
         self._initialCellOil()
 
@@ -85,92 +95,147 @@ class Simulation:
             self._plot.clean_up()
 
     def _runStandardSimulation(self, createVideo):
+        """
+        Runs a very general simulation where every flux calculation
+        is done every time step. Will always give correct results.
+
+        :param self: Boolean - createVideo
+        """
+        # initial values
+        stepCount = 0
         dt = self._toml.tEnd / self._toml.nSteps
 
-        stepCount = 0
+        # progressbar
         pbar = tqdm(
             total=self._toml.nSteps, desc=f"Computing sim {self._simName}"
             )
         while stepCount < self._toml.nSteps:
-            t = dt * stepCount
-
-            self._standardStep(dt, t)
+            # create image
             if (stepCount % self._toml.writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
 
+            # elapsed time
+            t = dt * stepCount
+
+            # simulation step
+            self._standardStep(dt, t)
             stepCount += 1
 
-            # after simulation is over, log the final result
+            # log results
             fishOil = self._countOilInFishingGrounds()
             self._log.info(
                 f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
+
+            # progress bar
             pbar.update(1)
         pbar.close()
 
+        # create final image
+        if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+            self._plot.plot_current_values()
+            self._savePicture()
+
     def _standardStep(self, dt, t):
+        """
+        Handles a single timestep for the general simulation.
+
+        :param dt: float - timestep
+        :param t: float - elapsed time
+        """
+        # iterate over every cell
         for cell in self._mesh.cells:
+            # line cell has no oil exchange
             if isinstance(cell, Line):
                 continue
+            # iterate over every neighbour
             for neighbour, scaledNormal in cell.neighbours.items():
+                # line cell has no oil exchange
                 if isinstance(neighbour, Line):
                     continue
 
+                # Calulate average velocity between cell and ngh
                 vA = self._solver.vectorField(cell.centerPoint, t)
                 vB = self._solver.vectorField(neighbour.centerPoint, t)
                 vAVG = self._solver.averageVelocity(vA, vB)
 
+                # calulate flux between cell and ngh
                 flux = self._solver.flux(
                     cell,
                     neighbour,
                     vAVG,
                     scaledNormal,
                 )
-
+                # apply flux
                 cell.update -= dt * flux / cell.area
 
+        # move oil from buffer variable to the actual oil density
         for cell in self._mesh.cells:
             cell.updateOilDensity()
 
     def _runFaucetOptimisedSimulation(self, createVideo):
+        """
+        Runs an optimized simulation based on assumptions of a
+        constant velocityField over time. Precomputes every value in
+        a structure called faucet and apply these every timestep.
+        Reduces complex vector operations to simple multiplications
+
+        :param self: Boolean - createVideo
+        """
+        # inital values
+        stepCount = 0
         dt = self._toml.tEnd / self._toml.nSteps
+
+        # cell velocity is constant and will be initialized once
         self._initialCellVelocity()
         self._createFaucets(dt)
-        stepCount = 0
 
+        # progressbar
         pbar = tqdm(
             total=self._toml.nSteps, desc=f"Computing sim {self._simName}"
             )
-        while stepCount < self._toml.nSteps:
-            self._faucetStep()
 
+        # simulation loop
+        while stepCount < self._toml.nSteps:
+            # create image
             if (stepCount % self._toml.writeFrequency == 0 and createVideo):
                 self._plot.plot_current_values()
                 self._savePicture()
 
+            # take simulation step
+            self._faucetStep()
             stepCount += 1
-            # after simulation is over, log the final result
+
+            # log results
             fishOil = self._countOilInFishingGrounds()
             t = dt * stepCount
             self._log.info(
                 f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
+            # progress bar
             pbar.update(1)
         pbar.close()
 
+        # create final image
+        if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+            self._plot.plot_current_values()
+            self._savePicture()
+
     def _faucetStep(self):
+        # loop over every faucet
         for sourceCell, targetCell, flowAB, flowBA in self._faucets:
-            # If the source is empty there will be no velocity to neighbours
+            # If the source has no oil there will be
+            # no oil transport to its neighbours
             if sourceCell.oilDensity <= 0:
                 continue
 
-            # Add the velocity to the update
+            # Update the update buffers with the faucet formula
             sourceCell.update -= sourceCell.oilDensity * flowAB
             targetCell.update += sourceCell.oilDensity * flowBA
 
+        # move oil from buffer variable to the actual oil density
         for cell in self._mesh.cells:
-            # Update the oil densitiess and reset the update for every cell
             cell.updateOilDensity()
 
     def _createFaucets(self, dt):
@@ -184,55 +249,92 @@ class Simulation:
         cell neighbour pair. The simulation will then turn into a simple lookup
         of COF's, cell source, and cell target.
         """
+        # list for storing all faucets
         self._faucets = []
         for sourceCell in self._mesh.cells:
-            # We only consider oil velocitying out from a main cell
+            # We only consider oil transport out of a main cell
             # and into its neigbours
 
-            # there should not be any velocity related to a line cell
+            # there should not be any oil exchange related to a line cell
             if isinstance(sourceCell, Line):
                 continue
 
             # calculate the velocity into each neighbour cell
             for targetCell, scaledNormal in sourceCell.neighbours.items():
+                # there should not be any oil exchange related to a line cell
                 if isinstance(targetCell, Line):
                     continue
+
                 # We only consider the velocity from the main cell
                 # to the neighbour. Not the oil absorbed
                 velocityAVG = self._solver.averageVelocity(
                     targetCell.velocity,
                     sourceCell.velocity,
                 )
+                # flowValue is a coefficient that measures how much the
+                # avg velocity alignsw with the outgoing normal
                 flowValue = np.dot(velocityAVG, scaledNormal)
-                if (flowValue <= 0):
-                    continue  # Line Cells has velocityValue = 0 by default
 
-                # Calculate velocity out of the cell
+                # if the alignment is less than 0 then this is oil absorbed
+                # if the main cell = i, and ngh cell = j we can say that this
+                # will be created as a differnet faucet from j -> i
+                # in a upcoming iteration
+                if (flowValue <= 0):
+                    continue
+
+                # Calculate the constant oil exchange coefficients
                 flowAB = dt * flowValue / sourceCell.area
                 flowBA = dt * flowValue / targetCell.area
 
+                # create and store faucet
                 faucet = (sourceCell, targetCell, flowAB, flowBA)
                 self._faucets.append(faucet)
 
     def _inFishingGrounds(self, cell: Cell) -> bool:
+        """
+        Checks if a cells centerpoint is inside the domain of
+        the fishing grounds
+
+        :param cell: Cell object
+
+        :rtype: bool
+        """
+        # fetch domain and centerpoint coord
         center2d = cell.centerPoint[:2]
         x_range = self._toml.borders[0]
         y_range = self._toml.borders[1]
+
+        # simple domain check (also clever way to store result in cell)
         cell.inFishingGround = (
             (x_range[0] <= center2d[0] <= x_range[1]) and
             (y_range[0] <= center2d[1] <= y_range[1])
             )
+
         return cell.inFishingGround
 
     def _initialCellOil(self):
+        """
+        Initialize oildensities in every cell
+        based on the presented function
+        """
         for cell in self._mesh.cells:
             cell.oilDensity = self._solver.initalOil(cell.centerPoint[:-1])
 
     def _initialCellVelocity(self):
+        """
+        Initialize velocities in every cell
+        based on the presented function
+        """
         for cell in self._mesh.cells:
             cell.velocity = self._solver.vectorField(cell.centerPoint[:-1])
 
     def _initiateFishingCells(self):
+        """
+        check if the cells in the mesh lies withing
+        the domain of the fishing grounds
+
+        :rtype: list of cell objects
+        """
         return [
             cell for cell in self._mesh.cells if self._inFishingGrounds(cell)
             ]
@@ -242,14 +344,18 @@ class Simulation:
 
     def countAllOil(self):
         """
-        Returns a value for the total amount of oil in all cells
+        Returns a scalar value for the total amount of oil in all cells
         """
         totalOil = 0
         for cell in self._mesh.cells:
+            # convert oil density to amount
             totalOil += cell.oilDensity * cell.area
         return totalOil
 
     def _savePicture(self):
+        """
+        Saves a picture for the current mesh data
+        """
         # Because the picture list is sorted alphabetically, it
         # is important to have a naming scheme where alphabetical sorting
         # and date sorting is identical
@@ -258,6 +364,9 @@ class Simulation:
         self._plotNumber += 1
 
     def _logParameters(self):
+        """
+        logs the config file parameters
+        """
         self._log.info(f"nSteps: {self._toml.nSteps}")
         self._log.info(f"tEnd: {self._toml.tEnd}")
         self._log.info(f"meshName: {self._toml.meshName}")

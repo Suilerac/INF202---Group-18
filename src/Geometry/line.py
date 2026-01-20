@@ -17,4 +17,8 @@ class Line(Cell):
         self._velocity = [0, 0]
 
     def _calculateArea(self):
+        """
+        calculate the area bound by the cell. For a line
+        this area will be 0
+        """
         return 0
