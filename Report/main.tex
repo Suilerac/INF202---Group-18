@@ -452,14 +452,23 @@ By having this 3rd party software, we were able to systematically and visually s
 
 \section{github}
 
-Implementing continuous integration (CI) with GitHub Actions and tox streamlined the project testing across multiple environments.
+Implementing continuous integration (CI) with GitHub Actions and tox streamlined the project testing across multiple environments. On every pull request the
+GitHub workflow ran our test units using pytest. In total we got well over 90\% coverage.
 The benefits with continuous integration is all about catching regressions early through automated linting, unit tests, and cross-version compatibility checks. 
 This setup ensures reliability before merging pull requests. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{Figures/CI.png}
-    \caption{Implementation of contionuous integration in github actions}
+    \begin{minipage}{.45\textwidth}
+      \centering
+      \includegraphics[height=5.3cm]{Figures/CI.png}
+      \caption{Implementation of contionuous integration in github actions}
+    \end{minipage}
+    \begin{minipage}{.45\textwidth}
+      \centering
+      \includegraphics[height=5.3cm]{Figures/covreport.png}
+      \caption{Pytest HTML coverage report of our final project}
+    \end{minipage}
 \end{figure}
 
 As demonstrated, having implemented continuous integration early on, 
