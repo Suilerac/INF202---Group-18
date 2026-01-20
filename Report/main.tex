@@ -380,6 +380,17 @@ The code is well optimized, with a single simulation running in less than
 5 seconds on one of our machines. This further improved our ability to rapidly iterate, as there was
 less time spent waiting, and more time spent fixing the things that went wrong.
 
+\section{Further development}
+No code is perfect, and there is always improvement to be done. In the Geometry package,
+more cell creation logic could be moved from Mesh to CellFactory, to the point of just passing
+the entire meshio data structure, and letting CellFactory take care of the rest. The area function
+for Cell can also be generalized for all polygons by splitting them into triangles from the centerpoint
+and summing up the triangle areas. 
+\\\\
+In the Simulation package we could improve the visualization, as currently the color of
+cells in the fishing grounds stays cyan regardless of how much oil enters. This can make it difficult
+to spot whether oil actually enters under certain conditions.
+
 \chapter{Agile development}
 Agile development is an iterative approach to software creation that emphasizes flexibility and
 collaboration. The main idea is breaking a complex problem into smaller parts.  
@@ -480,9 +491,18 @@ In conclusion, we got the following results with a few select simulations:
   \end{tabular}
 \end{center}
 \text{}\\
+
 There were some interesting observations about the two last items.
-The default values ran as expected, concluding with oil hitting the
-fishing grounds. If we let it go to $tEnd=2.5$ however, as seen in the
+The default values ran as expected, concluding with oil entering the
+fishing grounds as shown:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Figures/default.jpg}
+  \caption{Result of default sim}
+\end{figure}
+
+If we let it go to $tEnd=2.5$ however, as seen in the
 "Longer Duration" tab, we see that the oil density in the fishing grounds actually stabilizes.
 For quite some time towards the end, the oil density stayed static at $35.84$, which was also
 visible in the video. This is because as the oil hits the mesh borders, the flow stops, as line cells
