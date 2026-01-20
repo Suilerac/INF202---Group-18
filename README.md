@@ -395,10 +395,4 @@ This modular design makes the system easy to read, maintain, and extend.</p>
 <p>We also focused on performance optimization. A single simulation runs in under 5 seconds on our test machine, 
 allowing for rapid iteration and effective debugging with minimal downtime.</p>
 
-<img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/defualt.jpg" alt="LastPictureDefaultSim" width="1000" height="1000">
-
-
-
-<h1> Improvements </h1>
-
-<img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/meme.jpg" alt="Improvements" width="1000" height="1000">
+<img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/default.jpg" alt="LastPictureDefaultSim" width="1000" height="1000">
