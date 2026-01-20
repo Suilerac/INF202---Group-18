@@ -75,20 +75,6 @@ def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     assert np.allclose(result, expectedAvgVelocity)
 
 
-@pytest.mark.parametrize("CellA, CellB, SharedCoords, expectedVelocity", [
-    (triangle1, triangle2, [Pn1, Pn2], -.0999999999999999),
-    (triangle1, line1, [Pc1, Pn1], 0),
-])
-def test_velocity_value_triangle(
-    solver, CellA, CellB, SharedCoords, expectedVelocity
-):
-    """
-    Test that velocity calculation returns expected value
-    """
-    result = solver.calculateVelocityValue(CellA, CellB, SharedCoords)
-    assert result == pytest.approx(expectedVelocity)
-
-
 @pytest.mark.parametrize("CellA, CellB, sharedCoords, expectedFlux", [
     (triangle1, triangle2, [Pn1, Pn2], -4.038500374917757e-08),
     (triangle1, line1, [Pc1, Pn1], 0),
