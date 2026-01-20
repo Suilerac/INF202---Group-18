@@ -114,10 +114,10 @@ finally verify with <b>ffmpeg -version</b>
 
 <h1> Folder Structure </h1>
 <ul>
-<li>Examples: Contains examples..</li>
-<li>Config #toml configuration files</li>
+<li>Examples  # Contains examples.</li>
+<li>Config    #toml configuration files</li>
 <li>gifs_and_pictures</li>
-<li>meshes #Contains maps with meshes</li>
+<li>meshes    #Contains maps with meshes</li>
 <li>Report
 <li>src: <b>See UML diagram</b></li> <ul>
 <li> Geometry Package</li> <ul>
@@ -138,8 +138,8 @@ finally verify with <b>ffmpeg -version</b>
 <li> tomlParser.py</li>
 </ul>
 </ul>
-<li>temp #temprorary folder for image creation</li>
-<li>Tests #Tests for all classes</li>
+<li>temp      #temprorary folder for image creation</li>
+<li>Tests     #Tests for all classes</li>
 
 </ul>
 
@@ -151,9 +151,9 @@ finally verify with <b>ffmpeg -version</b>
 <h1> User guide  </h1>
 <p>
 Hello and welcome to our user guide, showing the simulation and its possibilities.    
-Follow the installation guide on github, and use the virtual enviroment as interpeter.  </p>
+Follow the installation guide on github, and use the virtual enviroment as the interpeter.  </p>
 
-Bellow is the an input.toml file. The simulation takes in the following arguments in order to run. 
+Bellow is the input.toml file. The simulation takes in the following arguments in order to run. 
 
 <pre style="
 background: #0d1117;
@@ -218,7 +218,8 @@ tab-size: 4;
 python main.py -f configs --find_all</pre>
 
 <p>
-The simulation will be stored in a newly created folder with the specific name you gave the config.toml file. It will output the following files: 
+The simulation will be stored in a newly created folder with the specific name you gave the config.toml file. 
+It will output the following files: 
 
 </p>
 <pre style="
@@ -257,14 +258,14 @@ max-width: 600px;
 resize: none;
 margin: 8px 0;
 tab-size: 4;
-"><b>Bay city default simulation from task description </b>
+"><b>The Bay city default simulation from task description </b>
 
 [settings]
 nSteps = 100
 tEnd = 0.5 
 
 [geometry]
-meshName = "meshes/bay.msh" #name of computational 
+meshName = "meshes/bay.msh" 
 borders = [[0.0, 0.45], [0.0, 0.2]]
 
 [IO]
@@ -289,19 +290,19 @@ max-width: 600px;
 resize: none;
 margin: 8px 0;
 tab-size: 4;
-"><b>simpleMesh.toml</b>
+"><b>simpleMesh example</b>
 
 [settings]
-nSteps = 500 #number of time steps
-tEnd = 1.5 #Specific end time
+nSteps = 500
+tEnd = 1.5
 
 [geometry]
-meshName = "meshes/simple.msh" #name of computational 
-borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
+meshName = "meshes/simple.msh"
+borders = [[0.0, 0.45], [0.0, 0.2]]
 
 [IO]
-logName = "input.log" #name of logfile
-writeFrequency = 20 #frequency of output video.</pre> 
+logName = "input.log"
+writeFrequency = 20</pre> 
 
 <b>video.gif</b>
 
