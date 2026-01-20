@@ -16,6 +16,16 @@ class Solver:
         self._initialOilSpatialPoint = initialOilPoint[:2]
         self._fieldIsTimeDependent = self._vectorFieldIsTimedependent()
 
+    @property
+    def fieldIsTimeDependent(self):
+        return self._fieldIsTimeDependent
+
+    # setter is strictly not necessary for the fieldIsTimeDepentend
+    # but it can sometimes be useful to overide the value
+    @fieldIsTimeDependent.setter
+    def fieldIsTimeDependent(self, value: bool):
+        self._fieldIsTimeDependent = value
+
     def initalOil(self, position):
         """
         calulating initial oildensity from a position vector
@@ -39,22 +49,6 @@ class Solver:
         fieldX = y - 0.2 * x
         fieldY = -x
         return np.array([fieldX, fieldY])
-
-    def _vectorFieldIsTimedependent(self):
-        """
-        Checks if the partial derivative of the vectorField with
-        respect to time equals [0, 0].
-        If it is true then we can use the faucet optimisation
-        """
-        testPos = np.array([1, 1])
-        for t in range(10):
-            vI = self.vectorField(testPos, t)
-            vF = self.vectorField(testPos, t + 1)
-
-            if la.norm(vI - vF) != 0:
-                return True
-
-        return False
 
     def averageVelocity(self, velocityA, velocityB):
         """
@@ -94,3 +88,19 @@ class Solver:
         else:
             # incoming flux
             return nghCell.oilDensity * dot
+
+    def _vectorFieldIsTimedependent(self):
+        """
+        Checks if the partial derivative of the vectorField with
+        respect to time equals [0, 0].
+        If it is true then we can use the faucet optimisation
+        """
+        testPos = np.array([1, 1])
+        for t in range(10):
+            vI = self.vectorField(testPos, t)
+            vF = self.vectorField(testPos, t + 1)
+
+            if la.norm(vI - vF) != 0:
+                return True
+
+        return False
