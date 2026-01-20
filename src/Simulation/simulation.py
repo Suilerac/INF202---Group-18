@@ -94,6 +94,16 @@ class Simulation:
             self._plot.video_maker(f"{self._simName}.mp4", frameduration)
             self._plot.clean_up()
 
+    def countAllOil(self):
+        """
+        Returns a scalar value for the total amount of oil in all cells
+        """
+        totalOil = 0
+        for cell in self._mesh.cells:
+            # convert oil density to amount
+            totalOil += cell.oilDensity * cell.area
+        return totalOil
+
     def _runStandardSimulation(self, createVideo):
         """
         Runs a very general simulation where every flux calculation
@@ -341,16 +351,6 @@ class Simulation:
 
     def _countOilInFishingGrounds(self):
         return sum(cell.oilDensity for cell in self._fishingCells)
-
-    def countAllOil(self):
-        """
-        Returns a scalar value for the total amount of oil in all cells
-        """
-        totalOil = 0
-        for cell in self._mesh.cells:
-            # convert oil density to amount
-            totalOil += cell.oilDensity * cell.area
-        return totalOil
 
     def _savePicture(self):
         """

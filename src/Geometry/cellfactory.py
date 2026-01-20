@@ -13,6 +13,10 @@ class CellFactory:
             "triangle": Triangle
             }
 
+    @property
+    def types(self):
+        return self._types
+
     def createCell(self, type, cell, points):
         """
         A function for creating a list of new Cell objects based
@@ -30,7 +34,3 @@ class CellFactory:
             pointIDs = data[i]
             cells.append(self._types[type](finalObjectCoords, pointIDs))
         return cells
-
-    @property
-    def types(self):
-        return self._types
