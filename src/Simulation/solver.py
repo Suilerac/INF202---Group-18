@@ -48,7 +48,7 @@ class Solver:
 
         return False
 
-    def _averageVelocity(self, velocityA, velocityB):
+    def averageVelocity(self, velocityA, velocityB):
         return 0.5 * (velocityA + velocityB)
 
     def flux(self, mainCell, nghCell, averageVelocity, scaledNormal):

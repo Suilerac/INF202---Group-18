@@ -119,7 +119,7 @@ class Simulation:
 
                 vA = self._solver.vectorField(cell.centerPoint, t)
                 vB = self._solver.vectorField(neighbour.centerPoint, t)
-                vAVG = self._solver._averageVelocity(vA, vB)
+                vAVG = self._solver.averageVelocity(vA, vB)
 
                 flux = self._solver.flux(
                     cell,
@@ -199,7 +199,7 @@ class Simulation:
                     continue
                 # We only consider the velocity from the main cell
                 # to the neighbour. Not the oil absorbed
-                velocityAVG = self._solver._averageVelocity(
+                velocityAVG = self._solver.averageVelocity(
                     targetCell.velocity,
                     sourceCell.velocity,
                 )
