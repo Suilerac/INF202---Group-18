@@ -170,7 +170,7 @@ borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
 logName = "input.log" #name of logfile
 writeFrequency = 20 #frequency of output video.</pre> 
 
-Execute the following command in terminal run one specific config file
+Execute the following command in terminal to run one specific config file
 <pre style="
 background: #0d1117;
 color: #c9d1d9;
