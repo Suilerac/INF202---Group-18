@@ -427,32 +427,9 @@ As demonstrated, having implemented continous integration early on,
 gave significant help throughout the project, assuring working code before merging.
 
 \chapter{Results}
-In this section, we'll cover how the entire process resulted
-in a highly scalable, well structured and optimized package.
-We'll also cover the results of actual simulations running with
-different parameters, and interesting observations made.
-\\\\
-The program is very scalable. The process of adding a new cell type
-is as simple as creating a class for it that inherits Cell, and write
-the function for calculating area. Then add this new class to the types
-dict in CellFactory. That's it, all other math and related data is generalized
-for all convex polygons.
-\\\\
-The structure of the code has made it intuitive to use, where a full simulation
-can be run with just a few lines. We have also worked hard to ensure that data
-handling happens where we felt it made sense. Geometric data handling regarding individual
-cells happens inside the cell class. Geometric data handling related to the mesh as a whole
-happens in Mesh. Simulation data handling happens in Simulation, visualization happens in
-Plotter, and simulation math is handled in Solver. This makes it easy to read, easy to work with,
-and easy to modify.
-\\\\
-We also worked hard to optimize the code, having a single simulation running in less than
-5 seconds on one of our machines. This further improved our ability to rapidly iterate, as there was
-less time spent waiting, and more time spent fixing the things that went wrong.
-\newpage
-All in all, this led to the following results:
+In conclusion, we got the following results with a few select simulations:
 \begin{center}
-  \begin{tabular}{| c | c | c | c |}
+  \hspace*{-1.2cm}\begin{tabular}{| c | c | c | c |}
     \hline
     & Default & Longer duration & Fewer steps \\
     \hline
@@ -476,13 +453,38 @@ All in all, this led to the following results:
     \hline
   \end{tabular}
 \end{center}
-
-There were some interesting observations in these. The first one is that
-as tEnd gets long enough for the oil to reach the mesh borders, the visualization
-messes up by making the oil suddenly "disappear". This is because the oil density
-in certain cells starts exceeding the limit of the colorbar,
-leading to a sudden change in the color scale. This was fixed by clamping the visualized
-oil density values to the set limit of the colorbar.
+\text{}\\
+There were some interesting observations about the two last items.
+The default values ran as expected, concluding with oil hitting the
+fishing grounds. If we let it go to $tEnd=2.5$ however, as seen in the
+"Longer Duration" tab, we see the oil density in the fishing grounds actually stabilize.
+For quite some time towards the end, the oil density stayed static at $35.84$, which was also
+visible in the video. This is because as the oil hits the mesh borders, the flow stops, as line cells
+cannot give or receive oil.
+\\\\
+The results of the "Fewer steps" simulation were also interesting. The oil density rapidly grew
+accross the entire plot, leaving almost the entire plot completely covered in oil by the end.
+This is because the $dt$ variable grows so large that the oilDensity increases beyond what is reasonable.
+\\\\
+The entire project resulted
+in a highly scalable, well structured and optimized package.
+The process of adding a new cell type
+is as simple as creating a class for it that inherits Cell, and write
+the function for calculating area. Then add this new class to the types
+dict in CellFactory. All other math and related data is generalized
+for all convex polygons.
+\\\\
+The structure of the code has made it intuitive to use, where a full simulation with custom
+parameters can be run with just a few lines of code. We have also worked hard to ensure that data
+handling happens where it makes sense. Geometric data handling regarding individual
+cells happens inside the cell class. Geometric data handling related to the mesh as a whole
+happens in Mesh. Simulation data handling happens in Simulation, visualization happens in
+Plotter, and simulation math is handled in Solver. This makes it easy to read, easy to work with,
+and easy to modify.
+\\\\
+We also worked hard to optimize the code, having a single simulation running in less than
+5 seconds on one of our machines. This further improved our ability to rapidly iterate, as there was
+less time spent waiting, and more time spent fixing the things that went wrong.
 
 % Bibliography
 \blankpage\printbibliography
