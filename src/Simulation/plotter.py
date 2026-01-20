@@ -144,7 +144,8 @@ class Plotter:
             coord = np.array([point[:2] for point in cell.coordinates])
             if not isinstance(cell, Line) and not cell.inFishingGround:
                 coords.append(coord)
-                values.append(cell.oilDensity)
+                # Clamp for visual consistency
+                values.append(min(cell.oilDensity, 1))
         polcol = PolyCollection(
             verts=coords,
             array=values,
@@ -185,7 +186,8 @@ class Plotter:
             coord = np.array([point[:2] for point in cell.coordinates])
             if isinstance(cell, Line) and not cell.inFishingGround:
                 coords.append(coord)
-                values.append(cell.oilDensity)
+                # Clamp for visual consistency
+                values.append(min(cell.oilDensity, 1))
         linecol = LineCollection(
             segments=coords,
             array=values,
