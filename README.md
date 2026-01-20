@@ -64,7 +64,7 @@ tab-size: 4;
 $pip install uv
 $uv venv
 # activate local venv
-$uv venv/bin/activate  
+$.\venv\Scripts\activate  
 # install dependencies
 $uv pip install -r requirements.txt
 # build a distribution and install our package
@@ -151,7 +151,7 @@ finally verify with <b>ffmpeg -version</b>
 <h1> User guide  </h1>
 <p>
 Hello and welcome to our user guide, showing the simulation and its possibilities.    
-Follow the installation guide on github, and use the virtual enviroment as the interpeter.  </p>
+Follow the installation guide on github, and use the virtual enviroment as the interpeter!</p>
 
 Bellow is the input.toml file. The simulation takes in the following arguments in order to run. 
 
