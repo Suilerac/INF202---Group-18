@@ -69,7 +69,7 @@ the numerical methods to solve these models, and the implementation of the simul
 \chapter{Overall problem and solution}
 
 \section{Problem Description}
-The fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
+The fictional fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
 The objective of the simulation is to assess the impact of the oil spill on the surrounding
 fishing grounds and to determine appropriate measures to protect the local fish population.
 
@@ -222,7 +222,7 @@ Follow the installation guide on GitHub (https://github.com/Suilerac/INF202---Gr
 
 Below is the \texttt{input.toml} file. The simulation takes in the following arguments in order to run.
 
-\subsection{Configuration file}
+\section{Configuration file}
 
 \begin{verbatim}
 [settings]
@@ -240,7 +240,7 @@ logName = "input.log" #name of logfile
 writeFrequency = 20   #frequency of output video.
 \end{verbatim}
 
-\subsection{Running the simulation}
+\section{Running the simulation}
 
 Execute the following command in a terminal to run one specific config file:
 
@@ -256,7 +256,7 @@ python main.py -f configs --find_all
 
 Running \textbf{\texttt{main.py}} will use \textbf{\texttt{input.toml}} as configuration file.
 
-\subsection{Simulation output}
+\section{Simulation output}
 
 The simulation will be stored in a \textbf{newly created folder} with the specific name you gave the \texttt{.toml} file. 
 It will output the following files:
@@ -269,6 +269,8 @@ It will output the following files:
 
 \chapter{Code structre}
 
+Building a clear and consistent code structure ensures readability, maintainability, and scalability. 
+It supports efficient collaboration and provides a solid foundation for future development.
 \section{Folder structre}
 
 
@@ -298,23 +300,25 @@ It will output the following files:
 .2 temp              /: temporary location for images created while running sim.
 .2 Tests             /: Folder for unit tests.
 }
+\newpage
 
-The folder structure is split into three packages,
+The source code is split into three packages,
 each with their own functionalities and purposes.
-The Geometry package, as the name suggests, handles
+\\\\
+\textbf{The Geometry package}, as the name suggests, handles
 data relating to the geometry provided. It has classes
 for the various different cell types, and a class for handling
 the mesh data, and by extension, centralizing the data from the
 cell classes.
 \\\\
-The InputOutput package handles data relating to user input and output.
+\textbf{The InputOutput package} handles data relating to user input and output.
 In this case, the user input is config file(s) in toml format
 and command-line arguments. The user output is a log file. As such,
 this package has one class for each of those functionalities.
 A class to handle logging, a class to read and parse command-line
 arguments, and a class to parse and provide the data of toml files.
 \\\\
-The Simulation is the most central package, and contains classes that handle the data
+\textbf{The Simulation} is the most central package, and contains classes that handle the data
 relating to the actual simulation. It has a plotter class
 that handles the various aspects of visualization of data,
 including image and video creation. The solver class implements
@@ -333,14 +337,15 @@ easier to work with. Because of how independent these packages are,
 it also increased testability, as we could quickly write isolated
 tests for almost everything added. The packages aren't entirely independent of course,
 as some utilization of each other is necessary to actually get a simulation.
-We managed to avoid circular dependencies though, and worked hard to make each
+We managed to avoid circular dependencies, and worked hard to make each
 class as independent of other classes as possible, and to keep necessary dependancy
 as linear as possible.
 
 \section{UML-diagram}
 
 \begin{figure}[H]
-    \includegraphics[width=1.2\textwidth]{Figures/UML-diagram-final.png}
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/UML-diagram-final.png}
     \caption{Final UML diagram}
 \end{figure}
 The UML diagram above showcases what was described in the folder structure
@@ -402,7 +407,7 @@ it gave a better overview to edit description and add checkmarks.
 Looking at some examples of tasks created on StoriesOnBoard, to demonstrate several features with agile development. 
 It has instantanious replication to github issues. The possiblity to stage multiple issues and bulk push them was useful. 
 This enables us to keep an overview and it assured creation of good descriptions and to think through what the issue would required for completion.
-A task could have multiple attriubutes for weiging through priority, difficulty and effect. 
+A task could have multiple attriubutes for weights through priority, difficulty and effect. 
 By having this 3rd party software, we where able to systematicly and visualy structre the project through agile development principles.
 
 
