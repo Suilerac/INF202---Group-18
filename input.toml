@@ -8,4 +8,4 @@ borders = [[0.0, 0.45], [0.0, 0.2]]
 
 [IO]
 logName = "input.log"
-writeFrequency = 0
+writeFrequency = 20
