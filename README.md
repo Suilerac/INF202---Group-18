@@ -1,4 +1,4 @@
-<h1>Oil spill simulation at Bay City</h1>
+<h1>Bay city oil spill simulation</h1>
 
 <p> <b>INF202: Project task in advanced programming January 2026</b></p>
 <p><b><a href="https://www.nmbu.no/">@University of Life Sciences </b></a></p><img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/NMBU.jpg" alt="NMBU logo" width="200" height="200">
@@ -64,7 +64,7 @@ tab-size: 4;
 $pip install uv
 $uv venv
 # activate local venv
-$uv venv/bin/activate  
+$.\venv\Scripts\activate  
 # install dependencies
 $uv pip install -r requirements.txt
 # build a distribution and install our package
@@ -151,7 +151,7 @@ finally verify with <b>ffmpeg -version</b>
 <h1> User guide  </h1>
 <p>
 Hello and welcome to our user guide, showing the simulation and its possibilities.    
-Follow the installation guide on github, and use the virtual enviroment as the interpeter.  </p>
+Follow the installation guide on github, and use the virtual enviroment as the interpeter!</p>
 
 Bellow is the input.toml file. The simulation takes in the following arguments in order to run. 
 
@@ -311,10 +311,88 @@ writeFrequency = 10</pre>
 
 <h1>Results</h1>
 
-From report
+<p>In conclusion, we got the following results with a few select simulations:</p>
 
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; text-align:center; margin:auto;">
+  <tr>
+    <th></th>
+    <th>Default</th>
+    <th>Longer duration</th>
+    <th>Fewer steps</th>
+  </tr>
+  <tr>
+    <td><b>nSteps</b></td>
+    <td>500</td>
+    <td>2500</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td><b>tEnd</b></td>
+    <td>0.5</td>
+    <td>2.5</td>
+    <td>0.5</td>
+  </tr>
+  <tr>
+    <td><b>meshName</b></td>
+    <td>bay.msh</td>
+    <td>bay.msh</td>
+    <td>bay.msh</td>
+  </tr>
+  <tr>
+    <td><b>borders</b></td>
+    <td>[[0.0, 0.45], [0.0, 0.2]]</td>
+    <td>[[0.0, 0.45], [0.0, 0.2]]</td>
+    <td>[[0.0, 0.45], [0.0, 0.2]]</td>
+  </tr>
+  <tr>
+    <td><b>logName</b></td>
+    <td>log</td>
+    <td>log</td>
+    <td>log</td>
+  </tr>
+  <tr>
+    <td><b>writeFrequency</b></td>
+    <td>20</td>
+    <td>10</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td><b>Oil density in fishing grounds at end</b></td>
+    <td>19.33</td>
+    <td>35.84</td>
+    <td>32.13</td>
+  </tr>
+  <tr>
+    <td><b>Runtime on Macbook Air M4</b></td>
+    <td>2.7s</td>
+    <td>20.6s</td>
+    <td>0.6s</td>
+  </tr>
+</table>
 
+<p>There were some interesting observations about the two last items. 
+The default values ran as expected, concluding with oil hitting the fishing grounds. 
+If we let it go to <code>tEnd = 2.5</code>, as seen in the "Longer Duration" case, 
+the oil density in the fishing grounds stabilized at <b>35.84</b>. 
+This occurred because as the oil hits the mesh borders, the flow stops—line cells 
+cannot give or receive oil.</p>
 
-<h1> Improvements </h1>
+<p>The results of the "Fewer steps" simulation were also interesting. 
+The oil density rapidly grew across the entire plot, leaving it almost completely covered in oil by the end. 
+This happened because the <code>dt</code> variable grew so large that the oil density increased beyond reasonable values.</p>
 
-<img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/meme.jpg" alt="Improvements" width="1000" height="1000">
+<p>The entire project resulted in a highly scalable, well-structured, and optimized package. 
+Adding a new cell type is as simple as creating a subclass of <code>Cell</code> and implementing 
+its <code>area</code> calculation. Then, add the new class to the <code>types</code> dictionary in 
+<code>CellFactory</code>. All other mathematical operations and data are generalized for all convex polygons.</p>
+
+<p>The code structure is intuitive, allowing a full simulation with custom parameters to be run in just a few lines. 
+Data handling is organized logically: geometric data related to cells is handled in <code>Cell</code>; 
+mesh-wide operations reside in <code>Mesh</code>; simulation control lives in <code>Simulation</code>; 
+visualization in <code>Plotter</code>; and numerical solving in <code>Solver</code>. 
+This modular design makes the system easy to read, maintain, and extend.</p>
+
+<p>We also focused on performance optimization. A single simulation runs in under 5 seconds on our test machine, 
+allowing for rapid iteration and effective debugging with minimal downtime.</p>
+
+<img src="https://github.com/Suilerac/INF202---Group-18/raw/main/gifs_and_pictures/default.jpg" alt="LastPictureDefaultSim" width="1000" height="1000">

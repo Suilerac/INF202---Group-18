@@ -71,7 +71,7 @@ def test_average_velocity_triangle(solver, CellA, CellB, expectedAvgVelocity):
     """
     Tests that the average velocity calculation returns expected values
     """
-    result = solver._averageVelocity(CellA.velocity, CellB.velocity)
+    result = solver.averageVelocity(CellA.velocity, CellB.velocity)
     assert np.allclose(result, expectedAvgVelocity)
 
 
@@ -85,7 +85,7 @@ def test_Flux(solver, CellA, CellB, sharedCoords, expectedFlux):
     """
     CellA.velocity = solver.vectorField(CellA.centerPoint)
     CellB.velocity = solver.vectorField(CellB.centerPoint)
-    avgVelocity = solver._averageVelocity(CellA.velocity, CellB.velocity)
+    avgVelocity = solver.averageVelocity(CellA.velocity, CellB.velocity)
     scaledNormal = CellA.calculateScaledNormal(sharedCoords)
 
     result = solver.flux(

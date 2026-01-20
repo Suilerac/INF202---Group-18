@@ -56,7 +56,7 @@ class Solver:
 
         return False
 
-    def _averageVelocity(self, velocityA, velocityB):
+    def averageVelocity(self, velocityA, velocityB):
         """
         Calculates the average between two velocity vectors of the
         same size. Could have used np.mean but a descriptive method is better
