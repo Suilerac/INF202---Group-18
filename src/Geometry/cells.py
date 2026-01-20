@@ -16,12 +16,13 @@ class Cell(ABC):
         self._pointIDs = pointIDs
         self._oilDensity = 0
         self._update = 0
-
-        self._area = 0
+        # geometric attributes
         self._velocity = None
-        self._neighbours = {}
-        self._coordinates = coordinates
+        self._area = 0
         self._centerPoint = sum(self._coordinates) / len(self._coordinates)
+        self._coordinates = coordinates
+        self._neighbours = {}
+        # flag for analysis
         self._inFishingGround = False
 
     def __str__(self):
@@ -47,10 +48,21 @@ class Cell(ABC):
         return cellStr
 
     def updateOilDensity(self):
+        """
+        Add the update value to the cells oildensity
+        """
         self._oilDensity += self._update
+        # resets the update value
         self._update = 0
 
     def addNeighbour(self, ngh, scaledNormal):
+        """
+        registers a neighbour the neighbours dictionary together
+        with the related scalednormal pointing out from main cell
+
+        :param ngh: Neighbour cell object
+        :param scaledNormal: scalednormal pointing from cell to ngh
+        """
         self._neighbours[ngh] = scaledNormal
 
     def _calculateEdgeVector(self, coordinates):
@@ -75,12 +87,22 @@ class Cell(ABC):
         return p1 + edgeVector / 2
 
     def _calculateEdgeLength(self, edgeVector):
+        """
+        Calulates the length for an edge
+
+        :param edgeVector: vector between two points
+        of a cell given as a np array
+        """
         return la.norm(edgeVector)
 
     def _calculateNormal(self, coordinates):
         """
-        Calculates the normal vectors pointing towards neighbours
-        (away from the triangle centerpoint) for every edge in the edges list
+        Calculates the normal vector pointing towards a neighbour
+        (away from the triangle centerpoint) for a related edge connecting
+        the two cells
+
+        :param coordinates: A list of the endpoints to the edge related to
+        the normal you desire to calculate
         """
 
         # decompose edge vector
@@ -112,7 +134,13 @@ class Cell(ABC):
         return normal
 
     def calculateScaledNormal(self, coordinates):
+        """
+        Calculates the scalednormal vectors pointing towards neighbours
+        (away from the triangle centerpoint) for every edge in the edges list
 
+        :param coordinates: A list of the endpoints to the edge related to
+        the scalednormal you desire to calculate
+        """
         # calculateData
         normal = self._calculateNormal(coordinates)
         edgeVector = self._calculateEdgeVector(coordinates)
