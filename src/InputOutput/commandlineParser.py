@@ -15,6 +15,22 @@ class CommandlineParser:
         self._configs = []
         self._addArguments()
 
+    @property
+    def configs(self):
+        return self._configs
+
+    @property
+    def folder(self):
+        return self._folder
+
+    @property
+    def config_file(self):
+        return self._config_file
+
+    @property
+    def findAll(self):
+        return self._findAll
+
     def setConfigList(self):
         """
         Get a list of all config paths requested by the user
@@ -54,30 +70,6 @@ class CommandlineParser:
             if name in dontOverwrite:
                 raise PermissionError(f"{config} can't overwrite {name}")
 
-    @property
-    def configs(self):
-        return self._configs
-
-    @property
-    def folder(self):
-        return self._folder
-
-    @property
-    def config_file(self):
-        return self._config_file
-
-    @property
-    def findAll(self):
-        return self._findAll
-
-    def _addArguments(self):
-        """
-        Adds all the command line arguments for parsing
-        """
-        self._parser.add_argument("--find_all", action='store_true')
-        self._parser.add_argument("-f", "--folder", default='')
-        self._parser.add_argument("-c", "--config_file", default="input.toml")
-
     def parse(self):
         """
         Parses the arguments and sets the class properties accordingly
@@ -86,3 +78,11 @@ class CommandlineParser:
         self._folder = args.folder
         self._config_file = args.config_file
         self._findAll = args.find_all
+
+    def _addArguments(self):
+        """
+        Adds all the command line arguments for parsing
+        """
+        self._parser.add_argument("--find_all", action='store_true')
+        self._parser.add_argument("-f", "--folder", default='')
+        self._parser.add_argument("-c", "--config_file", default="input.toml")
