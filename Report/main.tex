@@ -1,0 +1,532 @@
+% Packages & Document Configurations
+\documentclass{report_template}
+\usepackage{dirtree}
+
+% Authors & Supervisor
+\firstauthor{Andreas Carelius Brustad}
+
+\secondauthor{Håkon Bekken}
+
+\thirdauthor{Johannes Husevåg Standal}
+
+% Report Title & Subtitle
+\title{Bay City oil spill simulation}
+
+\subtitle{Course: \textbf{INF202}\\ Project assignment in advanced programming}
+
+% Filiations
+\university{Norwegian University of Life Sciences (NMBU)}
+\degree{}
+\school{}
+\course{}
+
+% Local & Date
+\date{Norway, \monthname[\month] \number\year}
+
+\begin{document}
+
+% Covers
+\include{Covers/00-Cover}
+
+% Roman numeration
+\pagenumbering{roman}
+
+% List of contents, figures, and tables
+\tableofcontents\blankpage
+
+% Arabic numeration
+\pagenumbering{arabic}
+
+% Chapters
+\chapter{Introduction}\label{ch:introduction}
+Computer simulations are widely used in science and engineering to model complex systems and phenomena. 
+They allow researchers to analyze and predict the behavior of systems under various conditions,
+providing insights that may be difficult or impossible to obtain through traditional experimental methods.
+The problem given of an oil spill has a real world implementation and is of significant importance for environmental concern.
+There are multiple examples like the Deepwater Horizon oil spill in 2010 \cite{DeepwaterHorizon}, where computational simulations were
+crucial in order to predict where surface oil would go, aiding skimming, booming, and shoreline protection.
+\\
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{Figures/deepwater-horizonbp-oil-spill.jpg}
+  \captionof{figure}{Deepwater Horizon oil spill
+  \parencite{DeepwaterHorizonOilSpill}}\label{fig:Deepwater Horizon BP oil spill}
+\end{minipage}%
+\begin{minipage}{.55\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{Figures/BayCity.png}
+  \captionof{figure}{Bay city
+  \parencite{Baycity}}\label{fig:Bay city from task}
+\end{minipage}
+\end{figure}
+
+Our simulation aims to model oil trajectory and spread forecasting in Bay city.
+Outside Bay city is a fishing ground that is voulnerable to oil spills.
+This report will discuss the mathematical models used to represent the oil spill dynamics,
+the numerical methods to solve these models, and the implementation of the simulation.
+\newpage
+
+\chapter{Overall problem and solution}
+
+\section{Problem Description}
+The fictional fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
+The objective of the simulation is to assess the impact of the oil spill on the surrounding
+fishing grounds and to determine appropriate measures to protect the local fish population.
+
+An external group of researchers has provided a simplified two-dimensional flow field that is used
+to approximate ocean currents in the region. In addition there is provided a two-dimensional map
+of Bay City from the file  \texttt{bay.msh}. The data includes the coastline and ocean for the region.
+
+\section{Initialisation}
+
+When a new simulation object is created, a mesh file is loaded from the configuration file.
+The mesh consists of a collection of cells (triangles for the ocean and lines for the coastline). 
+Each cell stores a scalar value representing the oil density within
+the area of the cell.
+
+The initial oil distribution is centered at the spatial point
+\begin{align*}
+\vec{x}^{\star} = (x^{\star}, y^{\star})^{\top} &= (0.35, 0.45)^{\top},
+\intertext{and is defined by the function}
+u(t=0,\vec{x}) &= \exp\left(-\frac{\|\vec{x}-\vec{x}^{\star}\|^{2}}{0.01}\right),
+\end{align*}
+where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ at time $t=0$.
+The oil density is evaluated at the centerpoint of each cell and stored as the initial oil density value.
+
+\section{Velocity field}
+The vector field defines the direction and magnitude of oil flow at each cell.
+The simplified ocean currents are given by this formula:
+\[
+\vec{v}(\vec{x}, t) =
+\begin{pmatrix}
+y - 0.2x \\
+-x
+\end{pmatrix}.
+\]
+ 
+The simulation supports a parameter for time $t$ to account for any development in the ocean currents. 
+This is not used in the current formula, but enables the programs extendability.
+If the vector field is time-independent this drastically increases the effectiveness of precomputated values.
+This assumption makes a much faster "faucet-optimized" simulation possible. 
+
+\section{Oil Transfer}
+
+Let $u_i^n$ be the oil density in cell $i$ (area $A_i$) at time $t^n$.  
+Each edge $\ell$ of cell $i$ has a scaled outward normal $\vec{\nu}_{i,\ell}$ pointing toward its neighbor $\text{ngh}_\ell$.
+
+The velocity at each edge is the average of the velocities at its endpoints:
+\[
+\vec{v}_{i,\ell}^n = \frac{1}{2} \big( \vec{v}(\vec{x}_i,t^n) + \vec{v}(\vec{x}_{\text{ngh}_\ell},t^n) \big)
+\]
+
+The flux through an edge is defined as:
+\[
+g(a,b,\vec{\nu},\vec{v}) =
+\begin{cases}
+a \, \langle \vec{v}, \vec{\nu} \rangle, & \text{if } \langle \vec{v}, \vec{\nu} \rangle > 0,\\
+b \, \langle \vec{v}, \vec{\nu} \rangle, & \text{else}.
+\end{cases}
+\]
+
+The flux contribution from edge $\ell$ is:
+\[
+F_i^{(\text{ngh}_\ell,n)} = -\frac{\Delta t}{A_i} \, g(u_i^n, u_{\text{ngh}_\ell}^n, \vec{\nu}_{i,\ell}, \vec{v}_{i,\ell}^n)
+\]
+
+These edge contributions are first computed and stored. Then the oil density is updated for cell $i$ as:
+\[
+u_i^{n+1} = u_i^n + \sum_{\ell=1}^{3} F_i^{(\text{ngh}_\ell,n)}
+\]
+
+Each cell exchanges oil with its neighbors through edges, using the flux function. Updates are calculated first for all cells, then applied simultaneously.
+
+\section{Simulation types}
+\subsection{Main simulation}
+When the simulation starts, the solver initializes the values according to the provided functions. 
+The mesh connects cells that share an edge as neighbors, storing a reference to each neighbor in a dictionary within the cell. 
+Each entry in this dictionary associates a neighbor cell with the corresponding outward-pointing scaled normal vector, 
+which points from the main cell toward that neighbor.
+Given a total simulation time $t_{\text{end}}$ and
+$N$ time steps, the time step size is:
+\[
+\Delta t = \frac{t_{\text{end}}}{N}.
+\]
+
+After initialization, the solver checks whether it can run the optimized faucet simulation and produce the same result. 
+If the criteria are not met, it falls back to the standard simulation.
+\subsection{Standard Simulation}
+
+For a time-dependent velocity field $\vec{v}(\vec{x},t)$, the above fluxes are
+recomputed at every time step. At each timestep $t^n = n\Delta t$, fluxes are evaluated for all triangle cells,
+and the change in oil densities are stored in a buffer variable. After all the cells have calculated
+their update value, they add it to their stored oil density
+
+\subsection{Faucet Simulation}
+
+When the velocity field is time-independent, its time derivative vanishes,
+and the velocity at each cell remains constant for all times:
+\[
+\frac{\partial \vec{v}}{\partial t} = [0,0],
+\]
+This means that all properties associated with a cell
+can be precomputed before the simulation starts using the given formulas.
+
+The flux direction across an edge is determined by:
+\[
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle
+\]
+
+We only consider flow out of a cell and into its neighbour. 
+The flux direction will align with the velocity if $direction>0$.
+
+
+For each such outgoing edge, a \emph{faucet} from cell \(I\) to cell
+
+\(\text{ngh}\) is defined.  
+Each faucet is characterized by two constant coefficients,
+\[
+\text{flow}_{I\to\text{ngh}}
+= \frac{\Delta t}{A_I}
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle,
+\qquad
+\text{flow}_{\text{ngh}\to I}
+= \frac{\Delta t}{A_{\text{ngh}}}
+\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle,
+\]
+where \(A\) the cell areas.
+
+During a single time step, the oil density update induced by one faucet
+\((I \rightarrow \text{ngh})\) is given by
+\[
+u_I^{n+1} = u_I^n - u_I^n\,\text{flow}_{I\to\text{ngh}},
+\]
+\[
+u_{\text{ngh}}^{n+1} = u_{\text{ngh}}^n + u_I^n\,\text{flow}_{\text{ngh}\to I}.
+\]
+
+The total update of a cell is obtained by applying all faucets connected to it.
+After all faucet contributions have been accumulated, the oil densities of all
+cells are updated simultaneously.
+
+\section{Conservation}
+
+This formulation guarantees conservation of the total oil amount.
+For each faucet, the oil removed from the source cell is exactly redistributed
+to the neighboring cell, with changes scaled by the corresponding cell areas.
+Since conservation holds locally for every faucet, it also holds globally over
+the entire computational domain.
+
+\chapter{User guide}
+ 
+Follow the installation guide on GitHub (https://github.com/Suilerac/INF202---Group-18), and use the virtual environment as the interpreter.
+
+Below is the \texttt{input.toml} file. The simulation takes in the following arguments in order to run.
+
+\section{Configuration file}
+
+\begin{verbatim}
+[settings]
+nSteps = 100 #number of time steps
+tEnd = 0.5   #Specific end time (MUST BE FLOAT value)
+
+
+[geometry]
+meshName = "meshes/bay.msh"         #name of computational mesh
+borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
+
+
+[IO]
+logName = "input.log" #name of logfile
+writeFrequency = 20   #frequency of output video.
+\end{verbatim}
+
+\section{Command line arguments}
+
+Below is a table of command line arguments, with a description for each:
+\begin{center}
+  \begin{tabular}{| c | c | c |}
+    \hline
+    Arg1 & Arg2 & Desc \\
+    \hline
+    \hline
+    \verb|-f| & \verb|--folder| & Config file location (root if not given) \\
+    \hline
+    \verb|-c| & \verb|--config_file| & Config file name (input.toml if not given) \\
+    \hline
+    \verb|--find_all| & & Uses all configs in target folder \\
+    \hline
+  \end{tabular}
+\end{center}
+
+Running \textbf{\texttt{main.py}} without arguments will use \textbf{\texttt{input.toml}} in root directory as configuration file.
+
+\section{Simulation output}
+
+The simulation will be stored in a \textbf{newly created folder} with the specific name you gave the \texttt{.toml} file. 
+It will output the following files:
+
+\begin{verbatim}
+-> "name_of_config_file".log # Display oil density in fishing grounds 
+-> "name_of_config_file".mp4 # A video showing the simulation
+-> "name_of_config_file".png # The last picture generated by the simulaton
+\end{verbatim}
+
+\chapter{Code structre}
+
+Building a clear and consistent code structure ensures readability, maintainability, and scalability. 
+It supports efficient collaboration and provides a solid foundation for future development.
+\section{Folder structre}
+
+
+
+\dirtree{%
+.1 Inf202---Group-18 /: Root folder.
+.2 Examples          /: Example notebooks.
+.2 Config            /: location for toml files.
+.2 GifsAndPictures   /: Pictures used in readme.
+.2 meshes            /: loaction for computational meshes.
+.2 Report            /: The report.
+.2 src               /: Contains the source code.
+.3 Geometry.
+.4 geometry.py.
+.4 mesh.py.
+.4 cell.py.
+.4 line.py.
+.4 triangle.py.
+.3 Simulation.
+.4 plotter.py.
+.4 simulation.py.
+.4 solver.py.
+.3 InputOutput.  
+.4 commandlineParser.py.
+.4 log.py.
+.4 tomlParser.py.
+.2 temp              /: temporary location for images created while running sim.
+.2 Tests             /: Folder for unit tests.
+}
+\newpage
+
+The source code is split into three packages,
+each with their own functionalities and purposes.
+\\\\
+\textbf{The Geometry package}, as the name suggests, handles
+data relating to the geometry provided. It has classes
+for the various different cell types, and a class for handling
+the mesh data, and by extension, centralizing the data from the
+cell classes.
+\\\\
+\textbf{The InputOutput package} handles data relating to user input and output.
+In this case, the user input is config file(s) in toml format
+and command-line arguments. The user output is a log file. As such,
+this package has one class for each of those functionalities.
+A class to handle logging, a class to read and parse command-line
+arguments, and a class to parse and provide the data of toml files.
+\\\\
+\textbf{The Simulation} is the most central package, and contains classes that handle the data
+relating to the actual simulation. It has a plotter class
+that handles the various aspects of visualization of data,
+including image and video creation. The solver class implements
+all the formulas needed in the simulation, putting the advanced math
+in one place. The simulation class brings those two together,
+handling the overall logic needed to make use of the tools provided
+in the two other classes. The simulation class also brings the other two packages
+together, and thus is the most complex class in our project. Because this
+particular class relies on everything else, writing unit tests that only relied
+on this class's logic was difficult. However, with the other classes having
+their own unit tests, the location of a potential problem can be safely assumed based
+on the overall context.
+\\\\
+The separation of these packages made the program more structured and
+easier to work with. Because of how independent these packages are,
+it also increased testability, as we could quickly write isolated
+tests for almost everything added. The packages aren't entirely independent of course,
+as some utilization of each other is necessary to actually get a simulation.
+We managed to avoid circular dependencies, and worked hard to make each
+class as independent of other classes as possible, and to keep necessary dependancy
+as linear as possible.
+
+\section{UML-diagram}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/UML-diagram-final.png}
+    \caption{Final UML diagram}
+\end{figure}
+The UML diagram above showcases what was described in the folder structure
+section. Everything is centralized on simulation, with no class except for simulation
+being fully dependant on more than one other class. Thus, the entire project could be
+built iteratively with an intuitive flow through scrum concepts described below.
+
+\section{Quality}
+The entire project resulted
+in a highly scalable, well structured and optimized package.
+The process of adding a new cell type
+is as simple as creating a class for it that inherits Cell, and write
+the function for calculating area. Then add this new class to the types
+dict in CellFactory. All other math and related data is generalized
+for all convex polygons.
+\\\\
+The structure of the code has made it intuitive to use, where a full simulation with custom
+parameters can be run with just a few lines of code. We have also worked hard to ensure that data
+handling happens where it makes sense. Geometric data handling regarding individual
+cells happens inside the cell class. Geometric data handling related to the mesh as a whole
+happens in Mesh. Simulation data handling happens in Simulation, visualization happens in
+Plotter, and simulation math is handled in Solver. This makes it easy to read, easy to work with,
+and easy to modify.
+\\\\
+The code is well optimized, with a single simulation running in less than
+5 seconds on one of our machines. This further improved our ability to rapidly iterate, as there was
+less time spent waiting, and more time spent fixing the things that went wrong.
+
+\section{Further development}
+No code is perfect, and there is always improvement to be done. In the Geometry package,
+more cell creation logic could be moved from Mesh to CellFactory, to the point of just passing
+the entire meshio data structure, and letting CellFactory take care of the rest. The area function
+for Cell can also be generalized for all polygons by splitting them into triangles from the centerpoint
+and summing up the triangle areas. 
+\\\\
+In the Simulation package we could improve the visualization, as currently the color of
+cells in the fishing grounds stays cyan regardless of how much oil enters. This can make it difficult
+to spot whether oil actually enters under certain conditions. In addition to these notes,
+there is always more to improve, and bugs or flaws we didn't catch. Overall the project follows
+the parameters for success defined by the task description.
+
+\chapter{Agile development}
+Agile development is an iterative approach to software creation that emphasizes flexibility and
+collaboration. The main idea is breaking a complex problem into smaller parts.  
+Through small, frequent releases of working software, 
+the strategy will produce results that get gradually closer to the end goal.
+
+\section{Story map and 3rd party software}
+Our approach to implement agile development was firstly to clarify expectations to eachother working in a group.
+Secondly, we spent the first days reading and understanding the problem thoroughly. 
+By breaking the problem down to smaller pieces, we got a clear idea about what solutions
+the problem would require. By identifying this, we structured the work by creating a story map.
+\subsection{StoriesOnBoard}
+We used a 3rd party software from https://StoriesOnBoard.com with a 14 days free trial in order to facilitate agile development. 
+We chose StoriesOnBoard because it offered more features than native github projects, had a nice layout, a user friendly GUI, and the ability to integrate with GitHub. 
+Focusing on documentation and organizing the main structure, we achieved a foundation to start tackling the problem. 
+Applying timelines and sprints, we also gained an idea as to when certain tasks were supposed to be done.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/StoryBoard.png}
+    \caption{Story map}
+\end{figure}
+
+Our story map follows a traditional setup with Epics at the top, user stories on the second level  and tasks below their respective user story.
+The tasks were assigned under a Sprint that was set with a duration of 5 days. 
+They emphasize a detailed decription and checkmarks within the task, rather than a big quantity of tasks in order to have a clear overview in the Story map.
+If a task was missing certain elements, rather than creating new issues or sub issues,
+it gave a better overview to edit the description and add checkmarks.
+
+\newpage
+\begin{figure}[H]
+\centering
+\begin{minipage}{.45\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Figures/ExampleTask.png}
+\end{minipage}\hfill%
+\begin{minipage}{.45\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Figures/ExampleTask2.png}
+\end{minipage}
+
+\vspace{0.5em}
+
+\begin{minipage}{.65\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Figures/ExampleTask3.png}
+\end{minipage}
+\caption{Example of tasks}
+\end{figure}
+
+Looking at some examples of tasks created on StoriesOnBoard, to demonstrate several features with agile development. 
+It has instantaneous replication of GitHub issues. The possibility to stage multiple issues and bulk push them was useful. 
+This enables us to keep a thorough overview, and it made the creation of good descriptions easier.
+A task could have multiple attributes for weights through priority, difficulty and effect. 
+By having this 3rd party software, we were able to systematically and visually structure the project through agile development principles.
+
+
+\section{github}
+
+Implementing continuous integration (CI) by using tox with GitHub Actions streamlined the project testing across multiple environments. On every pull request the
+GitHub workflow ran our test units using pytest. During the project, we worked to keep coverage above 90\%
+in order to catch mistakes early. The final project got well over 90\% coverage as seen in Figure 5.4.
+The benefits with continuous integration is all about catching regressions early through automated linting, unit tests, and cross-version compatibility checks. 
+This setup ensures reliability before merging pull requests. 
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{.45\textwidth}
+      \centering
+      \includegraphics[height=5.3cm]{Figures/CI.png}
+      \caption{Implementation of contionuous integration in github actions}
+    \end{minipage}
+    \begin{minipage}{.45\textwidth}
+      \centering
+      \includegraphics[height=5.3cm]{Figures/covreport.png}
+      \caption{Pytest HTML coverage report of our final project}
+    \end{minipage}
+\end{figure}
+
+As demonstrated, having implemented continuous integration early on, 
+gave significant help throughout the project, ensuring working code before merging.
+
+\chapter{Results}
+In conclusion, we got the following results with a few select simulations:
+\begin{center}
+  \hspace*{-1.2cm}\begin{tabular}{| c | c | c | c |}
+    \hline
+    & Default & Longer duration & Fewer steps \\
+    \hline
+    \hline
+    nSteps & 500 & 2500 & 5 \\
+    \hline
+    tEnd & 0.5 & 2.5 & 0.5 \\
+    \hline
+    meshName & bay.msh & bay.msh & bay.msh \\
+    \hline
+    borders & [[0.0, 0.45], [0.0, 0.2]] & [[0.0, 0.45], [0.0, 0.2]] & [[0.0, 0.45], [0.0, 0.2]] \\
+    \hline
+    logName & log & log & log \\
+    \hline
+    writeFrequency & 20 & 10 & 1 \\
+    \hline
+    \hline
+    Oildensity in fishing grounds at end & 19.33 & 35.84 & 32.13 \\
+    \hline
+    Runtime on Macbook Air M4 & 2.7s & 20.6s & 0.6s \\
+    \hline
+  \end{tabular}
+\end{center}
+\text{}\\
+
+There were some interesting observations about the two last items.
+The default values ran as expected, concluding with oil entering the
+fishing grounds as shown:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Figures/default.jpg}
+  \caption{Result of default sim}
+\end{figure}
+
+If we let it go to $tEnd=2.5$ however, as seen in the
+"Longer Duration" tab, we see that the oil density in the fishing grounds actually stabilizes.
+For quite some time towards the end, the oil density stayed static at $35.84$, which was also
+visible in the video. This is because as the oil hits the mesh borders, the flow stops, as line cells
+cannot give or receive oil.
+\\\\
+The results of the "Fewer steps" simulation were also interesting. The oil density rapidly grew
+accross the entire plot, leaving almost the entire plot completely covered in oil by the end.
+This is because the $dt$ variable grows so large that the oilDensity increases beyond what is reasonable.
+
+
+
+% Bibliography
+\blankpage\printbibliography
+
+\end{document}
