@@ -271,6 +271,6 @@ img/*
 images.txt
 .vscode/*
 log
-configs/*
+
 logs/*
 .vscode/*

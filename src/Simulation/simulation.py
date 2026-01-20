@@ -142,8 +142,8 @@ class Simulation:
             pbar.update(1)
         pbar.close()
 
-        # create final image
-        if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+        # create final image after last step
+        if createVideo:
             self._plot.plot_current_values()
             self._savePicture()
 
@@ -227,8 +227,8 @@ class Simulation:
             pbar.update(1)
         pbar.close()
 
-        # create final image
-        if (stepCount % self._toml.writeFrequency == 0 and createVideo):
+        # create final image after last step
+        if createVideo:
             self._plot.plot_current_values()
             self._savePicture()
 
