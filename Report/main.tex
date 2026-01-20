@@ -77,12 +77,9 @@ An external group of researchers has provided a simplified two-dimensional flow 
 to approximate ocean currents in the region. In addition there is provided a two-dimensional map
 of Bay City from the file  \texttt{bay.msh}. The data includes the coastline and ocean for the region.
 
-The spatial domain is described using Cartesian coordinates $(x,y)$, where the point
-$(0,0)^{\top}$ corresponds to the lower-left corner of the map.
-
 \section{Initialisation}
 
-When a new simulation object is created, a mesh file is loaded from the configuration folder.
+When a new simulation object is created, a mesh file is loaded from the configuration file.
 The mesh consists of a collection of cells (triangles for the ocean and lines for the coastline). 
 Each cell stores a scalar value representing the oil density within
 the area of the cell.
@@ -93,7 +90,7 @@ The initial oil distribution is centered at the spatial point
 \intertext{and is defined by the function}
 u(t=0,\vec{x}) &= \exp\left(-\frac{\|\vec{x}-\vec{x}^{\star}\|^{2}}{0.01}\right),
 \end{align*}
-where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ at time $t$.
+where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ at time $t=0$.
 The oil density is evaluated at the centerpoint of each cell and stored as the initial oil density value.
 
 \section{Velocity field}
@@ -107,114 +104,84 @@ y - 0.2x \\
 \end{pmatrix}.
 \]
  
-Altough it is not used the simulation supports a parameter for time $t$ to account for any development in the ocean currents.
+The simulation supports a parameter for time $t$ to account for any development in the ocean currents. 
+This is not used in the current formula, but enables the programs extendebility.
 If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values.
 This assumption is the backbone of the optimized faucet simulation. 
 
-\section{Oil transfer}
+\section{Oil Transfer}
 
-Let $u_i^n$ denote the oil density in triangle cell $i$ with area $A_i$, at time $t^n$ .
-The scaled outward normal $\vec{\nu}_{i,\ell}$ associated with edge $\ell$ of
-cell $i$, pointing into its neighbour cell $\text{ngh}_\ell$.
-The velocity field is denoted by $\vec{v}(\vec{x},t)$. The scaled normals are fixed and precomputated
-for every cell edge, and stored in a dictionary related to 
-using the neighbour object as its key. 
+Let $u_i^n$ be the oil density in cell $i$ (area $A_i$) at time $t^n$.  
+Each edge $\ell$ of cell $i$ has a scaled outward normal $\vec{\nu}_{i,\ell}$ pointing toward its neighbor $\text{ngh}_\ell$.
 
-For each edge, the numerical flux contribution is
+The velocity at each edge is the average of the velocities at its endpoints:
 \[
-F_i^{(\text{ngh}_\ell,n)}
-=
-- \frac{\Delta t}{A_i}
-\, g\!\left(
-u_i^n,\,
-u_{\text{ngh}_\ell}^n,\,
-\vec{\nu}_{i,\ell},\,
-\vec{v}_{i,\ell}^n
-\right),
+\vec{v}_{i,\ell}^n = \frac{1}{2} \big( \vec{v}(\vec{x}_i,t^n) + \vec{v}(\vec{x}_{\text{ngh}_\ell},t^n) \big)
 \]
-where the edge velocity is defined as the midpoint average
-\[
-\vec{v}_{i,\ell}^n
-=
-\frac{1}{2}
-\left(
-\vec{v}(\vec{x}_i,t^n)
-+
-\vec{v}(\vec{x}_{\text{ngh}_\ell},t^n)
-\right),
-\]
-and the upwind flux function $g$ is given by
+
+The flux through an edge is defined as
 \[
 g(a,b,\vec{\nu},\vec{v}) =
 \begin{cases}
-a \, \langle \vec{v}, \vec{\nu} \rangle,
-& \text{if } \langle \vec{v}, \vec{\nu} \rangle > 0, \\
-b \, \langle \vec{v}, \vec{\nu} \rangle,
-& \text{else}.
+a \, \langle \vec{v}, \vec{\nu} \rangle, & \text{if } \langle \vec{v}, \vec{\nu} \rangle > 0,\\
+b \, \langle \vec{v}, \vec{\nu} \rangle, & \text{else}.
 \end{cases}
 \]
 
-The oil density update for cell $i$ is then
+The flux contribution from edge $\ell$ is
 \[
-up_i^{n}
-=
-\sum_{\ell=1}^{3}
-F_i^{(\text{ngh}_\ell,n)}
+F_i^{(\text{ngh}_\ell,n)} = -\frac{\Delta t}{A_i} \, g(u_i^n, u_{\text{ngh}_\ell}^n, \vec{\nu}_{i,\ell}, \vec{v}_{i,\ell}^n)
 \]
 
-After every cell has calculated their update value
-they will apply it to their own density
+These edge contributions are first computed and stored. Then the oil density is updated for cell $i$ as
 \[
-u_i^{n+1} = u_i^{n} + up_i^{n}
-\]
-then the update value will be reset for the next timestep
-\[
-up_i^{n} = 0
+u_i^{n+1} = u_i^n + \sum_{\ell=1}^{3} F_i^{(\text{ngh}_\ell,n)}
 \]
 
-\section{Standard Simulation}
+Each cell exchanges oil with its neighbors through edges, using the flux function. Updates are calculated first for all cells, then applied simultaneously.
 
-For a time-dependent velocity field $\vec{v}(\vec{x},t)$, the above fluxes are
-recomputed at every time step. Given a total simulation time $t_{\text{end}}$ and
+\section{Simulation types}
+\subsection{Main simulation}
+When the simulation starts, the solver initializes the values according to the provided functions. 
+The mesh connects cells that share an edge as neighbors, storing a reference to each neighbor in a dictionary within the cell. 
+Each entry in this dictionary associates a neighbor cell with the corresponding outward-pointing scaled normal vector, 
+which points from the main cell toward that neighbor.
+Given a total simulation time $t_{\text{end}}$ and
 $N$ time steps, the time step size is
 \[
 \Delta t = \frac{t_{\text{end}}}{N}.
 \]
 
-At each timestep $t^n = n\Delta t$, fluxes are evaluated for all triangle cells,
+After initialization, the solver checks whether it can run the optimized faucet simulation and produce the same result. 
+If the criteria are not met, it falls back to the standard simulation.
+\subsection{Standard Simulation}
+
+For a time-dependent velocity field $\vec{v}(\vec{x},t)$, the above fluxes are
+recomputed at every time step. At each timestep $t^n = n\Delta t$, fluxes are evaluated for all triangle cells,
 and the change in oil densities are stored in a buffer variable. After all the cells has calculated
 their update value, they add it to their stored oil density
 
-\section{Faucet Simulation}
+\subsection{Faucet Simulation}
 
 When the velocity field is time-independent, its time derivative vanishes,
+and the velocity at each cell remains constant for all times.
 \[
 \frac{\partial \vec{v}}{\partial t} = [0,0],
 \]
-and the velocity at each cell remains constant for all times.
-Consequently, all geometric and kinematic quantities associated with a cell
-interface can be precomputed before the simulation starts.
+This means that all properties associated with a cell
+can be precomputed before the simulation starts using the given formulas.
 
-For a triangle cell \(I\) and one of its neighboring cells \(\text{ngh}\),
-the edge-averaged velocity is defined as
+The flux direction across an edge is determined by
 \[
-\vec{v}_{I,\text{ngh}}
-= \frac{1}{2}\Big( \vec{v}(\vec{x}_I) + \vec{v}(\vec{x}_{\text{ngh}}) \Big),
+\langle \vec{v}_{I(\mathrm{ngh})}, \vec{\nu}_{I(\mathrm{ngh})} \rangle.
 \]
-which is constant in time.  
-The scaled outward normal vector \(\vec{\nu}_{I,\text{ngh}}\) associated with
-the common edge is also precomputed and fixed.
 
-The flux direction across the edge is determined by
-\[
-\langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle.
-\]
-Only edges for which this quantity is positive are considered, corresponding
-to oil flowing out of cell \(I\).
+We only consider flow out of a cell and into its neighbour. 
+The flux direction will align with the velocity if $0<direction$.
 
-\subsection*{Faucets}
 
 For each such outgoing edge, a \emph{faucet} from cell \(I\) to cell
+
 \(\text{ngh}\) is defined.  
 Each faucet is characterized by two constant coefficients,
 \[
@@ -226,13 +193,7 @@ Each faucet is characterized by two constant coefficients,
 = \frac{\Delta t}{A_{\text{ngh}}}
 \langle \vec{v}_{I,\text{ngh}}, \vec{\nu}_{I,\text{ngh}} \rangle,
 \]
-where \(A_I\) and \(A_{\text{ngh}}\) denote the areas of the source and
-neighboring cells, respectively.
-
-These coefficients remain constant throughout the simulation and are
-precomputed once during initialization.
-
-\subsection*{Time stepping}
+where \(A\) the cell areas.
 
 During a single time step, the oil density update induced by one faucet
 \((I \rightarrow \text{ngh})\) is given by
@@ -247,7 +208,7 @@ The total update of a cell is obtained by applying all faucets connected to it.
 After all faucet contributions have been accumulated, the oil densities of all
 cells are updated simultaneously.
 
-\subsection*{Conservation}
+\section{Conservation}
 
 This formulation guarantees conservation of the total oil amount.
 For each faucet, the oil removed from the source cell is exactly redistributed
