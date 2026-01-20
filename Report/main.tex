@@ -69,7 +69,6 @@ the numerical methods to solve these models, and the implementation of the simul
 \chapter{Overall problem and solution}
 
 \section{Problem Description}
-
 The fishing town of \emph{Bay City} has reported an oil spill from one of their ships.
 The objective of the simulation is to assess the impact of the oil spill on the surrounding
 fishing grounds and to determine appropriate measures to protect the local fish population.
@@ -94,14 +93,11 @@ The initial oil distribution is centered at the spatial point
 \intertext{and is defined by the function}
 u(t=0,\vec{x}) &= \exp\left(-\frac{\|\vec{x}-\vec{x}^{\star}\|^{2}}{0.01}\right),
 \end{align*}
-where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ and time $t$.
-This formulation produces a localized oil spill with maximum concentration at $\vec{x}^{\star}$
-and exponential decay with distance.
-
+where $u(t,\vec{x})$ denotes the oil density at position $\vec{x}$ at time $t$.
 The oil density is evaluated at the centerpoint of each cell and stored as the initial oil density value.
 
 \section{Velocity field}
-
+The vector field defines the direction and magnitude of oil flow at each cell.
 The simplified ocean currents are given by this formula
 \[
 \vec{v}(\vec{x}, t) =
@@ -110,22 +106,18 @@ y - 0.2x \\
 -x
 \end{pmatrix}.
 \]
-This vector field defines the direction and magnitude of oil flow at each cell. 
-The simulation supports parameter for time (t) in order to account for any development in the ocean currents.
-If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values. 
-Hence giving birth to the optimized faucet simulation. 
+ 
+Altough it is not used the simulation supports a parameter for time $t$ to account for any development in the ocean currents.
+If the vectorfield is time-independent this drastically increases the effectiveness of precomputated values.
+This assumption is the backbone of the optimized faucet simulation. 
 
 \section{Oil transfer}
 
-Oil transport is modeled using a finite-volume formulation on a triangular mesh.
-Only triangle cells carry oil; line cells represent boundaries and have identically
-zero oil content.
-
-Let $u_i^n$ denote the oil density in triangle cell $i$ at time $t^n$ with area $A_i$.
-Let $\vec{\nu}_{i,\ell}$ be the scaled outward normal associated with edge $\ell$ of
-cell $i$, and let $\text{ngh}_\ell$ denote the neighboring cell across this edge.
-The velocity field is denoted by $\vec{v}(\vec{x},t)$. Note that the scaled normals can be precomputated
-for every cell edge before running the simulation. We store this in a dictionary in the cell
+Let $u_i^n$ denote the oil density in triangle cell $i$ with area $A_i$, at time $t^n$ .
+The scaled outward normal $\vec{\nu}_{i,\ell}$ associated with edge $\ell$ of
+cell $i$, pointing into its neighbour cell $\text{ngh}_\ell$.
+The velocity field is denoted by $\vec{v}(\vec{x},t)$. The scaled normals are fixed and precomputated
+for every cell edge, and stored in a dictionary related to 
 using the neighbour object as its key. 
 
 For each edge, the numerical flux contribution is
@@ -348,6 +340,43 @@ It will output the following files:
 .2 Tests             /: Folder for unit tests.
 }
 
+The folder structure is split into three packages,
+each with their own functionalities and purposes.
+The Geometry package, as the name suggests, handles
+data relating to the geometry provided. It has classes
+for the various different cell types, and a class for handling
+the mesh data, and by extension, centralizing the data from the
+cell classes.
+\\\\
+The InputOutput package handles data relating to user input and output.
+In this case, the user input is config file(s) in toml format
+and command-line arguments. The user output is a log file. As such,
+this package has one class for each of those functionalities.
+A class to handle logging, a class to read and parse command-line
+arguments, and a class to parse and provide the data of toml files.
+\\\\
+The Simulation is the most central package, and contains classes that handle the data
+relating to the actual simulation. It has a plotter class
+that handles the various aspects of visualization of data,
+including image and video creation. The solver class implements
+all the formulas needed in the simulation, putting the advanced math
+in one place. The simulation class brings those two together,
+handling the overall logic needed to make use of the tools provided
+in the two other classes. The simulation class also brings the other two packages
+together, and thus is the most complex class in our project. Because this
+particular class relies on everything else, writing unit tests that only relied
+on this class's logic was difficult. However, with the other classes having
+their own unit tests, the location of a potential problem can be safely assumed based
+on the overall context.
+\\\\
+The separation of these packages made the program more structured and
+easier to work with. Because of how independent these packages are,
+it also increased testability, as we could quickly write isolated
+tests for almost everything added. The packages aren't entirely independent of course,
+as some utilization of each other is necessary to actually get a simulation.
+We managed to avoid circular dependencies though, and worked hard to make each
+class as independent of other classes as possible, and to keep necessary dependancy
+as linear as possible.
 
 \section{UML-diagram}
 
@@ -355,7 +384,11 @@ It will output the following files:
     \includegraphics[width=1.2\textwidth]{Figures/UML-diagram-final.png}
     \caption{Final UML diagram}
 \end{figure}
-
+The UML diagram above showcases what was described in the folder structure
+section. Everything is centralized on simulation, no class except for simulation
+is fully dependant on more than one other class. Thus, the flow of the program is
+intuitive to follow, and the project could be built step by step by utilizing
+concepts from the scrum process, further described in the next section.
 
 \chapter{Agile development}
 Agile development is an iterative approach to software creation that emphasizes flexibility and
@@ -431,8 +464,62 @@ gave significant help throughout the project, assuring working code before mergi
 
 
 \chapter{Results}
+In this section, we'll cover how the entire process resulted
+in a highly scalable, well structured and optimized package.
+We'll also cover the results of actual simulations running with
+different parameters, and interesting observations made.
+\\\\
+The program is very scalable. The process of adding a new cell type
+is as simple as creating a class for it that inherits Cell, and write
+the function for calculating area. Then add this new class to the types
+dict in CellFactory. That's it, all other math and related data is generalized
+for all convex polygons.
+\\\\
+The structure of the code has made it intuitive to use, where a full simulation
+can be run with just a few lines. We have also worked hard to ensure that data
+handling happens where we felt it made sense. Geometric data handling regarding individual
+cells happens inside the cell class. Geometric data handling related to the mesh as a whole
+happens in Mesh. Simulation data handling happens in Simulation, visualization happens in
+Plotter, and simulation math is handled in Solver. This makes it easy to read, easy to work with,
+and easy to modify.
+\\\\
+We also worked hard to optimize the code, having a single simulation running in less than
+5 seconds on one of our machines. This further improved our ability to rapidly iterate, as there was
+less time spent waiting, and more time spent fixing the things that went wrong.
+\newpage
+All in all, this led to the following results:
+\begin{center}
+  \begin{tabular}{| c | c | c | c |}
+    \hline
+    & Default & Longer & Simple \\
+    \hline
+    \hline
+    nSteps & 500 & 2500 & 500 \\
+    \hline
+    tEnd & 0.5 & 2.5 & 0.5 \\
+    \hline
+    meshName & bay.msh & bay.msh & simple.msh \\
+    \hline
+    borders & [[0.0, 0.45], [0.0, 0.2]] & [[0.0, 0.45], [0.0, 0.2]] & [[0.0, 0.45], [0.0, 0.2]] \\
+    \hline
+    logName & log & log & log \\
+    \hline
+    writeFrequency & 20 & 10 & 20 \\
+    \hline
+    \hline
+    Oil in fishing grounds at end & 19.33 && \\
+    \hline
+    Runtime on Macbook Air M4 &&& \\
+    \hline
+  \end{tabular}
+\end{center}
 
-
+There were some interesting observations in these. The first one is that
+as tEnd gets long enough for the oil to reach the mesh borders, the visualization
+messes up by making the oil suddenly "disappear". This is because the oil density
+in certain cells starts exceeding the limit of the colorbar,
+leading to a sudden change in the color scale. This was fixed by clamping the visualized
+oil density values to the set limit of the colorbar.
 
 % Bibliography
 \blankpage\printbibliography
