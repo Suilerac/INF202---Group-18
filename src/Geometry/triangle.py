@@ -18,8 +18,6 @@ class Triangle(Cell):
     def _calculateArea(self):
         """
         Calculating the area of a triangle
-
-        :param self: Description
         """
         p1 = self._coordinates[0]
         p2 = self._coordinates[1]
