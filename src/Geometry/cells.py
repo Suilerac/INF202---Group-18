@@ -19,8 +19,8 @@ class Cell(ABC):
         # geometric attributes
         self._velocity = None
         self._area = 0
-        self._centerPoint = sum(self._coordinates) / len(self._coordinates)
         self._coordinates = coordinates
+        self._centerPoint = sum(coordinates) / len(coordinates)
         self._neighbours = {}
         # flag for analysis
         self._inFishingGround = False
