@@ -250,7 +250,6 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,python
 
 # Report latex stuff, the only thing we need version control on is main.tex
-Report/main.pdf
 Report/main.aux
 Report/main.bbl
 Report/main.bcf
