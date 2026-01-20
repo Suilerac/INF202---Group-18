@@ -47,6 +47,62 @@ class Cell(ABC):
         cellStr += ']'
         return cellStr
 
+    @abstractmethod
+    def _calculateArea(self):
+        pass
+
+    @property
+    def area(self):
+        return self._area
+
+    @property
+    def coordinates(self):
+        return self._coordinates
+
+    @property
+    def neighbours(self):
+        return self._neighbours
+
+    @property
+    def centerPoint(self):
+        return self._centerPoint
+
+    @property
+    def pointIDs(self):
+        return self._pointIDs
+
+    @property
+    def oilDensity(self):
+        return self._oilDensity
+
+    @oilDensity.setter
+    def oilDensity(self, value):
+        self._oilDensity = value
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        self._velocity = value
+
+    @property
+    def update(self):
+        return self._update
+
+    @update.setter
+    def update(self, value):
+        self._update = value
+
+    @property
+    def inFishingGround(self):
+        return self._inFishingGround
+
+    @inFishingGround.setter
+    def inFishingGround(self, value: bool):
+        self._inFishingGround = value
+
     def updateOilDensity(self):
         """
         Add the update value to the cells oildensity
@@ -64,6 +120,24 @@ class Cell(ABC):
         :param scaledNormal: scalednormal pointing from cell to ngh
         """
         self._neighbours[ngh] = scaledNormal
+
+    def calculateScaledNormal(self, coordinates):
+        """
+        Calculates the scalednormal vectors pointing towards neighbours
+        (away from the triangle centerpoint) for every edge in the edges list
+
+        :param coordinates: A list of the endpoints to the edge related to
+        the scalednormal you desire to calculate
+        """
+        # calculateData
+        normal = self._calculateNormal(coordinates)
+        edgeVector = self._calculateEdgeVector(coordinates)
+        edgeLength = la.norm(edgeVector)
+
+        # calulate and store scaled normal
+        scaledNormal = normal * edgeLength
+
+        return scaledNormal[:2]
 
     def _calculateEdgeVector(self, coordinates):
         """
@@ -132,77 +206,3 @@ class Cell(ABC):
             normal *= -1
 
         return normal
-
-    def calculateScaledNormal(self, coordinates):
-        """
-        Calculates the scalednormal vectors pointing towards neighbours
-        (away from the triangle centerpoint) for every edge in the edges list
-
-        :param coordinates: A list of the endpoints to the edge related to
-        the scalednormal you desire to calculate
-        """
-        # calculateData
-        normal = self._calculateNormal(coordinates)
-        edgeVector = self._calculateEdgeVector(coordinates)
-        edgeLength = la.norm(edgeVector)
-
-        # calulate and store scaled normal
-        scaledNormal = normal * edgeLength
-
-        return scaledNormal[:2]
-
-    @property
-    def neighbours(self):
-        return self._neighbours
-
-    @property
-    def coordinates(self):
-        return self._coordinates
-
-    @property
-    def centerPoint(self):
-        return self._centerPoint
-
-    @property
-    def area(self):
-        return self._area
-
-    @property
-    def oilDensity(self):
-        return self._oilDensity
-
-    @property
-    def velocity(self):
-        return self._velocity
-
-    @property
-    def pointIDs(self):
-        return self._pointIDs
-
-    @property
-    def update(self):
-        return self._update
-
-    @property
-    def inFishingGround(self):
-        return self._inFishingGround
-
-    @update.setter
-    def update(self, value):
-        self._update = value
-
-    @oilDensity.setter
-    def oilDensity(self, value):
-        self._oilDensity = value
-
-    @velocity.setter
-    def velocity(self, value):
-        self._velocity = value
-
-    @inFishingGround.setter
-    def inFishingGround(self, value: bool):
-        self._inFishingGround = value
-
-    @abstractmethod
-    def _calculateArea(self):
-        pass

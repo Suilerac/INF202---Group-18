@@ -40,27 +40,6 @@ class Mesh:
     def y_range(self):
         return self._y_range
 
-    def _addCells(self):
-        """
-        Creates all cell objects and adds them to the cell list
-        """
-        for cell, index in self._findCellIndexes().items():
-            self._cells += self._factory.createCell(
-                cell.type, self._mesh.cells[index], self._points
-            )
-
-    def _findCellIndexes(self):
-        """
-        Finds the indexes of cells supported by the cellFactory
-        """
-        indexes = {}
-        i = 0
-        for cell in self._mesh.cells:
-            if cell.type in self._factory.types:
-                indexes[cell] = i
-            i += 1
-        return indexes
-
     def addAllNeighbours(self):
         """
         Goes through all cells and adds all neighbours for each cell
@@ -91,3 +70,24 @@ class Mesh:
                     edgemap[edge] = []
                 # And add this cell to its value
                 edgemap[edge].append(cell)
+
+    def _addCells(self):
+        """
+        Creates all cell objects and adds them to the cell list
+        """
+        for cell, index in self._findCellIndexes().items():
+            self._cells += self._factory.createCell(
+                cell.type, self._mesh.cells[index], self._points
+            )
+
+    def _findCellIndexes(self):
+        """
+        Finds the indexes of cells supported by the cellFactory
+        """
+        indexes = {}
+        i = 0
+        for cell in self._mesh.cells:
+            if cell.type in self._factory.types:
+                indexes[cell] = i
+            i += 1
+        return indexes
