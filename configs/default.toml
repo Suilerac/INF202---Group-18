@@ -1,0 +1,11 @@
+[settings]
+nSteps = 500
+tEnd = 0.5
+
+[geometry]
+meshName = "meshes/bay.msh"
+borders = [[0.0, 0.45], [0.0, 0.2]]
+
+[IO]
+logName = "default.log"
+writeFrequency = 20
