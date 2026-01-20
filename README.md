@@ -138,5 +138,144 @@ finally verify with <b>ffmpeg -version</b>
 
 
 <h1> User guide  </h1>
+<p>
+Hello and welcome to our user guide showing the simulation and its possibilities.    
+Follow the installation guide on github, and use the virtual enviroment as interpeter.  </p>
 
-Help me boys
+Bellow is the the input.toml file. The simulation takes in the following arguments. 
+
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+">[settings]
+nSteps = 100 #number of time steps
+tEnd = 0.5 #Specific end time
+
+[geometry]
+meshName = "meshes/bay.msh" #name of computational 
+borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
+
+[IO]
+logName = "input.log" #name of logfile
+writeFrequency = 20 #frequency of output video.</pre> 
+
+Execute the following command in terminal run one specific config file
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+">python main.py -f configs .\configs\"Specific config file"</pre>
+
+
+Execute the following command in terminal to run multiple config files  
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+">
+python main.py -f configs --find_all</pre>
+
+
+The simulation will be stored in a newly created folder with the specific name you gave the config.toml file  
+
+
+Here are some example simulations running follwoing paramaters
+
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+"><b>Bay city default simulation from task description </b>
+
+[settings]
+nSteps = 100
+tEnd = 0.5 
+
+[geometry]
+meshName = "meshes/bay.msh" #name of computational 
+borders = [[0.0, 0.45], [0.0, 0.2]]
+
+[IO]
+logName = "input.log"
+writeFrequency = 20 .</pre> 
+
+<b> video.gif</b>
+
+
+
+<pre style="
+background: #0d1117;
+color: #c9d1d9;
+border: none;
+padding: 16px;
+border-radius: 6px;
+font-family: 'Monaco','Menlo',monospace;
+font-size: 14px;
+line-height: 1.5;
+width: 100%;
+max-width: 600px;
+resize: none;
+margin: 8px 0;
+tab-size: 4;
+"><b>simpleMesh.toml</b>
+
+[settings]
+nSteps = 500 #number of time steps
+tEnd = 1.5 #Specific end time
+
+[geometry]
+meshName = "meshes/simple.msh" #name of computational 
+borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
+
+[IO]
+logName = "input.log" #name of logfile
+writeFrequency = 20 #frequency of output video.</pre> 
+
+<b>video.gif</b>
+
+
+
+<h1>Results</h1>
+
+From report
