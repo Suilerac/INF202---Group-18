@@ -1,6 +1,5 @@
 from Simulation.simulation import Simulation
 from InputOutput.commandlineParser import CommandlineParser
-from tqdm import tqdm
 
 
 def main():
@@ -8,7 +7,7 @@ def main():
     clp.parse()
     clp.setConfigList()
     sims = [Simulation(config) for config in clp.configs]
-    for sim in tqdm(sims, desc="Computing simulations:"):
+    for sim in sims:
         sim.run()
 
 

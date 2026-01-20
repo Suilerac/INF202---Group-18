@@ -7,6 +7,7 @@ from InputOutput.tomlParser import TomlParser
 from InputOutput.log import Log
 import numpy as np
 import math
+from tqdm import tqdm
 
 
 class Simulation:
@@ -87,6 +88,9 @@ class Simulation:
         dt = self._toml.tEnd / self._toml.nSteps
 
         stepCount = 0
+        pbar = tqdm(
+            total=self._toml.nSteps, desc=f"Computing sim {self._simName}"
+            )
         while stepCount < self._toml.nSteps:
             t = dt * stepCount
 
@@ -102,6 +106,8 @@ class Simulation:
             self._log.info(
                 f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
+            pbar.update(1)
+        pbar.close()
 
     def _standardStep(self, dt, t):
         for cell in self._mesh.cells:
@@ -133,6 +139,9 @@ class Simulation:
         self._createFaucets(dt)
         stepCount = 0
 
+        pbar = tqdm(
+            total=self._toml.nSteps, desc=f"Computing sim {self._simName}"
+            )
         while stepCount < self._toml.nSteps:
             self._faucetStep()
 
@@ -147,6 +156,8 @@ class Simulation:
             self._log.info(
                 f"Oil density in fishing grounds at t={t:.2f}: {fishOil:.2f}"
                 )
+            pbar.update(1)
+        pbar.close()
 
     def _faucetStep(self):
         for sourceCell, targetCell, flowAB, flowBA in self._faucets:
