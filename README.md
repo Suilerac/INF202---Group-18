@@ -174,7 +174,7 @@ nSteps = 100 #number of time steps
 tEnd = 0.5 #Specific end time (MUST BE FLOAT value)
 
 [geometry]
-meshName = "meshes/bay.msh" #name of computational 
+meshName = "meshes/bay.msh" #name of computational mesh
 borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
 
 [IO]
