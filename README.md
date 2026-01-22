@@ -181,6 +181,50 @@ borders = [[0.0, 0.45], [0.0, 0.2]] # boarders of fishing grounds
 logName = "input.log" #name of logfile
 writeFrequency = 20 #frequency of output video.</pre> 
 
+<h3>Command Line arguments</h3>
+
+<table style="
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  background: #0d1117;
+  color: #c9d1d9;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+">
+  <thead>
+    <tr style="background: #21262d;">
+      <th style="padding: 16px 20px; text-align: left; border-bottom: 2px solid #30363d;">Short</th>
+      <th style="padding: 16px 20px; text-align: left; border-bottom: 2px solid #30363d;">Long</th>
+      <th style="padding: 16px 20px; text-align: left; border-bottom: 2px solid #30363d;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid #30363d;">
+      <td style="padding: 14px 20px; font-weight: bold; color: #58a6ff;"><code>-f</code></td>
+      <td style="padding: 14px 20px;"><code>--folder</code></td>
+      <td style="padding: 14px 20px;">Config file location <span style="color: #8b949e;">(root if not given)</span></td>
+    </tr>
+    <tr style="border-bottom: 1px solid #30363d;">
+      <td style="padding: 14px 20px; font-weight: bold; color: #58a6ff;"><code>-c</code></td>
+      <td style="padding: 14px 20px;"><code>--config_file</code></td>
+      <td style="padding: 14px 20px;">Config file name <span style="color: #8b949e;">(input.toml if not given)</span></td>
+    </tr>
+    <tr>
+      <td style="padding: 14px 20px; font-weight: bold; color: #f85149;"><code>--find_all</code></td>
+      <td style="padding: 14px 20px;"></td>
+      <td style="padding: 14px 20px; font-weight: 500;">Uses all configs in target folder</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
 Execute the following command in terminal to run one specific config file
 <pre style="
 background: #0d1117;
@@ -196,7 +240,7 @@ max-width: 600px;
 resize: none;
 margin: 8px 0;
 tab-size: 4;
-">python main.py -f configs .\configs\"Specific config file"</pre>
+">python main.py -c \configs\"Specific config file"</pre>
 
 
 Execute the following command in terminal to run multiple config files  
